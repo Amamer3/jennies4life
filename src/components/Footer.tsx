@@ -9,12 +9,7 @@ import {
   Instagram, 
   Youtube,
   Heart,
-  Shield,
-  Truck,
-  CreditCard,
-  ArrowRight,
-  Star
-} from 'lucide-react';
+  CreditCard} from 'lucide-react';
 
 const Footer: React.FC = () => {
   const currentYear = new Date().getFullYear();
@@ -57,28 +52,6 @@ const Footer: React.FC = () => {
     { name: 'YouTube', icon: Youtube, href: '#', color: 'hover:text-red-600' }
   ];
 
-  const features = [
-    {
-      icon: Truck,
-      title: 'Free Shipping',
-      description: 'On orders over $50'
-    },
-    {
-      icon: Shield,
-      title: 'Secure Payment',
-      description: '100% protected'
-    },
-    {
-      icon: Heart,
-      title: 'Expert Reviews',
-      description: 'Trusted recommendations'
-    },
-    {
-      icon: Star,
-      title: 'Best Deals',
-      description: 'Curated daily'
-    }
-  ];
 
   return (
     <footer className="bg-gray-900 text-white">

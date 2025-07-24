@@ -9,12 +9,11 @@ import {
   ArrowRight, 
   BookOpen,
   TrendingUp,
-  Filter,
-  Grid,
+  Grid, 
   List
 } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { blogPosts, categories } from '../data';
+import { blogPosts } from '../data';
 
 const BlogPage: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');

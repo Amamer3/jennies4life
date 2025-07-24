@@ -1,20 +1,17 @@
 import React, { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { 
-  Filter, 
   Grid, 
   List, 
   Star, 
   Heart, 
   ShoppingBag, 
   Search,
-  ChevronDown,
   SlidersHorizontal,
-  ExternalLink,
-  ArrowRight
+  ExternalLink
 } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { getCategoryBySlug, getProductsByCategory, categories } from '../data';
+import { getCategoryBySlug, getProductsByCategory } from '../data';
 // Inline type definition
 interface Product {
   id: string;
