@@ -79,7 +79,7 @@ const Categories: React.FC = () => {
   ];
 
   return (
-    <section className="py-8 sm:py-12 lg:py-16 bg-gray-50">
+    <section className="py-8 sm:py-12 lg:py-16 bg-neutral-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <motion.div
@@ -110,9 +110,9 @@ const Categories: React.FC = () => {
               className="group"
             >
               <Link
-                to={category.path}
-                className="block bg-white rounded-xl sm:rounded-2xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-2"
-              >
+                  to={category.path}
+                  className="block bg-neutral-50 rounded-xl sm:rounded-2xl shadow-sm border border-neutral-200 overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-2"
+                >
                 {/* Category Header */}
                 <div className={`relative h-24 sm:h-32 bg-gradient-to-br ${category.gradient} flex items-center justify-center overflow-hidden`}>
                   {/* Background Pattern */}
@@ -138,18 +138,18 @@ const Categories: React.FC = () => {
                 {/* Category Content */}
                 <div className="p-4 sm:p-6">
                   <div className="flex items-center justify-between mb-2 sm:mb-3">
-                    <h3 className="text-lg sm:text-xl font-semibold text-gray-900 group-hover:text-primary-600 transition-colors">
+                    <h3 className="text-lg sm:text-xl font-semibold text-neutral-900 group-hover:text-primary-600 transition-colors">
                       {category.name}
                     </h3>
                     <ArrowRight className="h-4 w-4 sm:h-5 sm:w-5 text-gray-400 group-hover:text-primary-600 transform group-hover:translate-x-1 transition-all duration-200" />
                   </div>
                   
-                  <p className="text-gray-600 mb-3 sm:mb-4 text-xs sm:text-sm leading-relaxed">
+                  <p className="text-neutral-600 mb-3 sm:mb-4 text-xs sm:text-sm leading-relaxed">
                     {category.description}
                   </p>
                   
                   <div className="flex items-center justify-between">
-                    <span className="text-xs sm:text-sm text-gray-500">
+                    <span className="text-xs sm:text-sm text-neutral-500">
                       {category.productCount} products
                     </span>
                     <div className="flex items-center space-x-1">
@@ -171,7 +171,7 @@ const Categories: React.FC = () => {
           viewport={{ once: true }}
           className="mt-8 sm:mt-12 lg:mt-16"
         >
-          <div className="relative bg-gradient-to-r from-primary-600 via-primary-700 to-secondary-600 rounded-xl sm:rounded-2xl lg:rounded-3xl overflow-hidden">
+          <div className="relative bg-[#FACC15] rounded-xl sm:rounded-2xl lg:rounded-3xl overflow-hidden">
             {/* Background Pattern */}
             <div className="absolute inset-0 opacity-10">
               <div className="absolute inset-0" style={{

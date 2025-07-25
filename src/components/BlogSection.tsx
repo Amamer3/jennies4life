@@ -25,7 +25,7 @@ const BlogSection: React.FC = () => {
       author: 'Tech Expert',
       publishDate: '2024-01-15',
       readTime: '5 min read',
-      image: '/api/placeholder/400/250',
+      image: "https://images.pexels.com/photos/1640777/pexels-photo-1640777.jpeg",
       slug: 'latest-vr-headset-trends'
     },
     {
@@ -36,7 +36,7 @@ const BlogSection: React.FC = () => {
       author: 'Parenting Specialist',
       publishDate: '2024-01-12',
       readTime: '7 min read',
-      image: '/api/placeholder/400/250',
+      image: 'https://images.pexels.com/photos/994197/pexels-photo-994197.jpeg',
       slug: 'baby-bedtime-routine-guide'
     },
     {
@@ -47,7 +47,7 @@ const BlogSection: React.FC = () => {
       author: 'Literary Critic',
       publishDate: '2024-01-10',
       readTime: '6 min read',
-      image: '/api/placeholder/400/250',
+      image: 'https://images.pexels.com/photos/994197/pexels-photo-994197.jpeg',
       slug: 'best-escapist-books'
     },
     {
@@ -58,7 +58,7 @@ const BlogSection: React.FC = () => {
       author: 'Gaming Pro',
       publishDate: '2024-01-08',
       readTime: '8 min read',
-      image: '/api/placeholder/400/250',
+      image: 'https://images.pexels.com/photos/994197/pexels-photo-994197.jpeg',
       slug: 'improve-gaming-performance'
     },
     {
@@ -69,7 +69,7 @@ const BlogSection: React.FC = () => {
       author: 'Auto Expert',
       publishDate: '2024-01-05',
       readTime: '4 min read',
-      image: '/api/placeholder/400/250',
+      image: 'https://images.pexels.com/photos/994197/pexels-photo-994197.jpeg',
       slug: 'when-to-replace-car-tires'
     },
     {
@@ -80,7 +80,7 @@ const BlogSection: React.FC = () => {
       author: 'Book Curator',
       publishDate: '2024-01-03',
       readTime: '5 min read',
-      image: '/api/placeholder/400/250',
+      image: 'https://images.pexels.com/photos/994197/pexels-photo-994197.jpeg',
       slug: 'choose-perfect-book'
     }
   ];
@@ -108,7 +108,7 @@ const BlogSection: React.FC = () => {
   };
 
   return (
-    <section className="py-8 sm:py-12 lg:py-16 bg-gray-50">
+    <section className="py-8 sm:py-12 lg:py-16 bg-[#e7e7e7]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <motion.div
@@ -119,13 +119,13 @@ const BlogSection: React.FC = () => {
           className="text-center mb-8 sm:mb-10 lg:mb-12"
         >
           <div className="flex items-center justify-center mb-4">
-            <BookOpen className="h-6 w-6 text-primary-600 mr-2" />
+            <BookOpen className="h-6 w-6 text-primary-600 mr-2"/>
             <span className="text-primary-600 font-semibold text-lg">Newest Blogs</span>
           </div>
           <h2 className="text-2xl sm:text-3xl lg:text-4xl font-heading font-bold text-gray-900 mb-2 sm:mb-4">
             Latest Insights & Guides
           </h2>
-          <p className="text-base sm:text-lg lg:text-xl text-gray-600 max-w-3xl mx-auto px-4">
+          <p className="text-base sm:text-lg lg:text-xl text-black max-w-3xl mx-auto px-4">
             Stay informed with our expert articles, product reviews, and lifestyle guides. 
             Discover tips, trends, and recommendations across all categories.
           </p>
@@ -142,21 +142,21 @@ const BlogSection: React.FC = () => {
           <div className="bg-gradient-to-r from-primary-600 to-secondary-600 rounded-xl sm:rounded-2xl lg:rounded-3xl overflow-hidden shadow-xl sm:shadow-2xl">
             <div className="grid lg:grid-cols-2 gap-0">
               {/* Content */}
-              <div className="p-4 sm:p-6 lg:p-8 xl:p-12 text-white">
+              <div className="p-4 sm:p-6 lg:p-8 xl:p-12 text-black">
                 <div className="flex items-center mb-3 sm:mb-4">
                   <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5 mr-2" />
-                  <span className="text-xs sm:text-sm font-medium bg-white bg-opacity-20 px-2 sm:px-3 py-1 rounded-full">
+                  <span className="text-xs sm:text-sm font-medium bg-[#FACC15] bg-opacity-20 px-2 sm:px-3 py-1 rounded-full">
                     Deal of the Day
                   </span>
                 </div>
                 <h3 className="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-heading font-bold mb-3 sm:mb-4 leading-tight">
                   {blogPosts[0].title}
                 </h3>
-                <p className="text-sm sm:text-base lg:text-lg text-blue-100 mb-4 sm:mb-6 leading-relaxed">
+                <p className="text-sm sm:text-base lg:text-lg text-black mb-4 sm:mb-6 leading-relaxed">
                   {blogPosts[0].excerpt}
                 </p>
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
-                  <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-4 space-y-2 sm:space-y-0 text-xs sm:text-sm text-blue-100">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-4 space-y-2 sm:space-y-0 text-xs sm:text-sm text-black">
                     <div className="flex items-center">
                       <Calendar className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
                       {formatDate(blogPosts[0].publishDate)}
@@ -178,13 +178,11 @@ const BlogSection: React.FC = () => {
               
               {/* Image */}
               <div className="relative h-48 sm:h-56 lg:h-auto">
-                <div className="absolute inset-0 bg-gradient-to-br from-blue-400 to-purple-500 opacity-80"></div>
+                <img src={blogPosts[0].image} alt={blogPosts[0].title} className="w-full h-full object-cover" />
+                <div className="absolute inset-0 bg-gradient-to-br from-blue-400 to-purple-500 opacity-30"></div>
                 <div className="absolute inset-0 flex items-center justify-center">
                   <div className="text-white text-center">
-                    <div className="w-16 h-16 sm:w-20 sm:h-20 lg:w-24 lg:h-24 mx-auto mb-3 sm:mb-4 bg-white bg-opacity-20 rounded-xl sm:rounded-2xl flex items-center justify-center">
-                      <BookOpen className="h-8 w-8 sm:h-10 sm:w-10 lg:h-12 lg:w-12" />
-                    </div>
-                    <p className="text-base sm:text-lg font-semibold">{blogPosts[0].category}</p>
+                    
                   </div>
                 </div>
               </div>
@@ -205,13 +203,7 @@ const BlogSection: React.FC = () => {
             >
               {/* Article Image */}
               <div className="relative h-40 sm:h-48 overflow-hidden">
-                <div className="w-full h-full bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
-                  <div className="text-gray-400 text-center">
-                    <BookOpen className="h-6 w-6 sm:h-8 sm:w-8 mx-auto mb-2" />
-                    <p className="text-xs sm:text-sm font-medium">{post.category}</p>
-                  </div>
-                </div>
-                
+                <img src={post.image} alt={post.title} className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" />
                 {/* Category Badge */}
                 <div className={`absolute top-2 sm:top-3 left-2 sm:left-3 ${getCategoryColor(post.category)} text-xs font-medium px-2 sm:px-3 py-1 rounded-full`}>
                   {post.category}
@@ -267,7 +259,7 @@ const BlogSection: React.FC = () => {
         >
           <Link
             to="/blog"
-            className="inline-flex items-center px-8 py-3 bg-gradient-to-r from-primary-600 to-secondary-600 text-white font-semibold rounded-xl hover:from-primary-700 hover:to-secondary-700 transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl"
+            className="inline-flex items-center px-8 py-3 bg-[#FACC15] text-white font-semibold rounded-xl hover:from-primary-700 hover:to-secondary-700 transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl"
           >
             View All Articles
             <BookOpen className="ml-2 h-5 w-5" />

@@ -115,7 +115,8 @@ const ProductPage: React.FC = () => {
                   }`}
                 >
                   <div className="w-full h-full bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
-                    <ShoppingBag className="h-6 w-6 text-gray-400" />
+                    Buy Now
+                    {/* <ShoppingBag className="h-6 w-6 text-gray-400" /> */}
                   </div>
                 </button>
               ))}

@@ -55,59 +55,7 @@ const Footer: React.FC = () => {
 
   return (
     <footer className="bg-gray-900 text-white">
-      {/* Features Bar */}
-      {/* <div className="border-b border-gray-800">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-            {features.map((feature, index) => {
-              const IconComponent = feature.icon;
-              return (
-                <div key={index} className="flex items-center space-x-3">
-                  <div className="flex-shrink-0">
-                    <div className="w-10 h-10 sm:w-12 sm:h-12 bg-primary-600 rounded-xl flex items-center justify-center">
-                      <IconComponent className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
-                    </div>
-                  </div>
-                  <div>
-                    <h3 className="text-sm sm:text-base font-semibold text-white">{feature.title}</h3>
-                    <p className="text-xs sm:text-sm text-gray-400">{feature.description}</p>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </div> */}
-
-      {/* Newsletter Section */}
-      {/* <div className="border-b border-gray-800">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10 lg:py-12">
-          <div className="grid lg:grid-cols-2 gap-6 sm:gap-8 items-center">
-            <div>
-              <h3 className="text-xl sm:text-2xl font-heading font-bold text-white mb-2">
-                Stay Updated with Latest Deals
-              </h3>
-              <p className="text-sm sm:text-base lg:text-lg text-gray-400">
-                Get exclusive offers, product recommendations, and lifestyle tips delivered to your inbox.
-              </p>
-            </div>
-            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
-              <div className="flex-1">
-                <input
-                  type="email"
-                  placeholder="Enter your email address"
-                  className="w-full px-3 sm:px-4 py-2 sm:py-3 bg-gray-800 border border-gray-700 rounded-xl text-sm sm:text-base text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                />
-              </div>
-              <button className="px-4 sm:px-6 py-2 sm:py-3 bg-gradient-to-r from-primary-600 to-secondary-600 text-white text-sm sm:text-base font-semibold rounded-xl hover:from-primary-700 hover:to-secondary-700 transition-all duration-200 flex items-center justify-center">
-                Subscribe
-                <ArrowRight className="ml-2 h-3 w-3 sm:h-4 sm:w-4" />
-              </button>
-            </div>
-          </div>
-        </div>
-      </div> */}
-
+      
       {/* Main Footer Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10 lg:py-12">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-6 sm:gap-8">
@@ -136,11 +84,11 @@ const Footer: React.FC = () => {
               </div>
               <div className="flex items-center space-x-2 sm:space-x-3 text-gray-400">
                 <Phone className="h-3 w-3 sm:h-4 sm:w-4 text-primary-500 flex-shrink-0" />
-                <span className="text-sm sm:text-base">+1 (555) 123-4567</span>
+                <span className="text-sm sm:text-base">(+233) 123-4567</span>
               </div>
               <div className="flex items-center space-x-2 sm:space-x-3 text-gray-400">
                 <MapPin className="h-3 w-3 sm:h-4 sm:w-4 text-primary-500 flex-shrink-0" />
-                <span className="text-sm sm:text-base">New York, NY 10001</span>
+                <span className="text-sm sm:text-base">Accra-Ghana, GA-100-01</span>
               </div>
             </div>
           </div>
