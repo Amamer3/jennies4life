@@ -1,6 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import { Search, Menu, X, ShoppingBag, Heart, User } from 'lucide-react';
+import { Search, Menu, X, ShoppingBag, Heart } from 'lucide-react';
 
 interface Category {
   name: string;
@@ -165,16 +165,8 @@ const Header: React.FC = () => {
                 <span className="absolute -top-2 -right-2 bg-blue-600 text-white text-xs rounded-full h-4 w-4 sm:h-5 sm:w-5 flex items-center justify-center text-[10px] sm:text-xs">
                   2
                 </span>
-              </Link>
-
-              {/* User Account */}
-              <Link
-                to="/account"
-                className="p-2 text-gray-600 hover:text-blue-600 transition-colors"
-                aria-label="User account"
-              >
-                <User className="h-4 w-4 sm:h-5 sm:w-5" />
-              </Link>
+              </Link> 
+              
 
               {/* Mobile Menu Button */}
               <button
@@ -283,15 +275,7 @@ const Header: React.FC = () => {
                 <ShoppingBag className="h-4 w-4 mr-3" />
                 Cart
               </Link>
-              <Link
-                to="/account"
-                className="flex items-center px-3 py-2 rounded-lg text-gray-700 hover:text-blue-600 hover:bg-blue-50 text-sm sm:text-base transition-all duration-200"
-                onClick={toggleMenu}
-                aria-label="Account"
-              >
-                <User className="h-4 w-4 mr-3" />
-                Account
-              </Link>
+              
             </div>
           </div>
         </div>
