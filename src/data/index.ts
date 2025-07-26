@@ -118,7 +118,7 @@ export const products: Product[] = [
     rating: 4.6,
     reviewCount: 8934,
     image: '/api/placeholder/400/400',
-    category: 'Home & Kitchen',
+    category: 'Home',
     subcategory: 'Small Appliances',
     brand: 'Ninja',
     inStock: true,
@@ -174,7 +174,7 @@ export const products: Product[] = [
     rating: 4.5,
     reviewCount: 9876,
     image: '/api/placeholder/400/400',
-    category: 'Health & Fitness',
+    category: 'Health',
     subcategory: 'Fitness Trackers',
     brand: 'Fitbit',
     inStock: true,
@@ -230,7 +230,7 @@ export const products: Product[] = [
     rating: 4.6,
     reviewCount: 45678,
     image: '/api/placeholder/400/400',
-    category: 'Home & Kitchen',
+    category: 'Home',
     subcategory: 'Large Appliances',
     brand: 'Instant Pot',
     inStock: true,
@@ -247,6 +247,70 @@ export const products: Product[] = [
     isBestseller: true,
     isFeatured: true,
     slug: 'instant-pot-duo-7in1'
+  },
+  {
+    id: '7',
+    name: 'Yoga Mat Non-Slip',
+    description: 'High-density non-slip yoga mat for exercise and fitness.',
+    price: 29.99,
+    rating: 4.7,
+    reviewCount: 1200,
+    image: '/api/placeholder/400/400',
+    category: 'Sports',
+    brand: 'Generic',
+    inStock: true,
+    features: ['Non-slip', 'Eco-friendly', '6mm thick'],
+    affiliateLink: 'https://amazon.com/yoga-mat',
+    tags: ['yoga', 'fitness'],
+    slug: 'yoga-mat-non-slip'
+  },
+  {
+    id: '8',
+    name: 'Vitamin C Serum',
+    description: 'Brightening vitamin C serum for face.',
+    price: 19.99,
+    rating: 4.5,
+    reviewCount: 800,
+    image: '/api/placeholder/400/400',
+    category: 'Beauty',
+    brand: 'The Ordinary',
+    inStock: true,
+    features: ['Antioxidant', 'Brightening', 'Hydrating'],
+    affiliateLink: 'https://amazon.com/vitamin-c-serum',
+    tags: ['skincare', 'serum'],
+    slug: 'vitamin-c-serum'
+  },
+  {
+    id: '9',
+    name: 'Protein Powder',
+    description: 'Whey protein powder for muscle building.',
+    price: 39.99,
+    rating: 4.6,
+    reviewCount: 1500,
+    image: '/api/placeholder/400/400',
+    category: 'Health',
+    brand: 'Optimum Nutrition',
+    inStock: true,
+    features: ['24g protein', 'Low carb', 'Gluten free'],
+    affiliateLink: 'https://amazon.com/protein-powder',
+    tags: ['supplements', 'fitness'],
+    slug: 'protein-powder'
+  },
+  {
+    id: '10',
+    name: 'Running Shoes',
+    description: 'Comfortable running shoes for men and women.',
+    price: 69.99,
+    rating: 4.4,
+    reviewCount: 900,
+    image: '/api/placeholder/400/400',
+    category: 'Sports',
+    brand: 'Nike',
+    inStock: true,
+    features: ['Cushioned', 'Breathable', 'Lightweight'],
+    affiliateLink: 'https://amazon.com/running-shoes',
+    tags: ['running', 'shoes'],
+    slug: 'running-shoes'
   }
 ];
 
@@ -286,12 +350,12 @@ export const categories: Category[] = [
   },
   {
     id: '3',
-    name: 'Home & Kitchen',
+    name: 'Home',
     description: 'Everything for your home, from appliances to decor',
     image: '/api/placeholder/300/200',
     icon: 'Home',
     productCount: 1834,
-    slug: 'home-kitchen',
+    slug: 'home',
     featured: true,
     subcategories: [
       { id: '3-1', name: 'Small Appliances', slug: 'small-appliances', productCount: 234 },
@@ -302,12 +366,12 @@ export const categories: Category[] = [
   },
   {
     id: '4',
-    name: 'Health & Fitness',
+    name: 'Health',
     description: 'Wellness products, fitness equipment, and health supplements',
     image: '/api/placeholder/300/200',
     icon: 'Heart',
     productCount: 892,
-    slug: 'health-fitness',
+    slug: 'health',
     featured: true,
     subcategories: [
       { id: '4-1', name: 'Fitness Equipment', slug: 'fitness-equipment', productCount: 234 },
@@ -334,18 +398,34 @@ export const categories: Category[] = [
   },
   {
     id: '6',
-    name: 'Beauty & Personal Care',
+    name: 'Beauty',
     description: 'Skincare, makeup, and personal care essentials',
     image: '/api/placeholder/300/200',
     icon: 'Sparkles',
     productCount: 1567,
-    slug: 'beauty-personal-care',
+    slug: 'beauty',
     featured: true,
     subcategories: [
       { id: '6-1', name: 'Skincare', slug: 'skincare', productCount: 445 },
       { id: '6-2', name: 'Makeup', slug: 'makeup', productCount: 567 },
       { id: '6-3', name: 'Hair Care', slug: 'hair-care', productCount: 334 },
       { id: '6-4', name: 'Personal Care', slug: 'personal-care', productCount: 221 }
+    ]
+  },
+  {
+    id: '7',
+    name: 'Sports',
+    description: 'Gear and equipment for all sports and outdoor activities',
+    image: '/api/placeholder/300/200',
+    icon: 'Dumbbell',
+    productCount: 1200,
+    slug: 'sports',
+    featured: true,
+    subcategories: [
+      { id: '7-1', name: 'Fitness Gear', slug: 'fitness-gear', productCount: 300 },
+      { id: '7-2', name: 'Outdoor Equipment', slug: 'outdoor-equipment', productCount: 250 },
+      { id: '7-3', name: 'Team Sports', slug: 'team-sports', productCount: 400 },
+      { id: '7-4', name: 'Cycling', slug: 'cycling', productCount: 250 }
     ]
   }
 ];
@@ -460,7 +540,7 @@ export const getFeaturedBlogPosts = (): BlogPost[] => {
 
 export const getProductsByCategory = (categorySlug: string): Product[] => {
   return products.filter(product => 
-    product.category.toLowerCase().replace(/\s+/g, '-') === categorySlug
+    product.category.toLowerCase().replace(/\s+/g, '-') === categorySlug.toLowerCase()
   );
 };
 
@@ -469,7 +549,7 @@ export const getProductById = (id: string): Product | undefined => {
 };
 
 export const getCategoryBySlug = (slug: string): Category | undefined => {
-  return categories.find(category => category.slug === slug);
+  return categories.find(category => category.slug.toLowerCase() === slug.toLowerCase());
 };
 
 export const getBlogPostBySlug = (slug: string): BlogPost | undefined => {

@@ -63,7 +63,7 @@ const Footer: React.FC = () => {
           <div className="lg:col-span-2">
             <Link to="/" className="inline-block mb-4 sm:mb-6">
               <div className="flex items-center space-x-2">
-                <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-r from-primary-600 to-secondary-600 rounded-xl flex items-center justify-center">
+                <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-r from-vibrant-purple to-vibrant-green2 rounded-xl flex items-center justify-center">
                   <Heart className="h-4 w-4 sm:h-6 sm:w-6 text-white" />
                 </div>
                 <span className="text-xl sm:text-2xl font-heading font-bold text-white">
@@ -79,7 +79,7 @@ const Footer: React.FC = () => {
             {/* Contact Info */}
             <div className="space-y-2 sm:space-y-3">
               <div className="flex items-center space-x-2 sm:space-x-3 text-gray-400">
-                <Mail className="h-3 w-3 sm:h-4 sm:w-4 text-primary-500 flex-shrink-0" />
+                <Mail className="h-3 w-3 sm:h-4 sm:w-4 text-vibrant-purple flex-shrink-0" />
                 <span className="text-sm sm:text-base">hello@jennies4life.org</span>
               </div>
               <div className="flex items-center space-x-2 sm:space-x-3 text-gray-400">
@@ -101,7 +101,7 @@ const Footer: React.FC = () => {
                 <li key={index}>
                   <Link
                     to={link.href}
-                    className="text-sm sm:text-base text-gray-400 hover:text-white transition-colors duration-200"
+                    className="text-sm sm:text-base text-gray-400 hover:text-vibrant-cyan transition-colors duration-200"
                   >
                     {link.name}
                   </Link>
@@ -176,7 +176,7 @@ const Footer: React.FC = () => {
 
             {/* Social Links */}
             <div className="flex items-center space-x-3 sm:space-x-4">
-              <span className="text-gray-400 text-xs sm:text-sm mr-1 sm:mr-2">Follow us:</span>
+              <span className="text-gray-400 text-xs sm:text-sm mr-1 sm:mr-2 hover:text-vibrant-green1">Follow us:</span>
               {socialLinks.map((social, index) => {
                 const IconComponent = social.icon;
                 return (

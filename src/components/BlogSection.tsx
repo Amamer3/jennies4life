@@ -87,13 +87,13 @@ const BlogSection: React.FC = () => {
 
   const getCategoryColor = (category: string) => {
     const colors: { [key: string]: string } = {
-      'Electronics': 'bg-blue-100 text-blue-800',
-      'Baby': 'bg-pink-100 text-pink-800',
-      'Books': 'bg-purple-100 text-purple-800',
-      'Gaming': 'bg-green-100 text-green-800',
-      'Automotive': 'bg-orange-100 text-orange-800',
-      'Health': 'bg-emerald-100 text-emerald-800',
-      'Fashion': 'bg-rose-100 text-rose-800'
+      'Electronics': 'bg-vibrant-cyan text-vibrant-purple',
+      'Baby': 'bg-vibrant-light text-vibrant-green2',
+      'Books': 'bg-vibrant-purple text-vibrant-light',
+      'Gaming': 'bg-vibrant-green1 text-vibrant-cyan',
+      'Automotive': 'bg-vibrant-green2 text-vibrant-purple',
+      'Health': 'bg-vibrant-light text-vibrant-green1',
+      'Fashion': 'bg-vibrant-cyan text-vibrant-green2'
     };
     return colors[category] || 'bg-gray-100 text-gray-800';
   };
@@ -108,7 +108,7 @@ const BlogSection: React.FC = () => {
   };
 
   return (
-    <section className="py-8 sm:py-12 lg:py-16 bg-[#e7e7e7]">
+    <section className="py-8 sm:py-12 lg:py-16 bg-vibrant-light">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <motion.div
@@ -122,10 +122,10 @@ const BlogSection: React.FC = () => {
             <BookOpen className="h-6 w-6 text-primary-600 mr-2"/>
             <span className="text-primary-600 font-semibold text-lg">Newest Blogs</span>
           </div>
-          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-heading font-bold text-gray-900 mb-2 sm:mb-4">
+          <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-heading font-bold text-gray-900 mb-2 sm:mb-4">
             Latest Insights & Guides
           </h2>
-          <p className="text-base sm:text-lg lg:text-xl text-black max-w-3xl mx-auto px-4">
+          <p className="text-sm sm:text-base md:text-lg lg:text-xl text-black max-w-3xl mx-auto px-4">
             Stay informed with our expert articles, product reviews, and lifestyle guides. 
             Discover tips, trends, and recommendations across all categories.
           </p>
@@ -139,10 +139,10 @@ const BlogSection: React.FC = () => {
           viewport={{ once: true }}
           className="mb-8 sm:mb-10 lg:mb-12"
         >
-          <div className="bg-gradient-to-r from-primary-600 to-secondary-600 rounded-xl sm:rounded-2xl lg:rounded-3xl overflow-hidden shadow-xl sm:shadow-2xl">
-            <div className="grid lg:grid-cols-2 gap-0">
+          <div className="bg-gradient-to-r from-vibrant-purple to-vibrant-green1 rounded-xl sm:rounded-2xl lg:rounded-3xl overflow-hidden shadow-xl sm:shadow-2xl">
+            <div className="grid md:grid-cols-2 gap-0">
               {/* Content */}
-              <div className="p-4 sm:p-6 lg:p-8 xl:p-12 text-black">
+              <div className="p-4 sm:p-6 md:p-8 lg:p-10 xl:p-12 text-black">
                 <div className="flex items-center mb-3 sm:mb-4">
                   <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5 mr-2" />
                   <span className="text-xs sm:text-sm font-medium bg-[#FACC15] bg-opacity-20 px-2 sm:px-3 py-1 rounded-full">
@@ -177,7 +177,7 @@ const BlogSection: React.FC = () => {
               </div>
               
               {/* Image */}
-              <div className="relative h-48 sm:h-56 lg:h-auto">
+              <div className="relative h-48 sm:h-64 md:h-80 lg:h-auto">
                 <img src={blogPosts[0].image} alt={blogPosts[0].title} className="w-full h-full object-cover" />
                 <div className="absolute inset-0 bg-gradient-to-br from-blue-400 to-purple-500 opacity-30"></div>
                 <div className="absolute inset-0 flex items-center justify-center">
@@ -191,7 +191,7 @@ const BlogSection: React.FC = () => {
         </motion.div>
 
         {/* Blog Posts Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 md:gap-8">
           {blogPosts.slice(1).map((post, index) => (
             <motion.article
               key={post.id}
@@ -202,7 +202,7 @@ const BlogSection: React.FC = () => {
               className="group bg-white rounded-xl sm:rounded-2xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
             >
               {/* Article Image */}
-              <div className="relative h-40 sm:h-48 overflow-hidden">
+              <div className="relative h-40 sm:h-48 md:h-56 overflow-hidden">
                 <img src={post.image} alt={post.title} className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" />
                 {/* Category Badge */}
                 <div className={`absolute top-2 sm:top-3 left-2 sm:left-3 ${getCategoryColor(post.category)} text-xs font-medium px-2 sm:px-3 py-1 rounded-full`}>
@@ -211,7 +211,7 @@ const BlogSection: React.FC = () => {
               </div>
 
               {/* Article Content */}
-              <div className="p-4 sm:p-5 lg:p-6">
+              <div className="p-4 sm:p-5 md:p-6 lg:p-7">
                 <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-2 sm:mb-3 line-clamp-2 group-hover:text-primary-600 transition-colors">
                   <Link to={`/blog/${post.slug}`}>
                     {post.title}
