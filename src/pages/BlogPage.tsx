@@ -15,19 +15,6 @@ import {
 import { motion } from 'framer-motion';
 import { blogPosts } from '../data';
 
-interface BlogPost {
-  id: string;
-  title: string;
-  excerpt: string;
-  category: string;
-  tags: string[];
-  publishDate: string;
-  readTime: string;
-  slug: string;
-  featured?: boolean;
-  author: { name: string };
-  image?: string;
-}
 
 const BlogPage: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
