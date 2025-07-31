@@ -24,7 +24,7 @@ interface ArrowProps {
 // Custom Arrow Components for Slider
 const NextArrow: React.FC<ArrowProps> = ({ onClick }) => (
   <button
-    className="absolute right-2 sm:right-4 top-1/2 transform -translate-y-1/2 bg-[#D1BF00] text-white p-2 sm:p-3 rounded-full z-10 hover:bg-[#A68B02] transition-all duration-300 shadow-md hover:shadow-lg"
+    className="absolute right-2 sm:right-4 top-1/2 transform -translate-y-1/2 bg-[#F0E68C] text-white p-2 sm:p-3 rounded-full z-10 hover:bg-[#DAA520] transition-all duration-300 shadow-md hover:shadow-lg"
     onClick={onClick}
     aria-label="Next slide"
   >
@@ -123,7 +123,7 @@ const Hero: React.FC = () => {
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.6, delay: 0.1 }}
               viewport={{ once: true }}
-              className="inline-flex items-center px-4 sm:px-5 py-2 bg-[#F4FFC1] rounded-full text-sm sm:text-base font-semibold text-[#896C0A] mb-6 sm:mb-8 shadow-sm"
+              className="inline-flex items-center px-4 sm:px-5 py-2 bg-[#FFFFF0] rounded-full text-sm sm:text-base font-semibold text-[#DAA520] mb-6 sm:mb-8 shadow-sm"
             >
               <Gift className="h-4 w-4 sm:h-5 sm:w-5 mr-2" />
               New Deals Added Daily
@@ -138,7 +138,7 @@ const Hero: React.FC = () => {
               className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-heading font-extrabold text-gray-900 mb-3 sm:mb-4 lg:mb-6 leading-tight"
             >
               Unlock the{' '}
-              <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#D1BF00] to-[#E27C00]">Best Deals</span>{' '}
+              <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#F0E68C] to-[#FFDAB9]">Best Deals</span>{' '}
               <span className="block sm:inline">Across All Products</span>
             </motion.h1>
 
@@ -166,11 +166,11 @@ const Hero: React.FC = () => {
                 <span className="text-xs sm:text-sm font-semibold text-gray-800">10K+ Happy Customers</span>
               </div>
               <div className="flex items-center space-x-2 sm:space-x-3">
-                <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5 text-[#FFA500]" />
+                <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5 text-[#FFDAB9]" />
                 <span className="text-xs sm:text-sm font-semibold text-gray-800">500+ Products Reviewed</span>
               </div>
               <div className="flex items-center space-x-2 sm:space-x-3">
-                <Gift className="h-4 w-4 sm:h-5 sm:w-5 text-[#FFFF00]" />
+                <Gift className="h-4 w-4 sm:h-5 sm:w-5 text-[#FFFACD]" />
                 <span className="text-xs sm:text-sm font-semibold text-gray-800">Daily New Deals</span>
               </div>
             </motion.div>
@@ -194,7 +194,7 @@ const Hero: React.FC = () => {
               <Link
                 to="/categories"
                 aria-label="Browse product categories"
-                className="inline-flex items-center justify-center px-6 sm:px-8 py-3 sm:py-4 bg-white text-[#D1BF00] text-sm sm:text-base font-semibold rounded-lg border-2 border-[#ECFF41] hover:border-[#F2FF0D] hover:bg-[#F4FFC1] transition-all duration-300 shadow-md hover:shadow-lg"
+                className="inline-flex items-center justify-center px-6 sm:px-8 py-3 sm:py-4 bg-white text-[#F0E68C] text-sm sm:text-base font-semibold rounded-lg border-2 border-[#FFFFE0] hover:border-[#FFFFCC] hover:bg-[#FFFFF0] transition-all duration-300 shadow-md hover:shadow-lg"
               >
                 Browse Categories
               </Link>

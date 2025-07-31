@@ -44,7 +44,7 @@ const Header: React.FC = () => {
         <div className="flex items-center justify-between h-14 sm:h-16">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
-            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-r from-[#FFFF00] to-[#FFA500] rounded-xl flex items-center justify-center">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-r from-[#FFFACD] to-[#FFDAB9] rounded-xl flex items-center justify-center">
               <Heart className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
             </div>
             <span className="text-lg sm:text-xl md:text-2xl font-heading font-bold text-gray-900">
@@ -56,11 +56,11 @@ const Header: React.FC = () => {
           <nav className="hidden md:flex items-center gap-4 lg:gap-6">
             <Link
               to="/"
-              className="text-gray-700 hover:text-[#D1BF00] font-medium text-sm lg:text-base relative group transition-colors duration-200"
+              className="text-gray-700 hover:text-[#F0E68C] font-medium text-sm lg:text-base relative group transition-colors duration-200"
               aria-label="Home"
             >
               Home
-              <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-[#D1BF00] transition-all duration-200 group-hover:w-full"></span>
+              <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-[#F0E68C] transition-all duration-200 group-hover:w-full"></span>
             </Link>
             <div className="relative group">
               <button
@@ -125,7 +125,7 @@ const Header: React.FC = () => {
               <input
                 type="text"
                 placeholder="Search products, articles..."
-                className="w-40 sm:w-48 lg:w-64 pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FFFF00] focus:border-transparent text-sm"
+                className="w-40 sm:w-48 lg:w-64 pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FFFACD] focus:border-transparent text-sm"
                 aria-label="Search products or articles"
               />
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -208,7 +208,7 @@ const Header: React.FC = () => {
           <div className="px-4 sm:px-6 py-4 space-y-1 max-h-[calc(100vh-80px)] overflow-y-auto">
             <Link
               to="/"
-              className="block px-3 py-2 rounded-lg text-gray-700 hover:text-primary-600 hover:bg-[#F4FFC1] font-medium text-sm sm:text-base transition-all duration-200"
+              className="block px-3 py-2 rounded-lg text-gray-700 hover:text-primary-600 hover:bg-[#FFFFF0] font-medium text-sm sm:text-base transition-all duration-200"
               onClick={toggleMenu}
               aria-label="Home"
             >

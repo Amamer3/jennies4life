@@ -237,7 +237,7 @@ const FeaturedProducts: React.FC = () => {
                 <div className="flex gap-2 sm:gap-3">
                   <Link
                     to={`/products/${product.id}`}
-                    className="flex-1 bg-[#D1BF00] hover:bg-[#B3A000] text-white font-medium py-2 px-3 sm:px-4 rounded-lg text-xs sm:text-sm transition-all duration-200 text-center"
+                    className="flex-1 bg-[#F0E68C] hover:bg-[#DAA520] text-white font-medium py-2 px-3 sm:px-4 rounded-lg text-xs sm:text-sm transition-all duration-200 text-center"
                     aria-label={`View details for ${product.name}`}
                   >
                     View Details

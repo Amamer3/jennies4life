@@ -23,8 +23,8 @@ const Categories: React.FC = () => {
       description: 'Supplements, fitness gear, and wellness products for a healthier lifestyle',
       icon: <Heart className="h-6 w-6 sm:h-8 sm:w-8" />,
       productCount: 245,
-      color: 'text-[#FFA500]',
-      gradient: 'bg-gradient-to-br from-[#FFB733] to-[#FF8C00]',
+      color: 'text-[#FFDAB9]',
+      gradient: 'bg-gradient-to-br from-[#FFE4C4] to-[#FFA07A]',
       path: '/category/health',
       backgroundImage: 'https://images.pexels.com/photos/1640777/pexels-photo-1640777.jpeg',
     },
@@ -34,8 +34,8 @@ const Categories: React.FC = () => {
       description: 'Latest gadgets, smart devices, and tech accessories',
       icon: <Smartphone className="h-6 w-6 sm:h-8 sm:w-8" />,
       productCount: 189,
-      color: 'text-[#D1BF00]',
-      gradient: 'bg-gradient-to-br from-[#FFFF00] to-[#FFA500]',
+      color: 'text-[#F0E68C]',
+      gradient: 'bg-gradient-to-br from-[#FFFACD] to-[#FFDAB9]',
       path: '/category/electronics',
       backgroundImage: 'https://images.pexels.com/photos/3861969/pexels-photo-3861969.jpeg',
     },
@@ -56,8 +56,8 @@ const Categories: React.FC = () => {
       description: 'Home decor, kitchen essentials, and garden tools',
       icon: <Home className="h-6 w-6 sm:h-8 sm:w-8" />,
       productCount: 156,
-      color: 'text-[#FF8C00]',
-      gradient: 'bg-gradient-to-br from-[#FFB733] to-[#FFFF00]',
+      color: 'text-[#FFA07A]',
+      gradient: 'bg-gradient-to-br from-[#FFE4C4] to-[#FFFACD]',
       path: '/category/home',
       backgroundImage: 'https://images.pexels.com/photos/279746/pexels-photo-279746.jpeg',
     },
@@ -68,7 +68,7 @@ const Categories: React.FC = () => {
       icon: <Dumbbell className="h-6 w-6 sm:h-8 sm:w-8" />,
       productCount: 198,
       color: 'text-[#D1BF00]',
-      gradient: 'bg-gradient-to-br from-[#FFFF66] to-[#FFA500]',
+      gradient: 'bg-gradient-to-br from-[#FFFFE0] to-[#FFDAB9]',
       path: '/category/sports',
       backgroundImage: 'https://images.pexels.com/photos/416717/pexels-photo-416717.jpeg',
     },
@@ -78,15 +78,15 @@ const Categories: React.FC = () => {
       description: 'Skincare, makeup, and personal care products',
       icon: <Zap className="h-6 w-6 sm:h-8 sm:w-8" />,
       productCount: 167,
-      color: 'text-[#FF8C00]',
-      gradient: 'bg-gradient-to-br from-[#FFFF66] to-[#FFFF00]',
+      color: 'text-[#FFA07A]',
+      gradient: 'bg-gradient-to-br from-[#FFFFE0] to-[#FFFACD]',
       path: '/category/beauty',
       backgroundImage: 'https://images.pexels.com/photos/301703/pexels-photo-301703.jpeg',
     },
   ];
 
   return (
-    <section className="py-8 sm:py-12 lg:py-16 bg-gradient-to-b from-[#FFD700] to-[#FFB733]">
+    <section className="py-8 sm:py-12 lg:py-16 bg-gradient-to-b from-[#FFFACD] to-[#FFE4C4]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <motion.div
@@ -142,10 +142,10 @@ const Categories: React.FC = () => {
                 {/* Category Content */}
                 <div className="p-4 sm:p-5">
                   <div className="flex items-center justify-between mb-2 sm:mb-3">
-                    <h3 className="text-base sm:text-lg font-semibold text-gray-900 group-hover:text-[#D1BF00] transition-colors">
+                    <h3 className="text-base sm:text-lg font-semibold text-gray-900 group-hover:text-[#F0E68C] transition-colors">
                       {category.name}
                     </h3>
-                    <ArrowRight className="h-4 w-4 sm:h-5 sm:w-5 text-gray-600 group-hover:text-[#D1BF00] transform group-hover:translate-x-1 transition-all duration-200" />
+                    <ArrowRight className="h-4 w-4 sm:h-5 sm:w-5 text-gray-600 group-hover:text-[#F0E68C] transform group-hover:translate-x-1 transition-all duration-200" />
                   </div>
                   <p className="text-xs sm:text-sm text-gray-600 mb-2 sm:mb-3 line-clamp-2">
                     {category.description}
@@ -155,7 +155,7 @@ const Categories: React.FC = () => {
                       {category.productCount} products
                     </span>
                     <div className="flex items-center gap-1">
-                      <div className="w-1.5 h-1.5 bg-[#FFA500] rounded-full"></div>
+                      <div className="w-1.5 h-1.5 bg-[#FFDAB9] rounded-full"></div>
                       <span className="text-xs sm:text-sm text-[#FF8C00] font-medium">Active deals</span>
                     </div>
                   </div>
@@ -173,7 +173,7 @@ const Categories: React.FC = () => {
           viewport={{ once: true }}
           className="mt-8 sm:mt-10 lg:mt-12"
         >
-          <div className="relative bg-gradient-to-r from-[#D1BF00] to-[#B3A000] rounded-lg shadow-md overflow-hidden">
+          <div className="relative bg-gradient-to-r from-[#F0E68C] to-[#DAA520] rounded-lg shadow-md overflow-hidden">
             {/* Background Pattern */}
             <div className="absolute inset-0 opacity-10">
               <div
@@ -187,14 +187,14 @@ const Categories: React.FC = () => {
               <h3 className="text-lg sm:text-xl lg:text-2xl font-heading font-bold text-white mb-2 sm:mb-3">
                 Discover More Categories
               </h3>
-              <p className="text-xs sm:text-sm lg:text-base text-[#FFFFE0] mb-4 sm:mb-6 max-w-xl mx-auto px-2">
+              <p className="text-xs sm:text-sm lg:text-base text-[#FFFFF0] mb-4 sm:mb-6 max-w-xl mx-auto px-2">
                 Shop our new arrivals, carefully selected for you. Find the perfect products across all categories with exclusive deals.
               </p>
               <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
                 <Link
                   to="/categories"
                   aria-label="Browse all product categories"
-                  className="inline-flex items-center px-5 sm:px-6 py-2 sm:py-2.5 bg-white text-primary-600 text-sm sm:text-base font-semibold rounded-lg hover:bg-[#F4FFC1] transform hover:scale-105 transition-all duration-200 shadow-md"
+                  className="inline-flex items-center px-5 sm:px-6 py-2 sm:py-2.5 bg-white text-[#F0E68C] text-sm sm:text-base font-semibold rounded-lg hover:bg-[#FFFFF0] transform hover:scale-105 transition-all duration-200 shadow-md"
                   title="Browse all categories"
                 >
                   Browse All Categories
@@ -203,7 +203,7 @@ const Categories: React.FC = () => {
                 <Link
                   to="/deals"
                   aria-label="View today's deals"
-                  className="inline-flex items-center px-5 sm:px-6 py-2 sm:py-2.5 bg-transparent border-2 border-white text-white text-sm sm:text-base font-semibold rounded-lg hover:bg-white hover:text-[#D1BF00] transition-all duration-200"
+                  className="inline-flex items-center px-5 sm:px-6 py-2 sm:py-2.5 bg-transparent border-2 border-white text-white text-sm sm:text-base font-semibold rounded-lg hover:bg-white hover:text-[#F0E68C] transition-all duration-200"
                   title="View today's deals"
                 >
                   View Today's Deals

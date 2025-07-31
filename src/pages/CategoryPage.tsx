@@ -207,7 +207,7 @@ const CategoryPage: React.FC = () => {
         {/* Badges */}
         <div className="absolute top-2 left-2 space-y-1.5">
           {product.isNew && (
-            <span className="bg-[#FFA500] text-white text-xs font-medium px-2 py-0.5 rounded-full">
+            <span className="bg-[#FFDAB9] text-white text-xs font-medium px-2 py-0.5 rounded-full">
               New
             </span>
           )}
@@ -243,7 +243,7 @@ const CategoryPage: React.FC = () => {
           </div>
         </div>
         <h3
-          className={`font-semibold text-gray-900 mb-2 group-hover:text-[#D1BF00] transition-colors ${
+          className={`font-semibold text-gray-900 mb-2 group-hover:text-[#F0E68C] transition-colors ${
             viewMode === 'list' ? 'text-base sm:text-lg line-clamp-2' : 'text-sm sm:text-base line-clamp-2'
           }`}
         >
@@ -269,7 +269,7 @@ const CategoryPage: React.FC = () => {
             href={product.affiliateLink}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center px-2 sm:px-3 py-1 sm:py-1.5 bg-[#FFFF00] text-white text-xs sm:text-sm font-medium rounded-lg hover:bg-[#D1BF00] transition-all duration-200"
+            className="inline-flex items-center px-2 sm:px-3 py-1 sm:py-1.5 bg-[#FFFACD] text-white text-xs sm:text-sm font-medium rounded-lg hover:bg-[#F0E68C] transition-all duration-200"
             aria-label={`Buy ${product.name}`}
           >
             Buy Now
@@ -287,7 +287,7 @@ const CategoryPage: React.FC = () => {
           <h1 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4">Category Not Found</h1>
           <Link
             to="/"
-            className="text-[#FFFF00] hover:text-primary-600 text-sm sm:text-base transition-colors"
+            className="text-[#FFFACD] hover:text-primary-600 text-sm sm:text-base transition-colors"
             aria-label="Return to homepage"
           >
             Return to Home
@@ -300,7 +300,7 @@ const CategoryPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Category Header */}
-      <div className="bg-gradient-to-r from-[#FFFF00] to-[#D1BF00] text-white">
+      <div className="bg-gradient-to-r from-[#FFFACD] to-[#F0E68C] text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 lg:py-16">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -317,7 +317,7 @@ const CategoryPage: React.FC = () => {
             >
               {category.name}
             </h1>
-            <p className="text-sm sm:text-base lg:text-lg text-[#FFFFE0] mb-4 sm:mb-6 max-w-prose mx-auto">
+            <p className="text-sm sm:text-base lg:text-lg text-[#FFFFF0] mb-4 sm:mb-6 max-w-prose mx-auto">
               {category.description}
             </p>
             <div className="flex items-center justify-center gap-2 sm:gap-4 text-primary-100 text-xs sm:text-sm">
@@ -360,7 +360,7 @@ const CategoryPage: React.FC = () => {
                 <Link
                   key={subcategory.id}
                   to={`/category/${category.slug}/${subcategory.slug}`}
-                  className="inline-flex items-center px-3 sm:px-4 py-1.5 sm:py-2 bg-white border border-gray-200 rounded-lg text-gray-700 text-xs sm:text-sm hover:border-[#FFFF00] hover:text-[#D1BF00] transition-all duration-200"
+                  className="inline-flex items-center px-3 sm:px-4 py-1.5 sm:py-2 bg-white border border-gray-200 rounded-lg text-gray-700 text-xs sm:text-sm hover:border-[#FFFACD] hover:text-[#F0E68C] transition-all duration-200"
                   aria-label={`View subcategory: ${subcategory.name}`}
                 >
                   {subcategory.name}
@@ -397,7 +397,7 @@ const CategoryPage: React.FC = () => {
                   type="text"
                   placeholder="Search..."
                   onChange={(e) => debouncedSetSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-3 sm:pr-4 py-1.5 sm:py-2 border border-gray-300 rounded-lg text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-[#FFFF00]"
+                  className="w-full pl-10 pr-3 sm:pr-4 py-1.5 sm:py-2 border border-gray-300 rounded-lg text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-[#FFFACD]"
                   aria-label="Search products"
                 />
               </div>
@@ -456,7 +456,7 @@ const CategoryPage: React.FC = () => {
             {(searchTerm || priceRange.min !== 0 || priceRange.max !== 1000 || selectedBrands.length > 0) && (
               <button
                 onClick={resetFilters}
-                className="w-full px-3 sm:px-4 py-1.5 sm:py-2 bg-white border border-gray-200 rounded-lg text-xs sm:text-sm text-gray-700 hover:bg-[#F4FFC1] hover:text-primary-600 transition-all duration-200"
+                className="w-full px-3 sm:px-4 py-1.5 sm:py-2 bg-white border border-gray-200 rounded-lg text-xs sm:text-sm text-gray-700 hover:bg-[#FFFFF0] hover:text-primary-600 transition-all duration-200"
                 aria-label="Reset all filters"
               >
                 Reset Filters
