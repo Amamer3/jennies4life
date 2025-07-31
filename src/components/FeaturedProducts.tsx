@@ -66,7 +66,7 @@ const FeaturedProducts: React.FC = () => {
       originalPrice: 149.99,
       rating: 4.7,
       reviews: 1156,
-      image: 'https://images.pexels.com/photos/4370367/pexels-photo-4370367.jpeg?auto=compress&cs=tinysrgb&w=300',
+      image: 'https://images.unsplash.com/photo-1570545889512-2cbb0c4228c0?q=80&w=300&auto=format&fit=crop',
       badge: 'Trending',
       affiliateLink: '#',
       description: 'Track your health metrics with advanced sensors',
@@ -102,13 +102,13 @@ const FeaturedProducts: React.FC = () => {
   const getBadgeColor = (badge?: string) => {
     switch (badge) {
       case 'Best Seller':
-        return 'bg-blue-600';
+        return 'bg-primary-600';
       case 'Limited Deal':
-        return 'bg-green-600';
+        return 'bg-secondary-600';
       case "Editor's Choice":
         return 'bg-purple-600';
       case 'Trending':
-        return 'bg-cyan-600';
+        return 'bg-secondary-500';
       case 'Flash Sale':
         return 'bg-red-600';
       case 'New Arrival':
@@ -134,8 +134,8 @@ const FeaturedProducts: React.FC = () => {
           className="text-center mb-8 sm:mb-12 lg:mb-16"
         >
           <div className="flex items-center justify-center mb-3 sm:mb-4">
-            <TrendingUp className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600 mr-2" />
-            <span className="text-blue-600 font-semibold text-base sm:text-lg">Today's Favorites</span>
+            <TrendingUp className="h-5 w-5 sm:h-6 sm:w-6 text-primary-600 mr-2" />
+            <span className="text-primary-600 font-semibold text-base sm:text-lg">Today's Favorites</span>
           </div>
           <h2 className="text-2xl sm:text-3xl lg:text-4xl font-heading font-bold text-gray-900 mb-2 sm:mb-4">
             Sourced Directly from the Latest Trends
@@ -190,9 +190,9 @@ const FeaturedProducts: React.FC = () => {
               {/* Product Info */}
               <div className="p-4 sm:p-5">
                 {/* Category */}
-                <p className="text-xs sm:text-sm text-blue-600 font-medium mb-1 sm:mb-2">{product.category}</p>
+                <p className="text-xs sm:text-sm text-primary-600 font-medium mb-1 sm:mb-2">{product.category}</p>
                 {/* Product Name */}
-                <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-1 sm:mb-2 line-clamp-2 group-hover:text-blue-600 transition-colors">
+                <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-1 sm:mb-2 line-clamp-2 group-hover:text-primary-600 transition-colors">
                   <Link to={`/products/${product.id}`} aria-label={`View details for ${product.name}`}>
                     {product.name}
                   </Link>
@@ -237,7 +237,7 @@ const FeaturedProducts: React.FC = () => {
                 <div className="flex gap-2 sm:gap-3">
                   <Link
                     to={`/products/${product.id}`}
-                    className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-3 sm:px-4 rounded-lg text-xs sm:text-sm transition-all duration-200 text-center"
+                    className="flex-1 bg-[#D1BF00] hover:bg-[#B3A000] text-white font-medium py-2 px-3 sm:px-4 rounded-lg text-xs sm:text-sm transition-all duration-200 text-center"
                     aria-label={`View details for ${product.name}`}
                   >
                     View Details
@@ -268,7 +268,7 @@ const FeaturedProducts: React.FC = () => {
         >
           <Link
             to="/products"
-            className="inline-flex items-center px-6 sm:px-8 py-2 sm:py-3 bg-blue-600 text-white text-sm sm:text-base font-medium rounded-lg hover:bg-blue-700 transition-all duration-200"
+            className="inline-flex items-center px-6 sm:px-8 py-2 sm:py-3 bg-primary-600 text-white text-sm sm:text-base font-medium rounded-lg hover:bg-primary-700 transition-all duration-200"
             aria-label="View all products"
           >
             View All Products

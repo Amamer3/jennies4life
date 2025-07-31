@@ -24,7 +24,7 @@ interface ArrowProps {
 // Custom Arrow Components for Slider
 const NextArrow: React.FC<ArrowProps> = ({ onClick }) => (
   <button
-    className="absolute right-2 sm:right-4 top-1/2 transform -translate-y-1/2 bg-blue-600 text-white p-2 sm:p-3 rounded-full z-10 hover:bg-blue-700 transition-all duration-300 shadow-md hover:shadow-lg"
+    className="absolute right-2 sm:right-4 top-1/2 transform -translate-y-1/2 bg-[#D1BF00] text-white p-2 sm:p-3 rounded-full z-10 hover:bg-[#A68B02] transition-all duration-300 shadow-md hover:shadow-lg"
     onClick={onClick}
     aria-label="Next slide"
   >
@@ -34,7 +34,7 @@ const NextArrow: React.FC<ArrowProps> = ({ onClick }) => (
 
 const PrevArrow: React.FC<ArrowProps> = ({ onClick }) => (
   <button
-    className="absolute left-2 sm:left-4 top-1/2 transform -translate-y-1/2 bg-blue-600 text-white p-2 sm:p-3 rounded-full z-10 hover:bg-blue-700 transition-all duration-300 shadow-md hover:shadow-lg"
+    className="absolute left-2 sm:left-4 top-1/2 transform -translate-y-1/2 bg-primary-600 text-white p-2 sm:p-3 rounded-full z-10 hover:bg-primary-700 transition-all duration-300 shadow-md hover:shadow-lg"
     onClick={onClick}
     aria-label="Previous slide"
   >
@@ -95,7 +95,7 @@ const Hero: React.FC = () => {
   ];
 
   return (
-    <section className="relative bg-gradient-to-br from-green-400 to-cyan-500 overflow-hidden">
+    <section className="relative bg-gradient-to-br from-[#F2FF0D] to-[#FFC71B] overflow-hidden">
       {/* Background Pattern */}
       <div className="absolute inset-0 opacity-10">
         <svg className="w-full h-full" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
@@ -123,7 +123,7 @@ const Hero: React.FC = () => {
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.6, delay: 0.1 }}
               viewport={{ once: true }}
-              className="inline-flex items-center px-4 sm:px-5 py-2 bg-blue-100 rounded-full text-sm sm:text-base font-semibold text-blue-800 mb-6 sm:mb-8 shadow-sm"
+              className="inline-flex items-center px-4 sm:px-5 py-2 bg-[#F4FFC1] rounded-full text-sm sm:text-base font-semibold text-[#896C0A] mb-6 sm:mb-8 shadow-sm"
             >
               <Gift className="h-4 w-4 sm:h-5 sm:w-5 mr-2" />
               New Deals Added Daily
@@ -138,7 +138,7 @@ const Hero: React.FC = () => {
               className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-heading font-extrabold text-gray-900 mb-3 sm:mb-4 lg:mb-6 leading-tight"
             >
               Unlock the{' '}
-              <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-cyan-600">Best Deals</span>{' '}
+              <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#D1BF00] to-[#E27C00]">Best Deals</span>{' '}
               <span className="block sm:inline">Across All Products</span>
             </motion.h1>
 
@@ -166,11 +166,11 @@ const Hero: React.FC = () => {
                 <span className="text-xs sm:text-sm font-semibold text-gray-800">10K+ Happy Customers</span>
               </div>
               <div className="flex items-center space-x-2 sm:space-x-3">
-                <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5 text-green-500" />
+                <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5 text-[#FFA500]" />
                 <span className="text-xs sm:text-sm font-semibold text-gray-800">500+ Products Reviewed</span>
               </div>
               <div className="flex items-center space-x-2 sm:space-x-3">
-                <Gift className="h-4 w-4 sm:h-5 sm:w-5 text-blue-500" />
+                <Gift className="h-4 w-4 sm:h-5 sm:w-5 text-[#FFFF00]" />
                 <span className="text-xs sm:text-sm font-semibold text-gray-800">Daily New Deals</span>
               </div>
             </motion.div>
@@ -186,7 +186,7 @@ const Hero: React.FC = () => {
               <Link
                 to="/deals"
                 aria-label="Explore today's deals"
-                className="inline-flex items-center justify-center px-6 sm:px-8 py-3 sm:py-4 bg-blue-600 text-white text-sm sm:text-base font-semibold rounded-lg hover:bg-blue-700 transform hover:scale-105 transition-all duration-300 shadow-md hover:shadow-lg"
+                className="inline-flex items-center justify-center px-6 sm:px-8 py-3 sm:py-4 bg-primary-600 text-white text-sm sm:text-base font-semibold rounded-lg hover:bg-primary-700 transform hover:scale-105 transition-all duration-300 shadow-md hover:shadow-lg"
               >
                 Explore Today's Deals
                 <ArrowRight className="ml-2 h-4 w-4 sm:h-5 sm:w-5" />
@@ -194,7 +194,7 @@ const Hero: React.FC = () => {
               <Link
                 to="/categories"
                 aria-label="Browse product categories"
-                className="inline-flex items-center justify-center px-6 sm:px-8 py-3 sm:py-4 bg-white text-blue-600 text-sm sm:text-base font-semibold rounded-lg border-2 border-blue-300 hover:border-blue-400 hover:bg-blue-50 transition-all duration-300 shadow-md hover:shadow-lg"
+                className="inline-flex items-center justify-center px-6 sm:px-8 py-3 sm:py-4 bg-white text-[#D1BF00] text-sm sm:text-base font-semibold rounded-lg border-2 border-[#ECFF41] hover:border-[#F2FF0D] hover:bg-[#F4FFC1] transition-all duration-300 shadow-md hover:shadow-lg"
               >
                 Browse Categories
               </Link>
@@ -228,7 +228,7 @@ const Hero: React.FC = () => {
                       />
                       <h3 className="font-semibold text-gray-900 text-base sm:text-lg mb-2">{product.title}</h3>
                       <div className="flex items-center justify-between">
-                        <span className="text-blue-600 font-bold text-sm sm:text-base">{product.discount}</span>
+                        <span className="text-primary-600 font-bold text-sm sm:text-base">{product.discount}</span>
                         <div className="flex text-yellow-400">
                           {[...Array(5)].map((_, i) => (
                             <Star key={i} className="h-3 w-3 sm:h-4 sm:w-4 fill-current" />

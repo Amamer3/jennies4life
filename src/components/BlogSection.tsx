@@ -119,7 +119,7 @@ const BlogSection: React.FC = () => {
           className="text-center mb-8 sm:mb-10 lg:mb-12"
         >
           <div className="flex items-center justify-center mb-4">
-            <BookOpen className="h-6 w-6 text-primary-600 mr-2"/>
+            <BookOpen className="h-6 w-6 text-[#D1BF00] mr-2"/>
             <span className="text-primary-600 font-semibold text-lg">Newest Blogs</span>
           </div>
           <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-heading font-bold text-gray-900 mb-2 sm:mb-4">
@@ -179,7 +179,7 @@ const BlogSection: React.FC = () => {
               {/* Image */}
               <div className="relative h-48 sm:h-64 md:h-80 lg:h-auto">
                 <img src={blogPosts[0].image} alt={blogPosts[0].title} className="w-full h-full object-cover" />
-                <div className="absolute inset-0 bg-gradient-to-br from-blue-400 to-purple-500 opacity-30"></div>
+                <div className="absolute inset-0 bg-gradient-to-br from-[#FFFF66] to-[#FFA500] opacity-30"></div>
                 <div className="absolute inset-0 flex items-center justify-center">
                   <div className="text-white text-center">
                     
@@ -212,7 +212,7 @@ const BlogSection: React.FC = () => {
 
               {/* Article Content */}
               <div className="p-4 sm:p-5 md:p-6 lg:p-7">
-                <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-2 sm:mb-3 line-clamp-2 group-hover:text-primary-600 transition-colors">
+                <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-2 sm:mb-3 line-clamp-2 group-hover:text-[#D1BF00] transition-colors">
                   <Link to={`/blog/${post.slug}`}>
                     {post.title}
                   </Link>
@@ -239,7 +239,7 @@ const BlogSection: React.FC = () => {
                 {/* Read More Link */}
                 <Link
                   to={`/blog/${post.slug}`}
-                  className="inline-flex items-center text-primary-600 hover:text-primary-700 font-medium text-sm group-hover:translate-x-1 transition-all duration-200"
+                  className="inline-flex items-center text-[#D1BF00] hover:text-[#B3A000] font-medium text-sm group-hover:translate-x-1 transition-all duration-200"
                 >
                   Read More
                   <ArrowRight className="ml-1 h-3 w-3" />
@@ -259,7 +259,7 @@ const BlogSection: React.FC = () => {
         >
           <Link
             to="/blog"
-            className="inline-flex items-center px-8 py-3 bg-[#FACC15] text-white font-semibold rounded-xl hover:from-primary-700 hover:to-secondary-700 transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl"
+            className="inline-flex items-center px-8 py-3 bg-[#FFB733] text-white font-semibold rounded-xl hover:bg-[#FFA500] transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl"
           >
             View All Articles
             <BookOpen className="ml-2 h-5 w-5" />

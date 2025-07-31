@@ -6,48 +6,31 @@ export default {
   ],
   theme: {
     extend: {
-      // Custom color palettes
+      // Custom color palettes based on provided designs
       colors: {
-        // Primary palette (blue shades for buttons, links)
+        // Yellow-Green Palette (from first image)
         primary: {
-          50: '#f0f9ff',
-          100: '#e0f2fe',
-          200: '#bae6fd',
-          300: '#7dd3fc',
-          400: '#38bdf8',
-          500: '#0ea5e9',
-          600: '#0284c7',
-          700: '#0369a1',
-          800: '#075985',
-          900: '#0c4a6e',
+          100: '#F4FFC1',
+          200: '#EEFF86',
+          300: '#ECFF41',
+          400: '#F2FF0D',
+          500: '#FFFF00', // Main yellow
+          600: '#D1BF00',
+          700: '#A68B02',
+          800: '#896C0A',
         },
-        // Secondary palette (pink shades for accents)
+        // Orange Palette (from second image)
         secondary: {
-          50: '#fdf2f8',
-          100: '#fce7f3',
-          200: '#fbcfe8',
-          300: '#f9a8d4',
-          400: '#f472b6',
-          500: '#ec4899',
-          600: '#db2777',
-          700: '#be185d',
-          800: '#9d174d',
-          900: '#831843',
+          100: '#FFF5C5',
+          200: '#FFEB85',
+          300: '#FFDA46',
+          400: '#FFC71B',
+          500: '#FFA500', // Main orange
+          600: '#E27C00',
+          700: '#BB5502',
+          800: '#984208',
         },
-        // Accent palette (orange shades for highlights)
-        accent: {
-          50: '#fff7ed',
-          100: '#ffedd5',
-          200: '#fed7aa',
-          300: '#fdba74',
-          400: '#fb923c',
-          500: '#f97316',
-          600: '#ea580c',
-          700: '#c2410c',
-          800: '#9a3412',
-          900: '#7c2d12',
-        },
-        // Neutral palette (gray shades for backgrounds, text)
+        // Neutral grays for text and backgrounds
         neutral: {
           50: '#f8fafc',
           100: '#f1f5f9',
@@ -59,53 +42,6 @@ export default {
           700: '#334155',
           800: '#1e293b',
           900: '#0f172a',
-        },
-        // Vibrant colors (used in gradients, buttons, icons)
-        vibrant: {
-          lime: '#36FB2C', // Formerly green1
-          emerald: '#00FF69', // Formerly green2
-          violet: '#5000C9', // Formerly purple
-          aqua: '#00FDC7', // Formerly cyan
-          mint: '#D4FFED', // Formerly light
-        },
-        // Additional colors used in components
-        blue: {
-          50: '#eff6ff',
-          100: '#dbeafe',
-          200: '#bfdbfe',
-          300: '#93c5fd',
-          400: '#60a5fa',
-          500: '#3b82f6',
-          600: '#2563eb',
-          700: '#1d4ed8',
-          800: '#1e40af',
-          900: '#1e3a8a',
-        },
-        indigo: {
-          500: '#6366f1',
-          600: '#4f46e5',
-        },
-        green: {
-          100: '#d1fae5',
-          500: '#22c55e',
-          600: '#16a34a',
-        },
-        red: {
-          100: '#fee2e2',
-          500: '#ef4444',
-          600: '#dc2626',
-        },
-        orange: {
-          100: '#ffedd5',
-          500: '#f97316',
-          800: '#c2410c',
-        },
-        yellow: {
-          400: '#facc15',
-        },
-        purple: {
-          500: '#a855f7',
-          600: '#9333ea',
         },
       },
       // Custom fonts

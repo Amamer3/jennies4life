@@ -46,8 +46,8 @@ const Footer: React.FC = () => {
   };
 
   const socialLinks = [
-    { name: 'Facebook', icon: Facebook, href: '#', color: 'hover:text-blue-600' },
-    { name: 'Twitter', icon: Twitter, href: '#', color: 'hover:text-blue-400' },
+    { name: 'Facebook', icon: Facebook, href: '#', color: 'hover:text-[#D1BF00]' },
+    { name: 'Twitter', icon: Twitter, href: '#', color: 'hover:text-[#FFFF66]' },
     { name: 'Instagram', icon: Instagram, href: '#', color: 'hover:text-pink-600' },
     { name: 'YouTube', icon: Youtube, href: '#', color: 'hover:text-red-600' }
   ];
@@ -79,11 +79,11 @@ const Footer: React.FC = () => {
             {/* Contact Info */}
             <div className="space-y-2 sm:space-y-3">
               <div className="flex items-center space-x-2 sm:space-x-3 text-gray-400">
-                <Mail className="h-3 w-3 sm:h-4 sm:w-4 text-vibrant-purple flex-shrink-0" />
+                <Mail className="h-3 w-3 sm:h-4 sm:w-4 text-[#FFA500] flex-shrink-0" />
                 <span className="text-sm sm:text-base">hello@jennies4life.org</span>
               </div>
               <div className="flex items-center space-x-2 sm:space-x-3 text-gray-400">
-                <Phone className="h-3 w-3 sm:h-4 sm:w-4 text-primary-500 flex-shrink-0" />
+                <Phone className="h-3 w-3 sm:h-4 sm:w-4 text-[#FFFF00] flex-shrink-0" />
                 <span className="text-sm sm:text-base">(+233) 123-4567</span>
               </div>
               <div className="flex items-center space-x-2 sm:space-x-3 text-gray-400">
@@ -101,7 +101,7 @@ const Footer: React.FC = () => {
                 <li key={index}>
                   <Link
                     to={link.href}
-                    className="text-sm sm:text-base text-gray-400 hover:text-vibrant-cyan transition-colors duration-200"
+                    className="text-sm sm:text-base text-gray-400 hover:text-[#FFB733] transition-colors duration-200"
                   >
                     {link.name}
                   </Link>
@@ -176,7 +176,7 @@ const Footer: React.FC = () => {
 
             {/* Social Links */}
             <div className="flex items-center space-x-3 sm:space-x-4">
-              <span className="text-gray-400 text-xs sm:text-sm mr-1 sm:mr-2 hover:text-vibrant-green1">Follow us:</span>
+              <span className="text-gray-400 text-xs sm:text-sm mr-1 sm:mr-2 hover:text-secondary-500">Follow us:</span>
               {socialLinks.map((social, index) => {
                 const IconComponent = social.icon;
                 return (
@@ -199,13 +199,13 @@ const Footer: React.FC = () => {
                 <div className="w-6 h-4 sm:w-8 sm:h-5 bg-gray-700 rounded flex items-center justify-center">
                   <CreditCard className="h-2 w-2 sm:h-3 sm:w-3 text-gray-400" />
                 </div>
-                <div className="w-6 h-4 sm:w-8 sm:h-5 bg-blue-600 rounded flex items-center justify-center">
+                <div className="w-6 h-4 sm:w-8 sm:h-5 bg-[#D1BF00] rounded flex items-center justify-center">
                   <span className="text-white text-xs font-bold">V</span>
                 </div>
                 <div className="w-6 h-4 sm:w-8 sm:h-5 bg-red-600 rounded flex items-center justify-center">
                   <span className="text-white text-xs font-bold">M</span>
                 </div>
-                <div className="w-6 h-4 sm:w-8 sm:h-5 bg-blue-500 rounded flex items-center justify-center">
+                <div className="w-6 h-4 sm:w-8 sm:h-5 bg-[#FFFF00] rounded flex items-center justify-center">
                   <span className="text-white text-xs font-bold">P</span>
                 </div>
               </div>

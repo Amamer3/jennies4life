@@ -207,7 +207,7 @@ const CategoryPage: React.FC = () => {
         {/* Badges */}
         <div className="absolute top-2 left-2 space-y-1.5">
           {product.isNew && (
-            <span className="bg-green-500 text-white text-xs font-medium px-2 py-0.5 rounded-full">
+            <span className="bg-[#FFA500] text-white text-xs font-medium px-2 py-0.5 rounded-full">
               New
             </span>
           )}
@@ -243,7 +243,7 @@ const CategoryPage: React.FC = () => {
           </div>
         </div>
         <h3
-          className={`font-semibold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors ${
+          className={`font-semibold text-gray-900 mb-2 group-hover:text-[#D1BF00] transition-colors ${
             viewMode === 'list' ? 'text-base sm:text-lg line-clamp-2' : 'text-sm sm:text-base line-clamp-2'
           }`}
         >
@@ -269,7 +269,7 @@ const CategoryPage: React.FC = () => {
             href={product.affiliateLink}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center px-2 sm:px-3 py-1 sm:py-1.5 bg-blue-500 text-white text-xs sm:text-sm font-medium rounded-lg hover:bg-blue-600 transition-all duration-200"
+            className="inline-flex items-center px-2 sm:px-3 py-1 sm:py-1.5 bg-[#FFFF00] text-white text-xs sm:text-sm font-medium rounded-lg hover:bg-[#D1BF00] transition-all duration-200"
             aria-label={`Buy ${product.name}`}
           >
             Buy Now
@@ -287,7 +287,7 @@ const CategoryPage: React.FC = () => {
           <h1 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4">Category Not Found</h1>
           <Link
             to="/"
-            className="text-blue-500 hover:text-blue-600 text-sm sm:text-base transition-colors"
+            className="text-[#FFFF00] hover:text-primary-600 text-sm sm:text-base transition-colors"
             aria-label="Return to homepage"
           >
             Return to Home
@@ -300,7 +300,7 @@ const CategoryPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Category Header */}
-      <div className="bg-gradient-to-r from-blue-500 to-indigo-500 text-white">
+      <div className="bg-gradient-to-r from-[#FFFF00] to-[#D1BF00] text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 lg:py-16">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -317,10 +317,10 @@ const CategoryPage: React.FC = () => {
             >
               {category.name}
             </h1>
-            <p className="text-sm sm:text-base lg:text-lg text-blue-100 mb-4 sm:mb-6 max-w-prose mx-auto">
+            <p className="text-sm sm:text-base lg:text-lg text-[#FFFFE0] mb-4 sm:mb-6 max-w-prose mx-auto">
               {category.description}
             </p>
-            <div className="flex items-center justify-center gap-2 sm:gap-4 text-blue-100 text-xs sm:text-sm">
+            <div className="flex items-center justify-center gap-2 sm:gap-4 text-primary-100 text-xs sm:text-sm">
               <span>{category.productCount} Products</span>
               <span aria-hidden="true">•</span>
               <span>Expert Curated</span>
@@ -334,7 +334,7 @@ const CategoryPage: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
         {/* Breadcrumb */}
         <nav className="flex items-center gap-2 text-xs sm:text-sm text-gray-500 mb-6 sm:mb-8" aria-label="Breadcrumb">
-          <Link to="/" className="hover:text-blue-600 transition-colors">
+          <Link to="/" className="hover:text-primary-600 transition-colors">
             Home
           </Link>
           <span aria-hidden="true">/</span>
@@ -360,7 +360,7 @@ const CategoryPage: React.FC = () => {
                 <Link
                   key={subcategory.id}
                   to={`/category/${category.slug}/${subcategory.slug}`}
-                  className="inline-flex items-center px-3 sm:px-4 py-1.5 sm:py-2 bg-white border border-gray-200 rounded-lg text-gray-700 text-xs sm:text-sm hover:border-blue-500 hover:text-blue-600 transition-all duration-200"
+                  className="inline-flex items-center px-3 sm:px-4 py-1.5 sm:py-2 bg-white border border-gray-200 rounded-lg text-gray-700 text-xs sm:text-sm hover:border-[#FFFF00] hover:text-[#D1BF00] transition-all duration-200"
                   aria-label={`View subcategory: ${subcategory.name}`}
                 >
                   {subcategory.name}
@@ -397,7 +397,7 @@ const CategoryPage: React.FC = () => {
                   type="text"
                   placeholder="Search..."
                   onChange={(e) => debouncedSetSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-3 sm:pr-4 py-1.5 sm:py-2 border border-gray-300 rounded-lg text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full pl-10 pr-3 sm:pr-4 py-1.5 sm:py-2 border border-gray-300 rounded-lg text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-[#FFFF00]"
                   aria-label="Search products"
                 />
               </div>
@@ -412,7 +412,7 @@ const CategoryPage: React.FC = () => {
                   placeholder="Min"
                   value={priceRange.min || ''}
                   onChange={(e) => setPriceRange((prev) => ({ ...prev, min: Number(e.target.value) || 0 }))}
-                  className="flex-1 px-3 py-1.5 sm:py-2 border border-gray-300 rounded-lg text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="flex-1 px-3 py-1.5 sm:py-2 border border-gray-300 rounded-lg text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
                   aria-label="Minimum price"
                 />
                 <span className="text-gray-500" aria-hidden="true">
@@ -423,7 +423,7 @@ const CategoryPage: React.FC = () => {
                   placeholder="Max"
                   value={priceRange.max || ''}
                   onChange={(e) => setPriceRange((prev) => ({ ...prev, max: Number(e.target.value) || 1000 }))}
-                  className="flex-1 px-3 py-1.5 sm:py-2 border border-gray-300 rounded-lg text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="flex-1 px-3 py-1.5 sm:py-2 border border-gray-300 rounded-lg text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
                   aria-label="Maximum price"
                 />
               </div>
@@ -443,7 +443,7 @@ const CategoryPage: React.FC = () => {
                           e.target.checked ? [...prev, brand] : prev.filter((b) => b !== brand)
                         )
                       }
-                      className="rounded border-gray-300 text-blue-500 focus:ring-blue-500"
+                      className="rounded border-gray-300 text-primary-500 focus:ring-primary-500"
                       aria-label={`Filter by brand: ${brand}`}
                     />
                     <span className="text-xs sm:text-sm text-gray-700">{brand}</span>
@@ -456,7 +456,7 @@ const CategoryPage: React.FC = () => {
             {(searchTerm || priceRange.min !== 0 || priceRange.max !== 1000 || selectedBrands.length > 0) && (
               <button
                 onClick={resetFilters}
-                className="w-full px-3 sm:px-4 py-1.5 sm:py-2 bg-white border border-gray-200 rounded-lg text-xs sm:text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-all duration-200"
+                className="w-full px-3 sm:px-4 py-1.5 sm:py-2 bg-white border border-gray-200 rounded-lg text-xs sm:text-sm text-gray-700 hover:bg-[#F4FFC1] hover:text-primary-600 transition-all duration-200"
                 aria-label="Reset all filters"
               >
                 Reset Filters
@@ -477,7 +477,7 @@ const CategoryPage: React.FC = () => {
               <div className="flex items-center gap-3 sm:gap-4">
                 <button
                   onClick={() => setShowFilters(!showFilters)}
-                  className="sm:hidden inline-flex items-center px-3 sm:px-4 py-1.5 sm:py-2 bg-white border border-gray-200 rounded-lg text-gray-700 text-xs sm:text-sm hover:bg-blue-50 transition-all"
+                  className="sm:hidden inline-flex items-center px-3 sm:px-4 py-1.5 sm:py-2 bg-white border border-gray-200 rounded-lg text-gray-700 text-xs sm:text-sm hover:bg-primary-50 transition-all"
                   aria-label={showFilters ? 'Hide filters' : 'Show filters'}
                 >
                   <SlidersHorizontal className="h-4 w-4 mr-1 sm:mr-2" />
@@ -492,7 +492,7 @@ const CategoryPage: React.FC = () => {
                 <select
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value)}
-                  className="px-3 sm:px-4 py-1.5 sm:py-2 bg-white border border-gray-200 rounded-lg text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="px-3 sm:px-4 py-1.5 sm:py-2 bg-white border border-gray-200 rounded-lg text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
                   aria-label="Sort products"
                 >
                   {[
@@ -512,7 +512,7 @@ const CategoryPage: React.FC = () => {
                   <button
                     onClick={() => setViewMode('grid')}
                     className={`p-1.5 sm:p-2 ${
-                      viewMode === 'grid' ? 'bg-blue-500 text-white' : 'text-gray-600 hover:bg-gray-50'
+                      viewMode === 'grid' ? 'bg-[#FFFF00] text-white' : 'text-gray-600 hover:bg-gray-50'
                     }`}
                     aria-label="Grid view"
                   >
@@ -521,7 +521,7 @@ const CategoryPage: React.FC = () => {
                   <button
                     onClick={() => setViewMode('list')}
                     className={`p-1.5 sm:p-2 ${
-                      viewMode === 'list' ? 'bg-blue-500 text-white' : 'text-gray-600 hover:bg-gray-50'
+                      viewMode === 'list' ? 'bg-primary-500 text-white' : 'text-gray-600 hover:bg-gray-50'
                     }`}
                     aria-label="List view"
                   >
@@ -545,7 +545,7 @@ const CategoryPage: React.FC = () => {
                 </p>
                 <button
                   onClick={resetFilters}
-                  className="inline-flex items-center px-3 sm:px-4 py-1.5 sm:py-2 bg-blue-500 text-white text-xs sm:text-sm font-medium rounded-lg hover:bg-blue-600 transition-all duration-200"
+                  className="inline-flex items-center px-3 sm:px-4 py-1.5 sm:py-2 bg-primary-500 text-white text-xs sm:text-sm font-medium rounded-lg hover:bg-primary-600 transition-all duration-200"
                   aria-label="Reset filters to view all products"
                 >
                   Reset Filters
@@ -588,8 +588,8 @@ const CategoryPage: React.FC = () => {
                       onClick={() => setCurrentPage(page)}
                       className={`px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg font-medium text-xs sm:text-sm transition-all ${
                         currentPage === page
-                          ? 'bg-blue-500 text-white'
-                          : 'bg-white text-gray-700 hover:bg-blue-50 border border-gray-200'
+                          ? 'bg-primary-500 text-white'
+                          : 'bg-white text-gray-700 hover:bg-primary-50 border border-gray-200'
                       }`}
                       aria-current={currentPage === page ? 'page' : undefined}
                       aria-label={`Go to page ${page}`}

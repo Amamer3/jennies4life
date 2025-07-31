@@ -30,7 +30,7 @@ const AboutPage: React.FC = () => {
         title: 'Curated Products',
         description: 'Hand-picked selections from trusted brands.',
         icon: <ShoppingBag />,
-        color: 'text-blue-500',
+        color: 'text-primary-500',
         type: 'feature',
       },
       {
@@ -46,7 +46,7 @@ const AboutPage: React.FC = () => {
         title: 'Community Focus',
         description: 'Building a community of smart shoppers.',
         icon: <Heart />,
-        color: 'text-green-500',
+        color: 'text-secondary-500',
         type: 'feature',
       },
       {
@@ -70,7 +70,7 @@ const AboutPage: React.FC = () => {
         title: 'Best Deals',
         description: 'Helping you find the best value for your money.',
         icon: <ShoppingBag />,
-        color: 'text-blue-400',
+        color: 'text-primary-400',
         type: 'value',
       },
     ],
@@ -83,7 +83,7 @@ const AboutPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Hero Section */}
-      <div className="bg-gradient-to-r from-blue-500 to-indigo-500 text-white">
+      <div className="bg-gradient-to-r from-primary-500 to-primary-600 text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 lg:py-16">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -95,7 +95,7 @@ const AboutPage: React.FC = () => {
             <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-4xl font-heading font-bold mb-2 sm:mb-3 md:mb-4">
               About Jennies4Life
             </h1>
-            <p className="text-sm sm:text-base lg:text-lg text-blue-100 mb-4 sm:mb-6 max-w-prose mx-auto">
+            <p className="text-sm sm:text-base lg:text-lg text-primary-100 mb-4 sm:mb-6 max-w-prose mx-auto">
               Your go-to destination for curated products, expert reviews, and lifestyle inspiration.
             </p>
           </motion.div>
@@ -123,7 +123,7 @@ const AboutPage: React.FC = () => {
             {features.map((feature) => (
               <div
                 key={feature.id}
-                className="bg-white p-4 sm:p-5 rounded-lg shadow-md border border-gray-100 group hover:shadow-lg hover:bg-blue-50 transition-all duration-300 focus-within:ring-2 focus-within:ring-blue-500"
+                className="bg-white p-4 sm:p-5 rounded-lg shadow-md border border-gray-100 group hover:shadow-lg hover:bg-primary-50 transition-all duration-300 focus-within:ring-2 focus-within:ring-primary-500"
                 role="article"
                 aria-label={feature.title}
               >
@@ -137,7 +137,7 @@ const AboutPage: React.FC = () => {
                       : feature.icon}
                   </div>
                 </Suspense>
-                <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-1 sm:mb-2 group-hover:text-blue-600 transition-colors">
+                <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-1 sm:mb-2 group-hover:text-primary-600 transition-colors">
                   {feature.title}
                 </h3>
                 <p className="text-xs sm:text-sm text-gray-800">{feature.description}</p>
@@ -163,7 +163,7 @@ const AboutPage: React.FC = () => {
             {values.map((value) => (
               <li
                 key={value.id}
-                className="flex items-start p-2 sm:p-3 rounded-lg group hover:bg-blue-50 hover:-translate-y-1 transition-all duration-200 focus-within:ring-2 focus-within:ring-blue-500"
+                className="flex items-start p-2 sm:p-3 rounded-lg group hover:bg-primary-50 hover:-translate-y-1 transition-all duration-200 focus-within:ring-2 focus-within:ring-primary-500"
                 role="listitem"
                 aria-label={value.title}
               >
@@ -178,7 +178,7 @@ const AboutPage: React.FC = () => {
                   </div>
                 </Suspense>
                 <div>
-                  <h3 className="text-base sm:text-lg font-semibold text-gray-900 group-hover:text-blue-600 transition-colors">
+                  <h3 className="text-base sm:text-lg font-semibold text-gray-900 group-hover:text-primary-600 transition-colors">
                     {value.title}
                   </h3>
                   <p className="text-xs sm:text-sm text-gray-800">{value.description}</p>
@@ -207,7 +207,7 @@ const AboutPage: React.FC = () => {
           <Suspense fallback={<div className="h-10 w-40 bg-gray-200 rounded-lg mx-auto" />}>
             <Link
               to="/signup"
-              className="inline-flex items-center px-6 sm:px-8 py-2 sm:py-3 bg-blue-500 text-white text-sm sm:text-base font-medium rounded-lg hover:bg-blue-600 focus:ring-2 focus:ring-blue-500 transition-all duration-200"
+              className="inline-flex items-center px-6 sm:px-8 py-2 sm:py-3 bg-primary-500 text-white text-sm sm:text-base font-medium rounded-lg hover:bg-primary-600 focus:ring-2 focus:ring-primary-500 transition-all duration-200"
               aria-label="Sign up for Jennies4Life"
             >
               Sign Up Now
