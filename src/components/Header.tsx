@@ -44,12 +44,13 @@ const Header: React.FC = () => {
         <div className="flex items-center justify-between h-14 sm:h-16">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
-            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-r from-[#FFFACD] to-[#FFDAB9] rounded-xl flex items-center justify-center">
+            <img src="/Jennie4lifelogo.png" alt="logo" className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl" />
+            {/* <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-r from-[#FFFACD] to-[#FFDAB9] rounded-xl flex items-center justify-center">
               <Heart className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
             </div>
             <span className="text-lg sm:text-xl md:text-2xl font-heading font-bold text-gray-900">
               Jennies4Life
-            </span>
+            </span> */}
           </Link>
 
           {/* Desktop Navigation */}

@@ -192,7 +192,7 @@ const FeaturedProducts: React.FC = () => {
                 {/* Category */}
                 <p className="text-xs sm:text-sm text-primary-600 font-medium mb-1 sm:mb-2">{product.category}</p>
                 {/* Product Name */}
-                <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-1 sm:mb-2 line-clamp-2 group-hover:text-primary-600 transition-colors">
+                <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-1 sm:mb-2 line-clamp-2 group-hover:text-red-600 transition-colors">
                   <Link to={`/products/${product.id}`} aria-label={`View details for ${product.name}`}>
                     {product.name}
                   </Link>
@@ -237,7 +237,7 @@ const FeaturedProducts: React.FC = () => {
                 <div className="flex gap-2 sm:gap-3">
                   <Link
                     to={`/products/${product.id}`}
-                    className="flex-1 bg-[#F0E68C] hover:bg-[#DAA520] text-white font-medium py-2 px-3 sm:px-4 rounded-lg text-xs sm:text-sm transition-all duration-200 text-center"
+                    className="flex-1 bg-[#e72a00] text-white font-medium py-2 px-3 sm:px-4 rounded-lg text-xs sm:text-sm transition-all duration-200 text-center"
                     aria-label={`View details for ${product.name}`}
                   >
                     View Details
