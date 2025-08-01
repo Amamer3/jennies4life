@@ -24,7 +24,7 @@ interface ArrowProps {
 // Custom Arrow Components for Slider
 const NextArrow: React.FC<ArrowProps> = ({ onClick }) => (
   <button
-    className="absolute right-2 sm:right-4 top-1/2 transform -translate-y-1/2 bg-[#F0E68C] text-white p-2 sm:p-3 rounded-full z-10 hover:bg-[#DAA520] transition-all duration-300 shadow-md hover:shadow-lg"
+    className="absolute right-2 sm:right-4 top-1/2 transform -translate-y-1/2 bg-[#ffe600] text-white p-2 sm:p-3 rounded-full z-10 hover:bg-[#DAA520] transition-all duration-300 shadow-md hover:shadow-lg"
     onClick={onClick}
     aria-label="Next slide"
   >
@@ -95,7 +95,7 @@ const Hero: React.FC = () => {
   ];
 
   return (
-    <section className="relative bg-gradient-to-br from-[#F2FF0D] to-[#FFC71B] overflow-hidden">
+    <section className="relative bg-gradient-to-br bg-[#F68B1E] overflow-hidden">
       {/* Background Pattern */}
       <div className="absolute inset-0 opacity-10">
         <svg className="w-full h-full" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
@@ -138,7 +138,7 @@ const Hero: React.FC = () => {
               className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-heading font-extrabold text-gray-900 mb-3 sm:mb-4 lg:mb-6 leading-tight"
             >
               Unlock the{' '}
-              <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#F0E68C] to-[#FFDAB9]">Best Deals</span>{' '}
+              <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#e72a00] to-[#e72a00] bg-[#e72a00]">Best Deals</span>{' '}
               <span className="block sm:inline">Across All Products</span>
             </motion.h1>
 
@@ -186,7 +186,7 @@ const Hero: React.FC = () => {
               <Link
                 to="/deals"
                 aria-label="Explore today's deals"
-                className="inline-flex items-center justify-center px-6 sm:px-8 py-3 sm:py-4 bg-primary-600 text-white text-sm sm:text-base font-semibold rounded-lg hover:bg-primary-700 transform hover:scale-105 transition-all duration-300 shadow-md hover:shadow-lg"
+                className="inline-flex items-center justify-center px-6 sm:px-8 py-3 sm:py-4 bg-[#e72a00] text-white text-sm sm:text-base font-semibold rounded-lg hover:bg-primary-700 transform hover:scale-105 transition-all duration-300 shadow-md hover:shadow-lg"
               >
                 Explore Today's Deals
                 <ArrowRight className="ml-2 h-4 w-4 sm:h-5 sm:w-5" />
@@ -194,7 +194,7 @@ const Hero: React.FC = () => {
               <Link
                 to="/categories"
                 aria-label="Browse product categories"
-                className="inline-flex items-center justify-center px-6 sm:px-8 py-3 sm:py-4 bg-white text-[#F0E68C] text-sm sm:text-base font-semibold rounded-lg border-2 border-[#FFFFE0] hover:border-[#FFFFCC] hover:bg-[#FFFFF0] transition-all duration-300 shadow-md hover:shadow-lg"
+                className="inline-flex items-center justify-center px-6 sm:px-8 py-3 sm:py-4 bg-white text-[#ffb922] text-sm sm:text-base font-semibold rounded-lg border-2 border-[#FFFFE0] hover:border-[#FFFFCC] hover:bg-[#FFFFF0] transition-all duration-300 shadow-md hover:shadow-lg"
               >
                 Browse Categories
               </Link>
