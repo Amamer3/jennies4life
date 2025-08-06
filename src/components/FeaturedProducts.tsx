@@ -268,7 +268,7 @@ const FeaturedProducts: React.FC = () => {
         >
           <Link
             to="/products"
-            className="inline-flex items-center px-6 sm:px-8 py-2 sm:py-3 bg-primary-600 text-white text-sm sm:text-base font-medium rounded-lg hover:bg-primary-700 transition-all duration-200"
+            className="inline-flex items-center px-6 sm:px-8 py-2 sm:py-3 bg-[#E72A00] text-white text-sm sm:text-base font-medium rounded-lg hover:bg-[#E72A00] transition-all duration-200"
             aria-label="View all products"
           >
             View All Products

@@ -44,7 +44,7 @@ const Header: React.FC = () => {
         <div className="flex items-center justify-between h-14 sm:h-16">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
-            <img src="/Jennie4lifelogo.png" alt="logo" className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl" />
+            <img src="/logonew1.jpg" alt="logo" className="w-30 h-28 sm:w-12 sm:h-12 rounded" />
             {/* <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-r from-[#FFFACD] to-[#FFDAB9] rounded-xl flex items-center justify-center">
               <Heart className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
             </div>

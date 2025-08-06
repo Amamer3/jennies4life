@@ -95,7 +95,7 @@ const Hero: React.FC = () => {
   ];
 
   return (
-    <section className="relative bg-gradient-to-br bg-[#F68B1E] overflow-hidden">
+    <section className="relative bg-gradient-to-br bg-[#62ff0099] overflow-hidden">
       {/* Background Pattern */}
       <div className="absolute inset-0 opacity-10">
         <svg className="w-full h-full" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
