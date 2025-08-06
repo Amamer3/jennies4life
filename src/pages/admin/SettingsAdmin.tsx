@@ -4,8 +4,6 @@ import {
   Settings,
   Save,
   Upload,
-  Globe,
-  Mail,
   Bell,
   Shield,
   CreditCard,
@@ -13,14 +11,8 @@ import {
   Palette,
   Database,
   Key,
-  Users,
-  FileText,
-  Smartphone,
-  Monitor,
   Eye,
   EyeOff,
-  Check,
-  X,
   AlertTriangle,
   Info
 } from 'lucide-react';

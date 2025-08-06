@@ -11,12 +11,9 @@ import {
   Download,
   Filter,
   BarChart3,
-  PieChart,
-  LineChart,
   Activity,
   Target,
   Clock,
-  Globe,
   Smartphone,
   Monitor,
   Tablet

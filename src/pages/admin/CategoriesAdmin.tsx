@@ -9,8 +9,7 @@ import {
   Grid3X3,
   Package,
   TrendingUp,
-  MoreHorizontal,
-  Image as ImageIcon
+  MoreHorizontal
 } from 'lucide-react';
 import AdminLayout from '../../components/AdminLayout';
 
