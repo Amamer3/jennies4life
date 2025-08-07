@@ -1,295 +1,490 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Star, TrendingUp, Gift } from 'lucide-react';
-import { motion } from 'framer-motion';
-import Slider from 'react-slick';
-import 'slick-carousel/slick/slick.css';
-import 'slick-carousel/slick/slick-theme.css';
+import { ArrowRight, Star, Sparkles, ShoppingBag, Zap, Users, ChevronLeft, ChevronRight } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
-// Define types for product data
-interface Product {
-  category: string;
+// Define types for feature data
+interface Feature {
+  icon: React.ComponentType<any>;
   title: string;
+  description: string;
+  color: string;
+}
+
+// Define types for carousel slide data
+interface CarouselSlide {
+  id: number;
+  title: string;
+  subtitle: string;
   discount: string;
   image: string;
-  delay: number;
-  rotate: number;
+  category: string;
+  originalPrice: string;
+  salePrice: string;
+  rating: number;
+  reviews: number;
 }
-
-// Define types for arrow props
-interface ArrowProps {
-  onClick?: () => void;
-}
-
-// Custom Arrow Components for Slider
-const NextArrow: React.FC<ArrowProps> = ({ onClick }) => (
-  <button
-    className="absolute right-2 sm:right-4 top-1/2 transform -translate-y-1/2 bg-[#ffe600] text-white p-2 sm:p-3 rounded-full z-10 hover:bg-[#DAA520] transition-all duration-300 shadow-md hover:shadow-lg"
-    onClick={onClick}
-    aria-label="Next slide"
-  >
-    <ArrowRight className="h-5 w-5 sm:h-6 sm:w-6" />
-  </button>
-);
-
-const PrevArrow: React.FC<ArrowProps> = ({ onClick }) => (
-  <button
-    className="absolute left-2 sm:left-4 top-1/2 transform -translate-y-1/2 bg-primary-600 text-white p-2 sm:p-3 rounded-full z-10 hover:bg-primary-700 transition-all duration-300 shadow-md hover:shadow-lg"
-    onClick={onClick}
-    aria-label="Previous slide"
-  >
-    <ArrowRight className="h-5 w-5 sm:h-6 sm:w-6 transform rotate-180" />
-  </button>
-);
 
 const Hero: React.FC = () => {
-  // Carousel settings
-  const settings = {
-    dots: true,
-    infinite: true,
-    speed: 500,
-    slidesToShow: 1,
-    slidesToScroll: 1,
-    autoplay: true,
-    autoplaySpeed: 4000,
-    fade: true,
-    nextArrow: <NextArrow />,
-    prevArrow: <PrevArrow />,
-    dotsClass: 'slick-dots custom-dots',
-  };
+  const [currentSlide, setCurrentSlide] = useState(0);
 
-  // Product data for carousel
-  const products: Product[] = [
+  // Carousel slides data
+  const slides: CarouselSlide[] = [
     {
+      id: 1,
+      title: 'Premium Wireless Headphones',
+      subtitle: 'Noise-Cancelling Technology',
+      discount: '45% OFF',
+      image: 'https://images.pexels.com/photos/3394650/pexels-photo-3394650.jpeg',
       category: 'Electronics',
-      title: 'Smart Gadgets',
-      discount: 'Up to 40% OFF',
-      image: 'https://images.pexels.com/photos/2536965/pexels-photo-2536965.jpeg',
-      delay: 0.6,
-      rotate: 3,
+      originalPrice: '$299.99',
+      salePrice: '$164.99',
+      rating: 4.8,
+      reviews: 2847
     },
     {
-      category: 'Beauty',
-      title: 'Skincare',
-      discount: '25% OFF',
+      id: 2,
+      title: 'Organic Skincare Set',
+      subtitle: 'Natural Beauty Collection',
+      discount: '35% OFF',
       image: 'https://images.pexels.com/photos/5076516/pexels-photo-5076516.jpeg',
-      delay: 0.7,
-      rotate: -3,
+      category: 'Beauty',
+      originalPrice: '$89.99',
+      salePrice: '$58.49',
+      rating: 4.9,
+      reviews: 1523
     },
     {
-      category: 'Health',
-      title: 'Wellness',
-      discount: '30% OFF',
-      image: 'https://images.pexels.com/photos/2988232/pexels-photo-2988232.jpeg',
-      delay: 0.8,
-      rotate: 2,
-    },
-    {
-      category: 'Fashion',
-      title: 'Trending',
+      id: 3,
+      title: 'Smart Fitness Tracker',
+      subtitle: 'Health & Wellness Monitor',
       discount: '50% OFF',
-      image: 'https://images.pexels.com/photos/3962285/pexels-photo-3962285.jpeg',
-      delay: 0.9,
-      rotate: -1,
+      image: 'https://images.pexels.com/photos/267394/pexels-photo-267394.jpeg',
+      category: 'Health',
+      originalPrice: '$199.99',
+      salePrice: '$99.99',
+      rating: 4.7,
+      reviews: 3621
     },
+    {
+      id: 4,
+      title: 'Designer Handbag',
+      subtitle: 'Luxury Fashion Accessory',
+      discount: '40% OFF',
+      image: 'https://images.pexels.com/photos/1152077/pexels-photo-1152077.jpeg',
+      category: 'Fashion',
+      originalPrice: '$249.99',
+      salePrice: '$149.99',
+      rating: 4.6,
+      reviews: 987
+    }
   ];
 
+  // Feature highlights
+  const features: Feature[] = [
+    {
+      icon: Zap,
+      title: 'Lightning Fast Deals',
+      description: 'New deals updated every hour',
+      color: 'from-yellow-400 to-orange-500'
+    },
+    {
+      icon: Users,
+      title: '50K+ Happy Customers',
+      description: 'Join our growing community',
+      color: 'from-blue-400 to-purple-500'
+    },
+    {
+      icon: ShoppingBag,
+      title: 'Curated Products',
+      description: 'Hand-picked by our experts',
+      color: 'from-green-400 to-teal-500'
+    }
+  ];
+
+  // Auto-advance carousel
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % slides.length);
+    }, 5000);
+    return () => clearInterval(timer);
+  }, [slides.length]);
+
+  const nextSlide = () => {
+    setCurrentSlide((prev) => (prev + 1) % slides.length);
+  };
+
+  const prevSlide = () => {
+    setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
+  };
+
   return (
-    <section className="relative bg-gradient-to-br bg-[#62ff0099] overflow-hidden">
-      {/* Background Pattern */}
-      <div className="absolute inset-0 opacity-10">
-        <svg className="w-full h-full" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
-          <g fill="none" fillRule="evenodd">
-            <g fill="#ffffff" fillOpacity="0.15">
-              <circle cx="30" cy="30" r="2" />
-            </g>
-          </g>
-        </svg>
+    <section className="relative min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 overflow-hidden">
+      {/* Animated Background Elements */}
+      <div className="absolute inset-0">
+        {/* Floating Orbs */}
+        <motion.div
+          className="absolute top-20 left-10 w-72 h-72 bg-gradient-to-r from-blue-400/20 to-purple-400/20 rounded-full blur-3xl"
+          animate={{
+            x: [0, 100, 0],
+            y: [0, -50, 0],
+            scale: [1, 1.1, 1]
+          }}
+          transition={{
+            duration: 20,
+            repeat: Infinity,
+            ease: "easeInOut"
+          }}
+        />
+        <motion.div
+          className="absolute bottom-20 right-10 w-96 h-96 bg-gradient-to-r from-pink-400/20 to-yellow-400/20 rounded-full blur-3xl"
+          animate={{
+            x: [0, -80, 0],
+            y: [0, 60, 0],
+            scale: [1, 0.9, 1]
+          }}
+          transition={{
+            duration: 25,
+            repeat: Infinity,
+            ease: "easeInOut"
+          }}
+        />
+        <motion.div
+          className="absolute top-1/2 left-1/2 w-64 h-64 bg-gradient-to-r from-green-400/15 to-blue-400/15 rounded-full blur-2xl"
+          animate={{
+            rotate: [0, 360],
+            scale: [1, 1.2, 1]
+          }}
+          transition={{
+            duration: 30,
+            repeat: Infinity,
+            ease: "linear"
+          }}
+        />
       </div>
 
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 lg:py-16">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 lg:gap-12 items-center">
-          {/* Content */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            viewport={{ once: true }}
-            className="text-center lg:text-left"
-          >
-            {/* Badge */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.6, delay: 0.1 }}
-              viewport={{ once: true }}
-              className="inline-flex items-center px-4 sm:px-5 py-2 bg-[#FFFFF0] rounded-full text-sm sm:text-base font-semibold text-[#DAA520] mb-6 sm:mb-8 shadow-sm"
-            >
-              <Gift className="h-4 w-4 sm:h-5 sm:w-5 mr-2" />
-              New Deals Added Daily
-            </motion.div>
+      {/* Grid Pattern Overlay */}
+      <div className="absolute inset-0 opacity-5">
+        <div className="w-full h-full" style={{
+          backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23000000' fill-opacity='0.1'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+          backgroundSize: '60px 60px'
+        }} />
+      </div>
 
-            {/* Headline */}
-            <motion.h1
-              initial={{ opacity: 0, y: 20 }}
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-20">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center min-h-[80vh]">
+          {/* Main Content */}
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            className="lg:col-span-7 text-center lg:text-left"
+          >
+            {/* Floating Badge */}
+            <motion.div
+              initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.2 }}
-              viewport={{ once: true }}
-              className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-heading font-extrabold text-gray-900 mb-3 sm:mb-4 lg:mb-6 leading-tight"
+              className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-full text-sm font-semibold mb-8 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+            >
+              <Sparkles className="h-5 w-5 mr-2 animate-pulse" />
+                New Deals Added Daily - Save Up to 70%!
+            </motion.div>
+
+            {/* Main Headline */}
+            <motion.h1
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.3 }}
+              className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-gray-900 mb-6 leading-tight"
             >
               Unlock the{' '}
-              <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#e72a00] to-[#e72a00] bg-[#e72a00]">Best Deals</span>{' '}
-              <span className="block sm:inline">Across All Products</span>
+              <span className="relative inline-block">
+                <span className="bg-clip-text text-transparent bg-gradient-to-r from-purple-600 via-pink-600 to-blue-600 animate-pulse">
+                  Best Deals
+                </span>
+                <motion.div
+                  className="absolute -bottom-2 left-0 right-0 h-1 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full"
+                  initial={{ scaleX: 0 }}
+                  animate={{ scaleX: 1 }}
+                  transition={{ duration: 1, delay: 1 }}
+                />
+              </span>
+              <br />
+              <span className="text-gray-800">Across All Products</span>
             </motion.h1>
 
-            {/* Subtitle */}
+            {/* Enhanced Subtitle */}
             <motion.p
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.3 }}
-              viewport={{ once: true }}
-              className="text-sm sm:text-base md:text-lg lg:text-xl text-gray-700 mb-4 sm:mb-6 lg:mb-8 max-w-2xl mx-auto lg:mx-0 leading-relaxed"
+              transition={{ duration: 0.8, delay: 0.4 }}
+              className="text-lg sm:text-xl lg:text-2xl text-gray-600 mb-8 max-w-3xl mx-auto lg:mx-0 leading-relaxed font-light"
             >
-              Your one-stop shop for savings! Discover curated products, expert reviews, and exclusive deals across health, wellness, electronics, fashion, and more.
+              Your ultimate destination for{' '}
+              <span className="font-semibold text-purple-600">curated products</span>,{' '}
+              <span className="font-semibold text-pink-600">expert reviews</span>, and{' '}
+              <span className="font-semibold text-blue-600">exclusive deals</span>{' '}
+              across health, wellness, electronics, fashion, and lifestyle essentials.
             </motion.p>
 
-            {/* Stats */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
+            {/* Enhanced Stats Cards */}
+            {/* <motion.div
+              initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.4 }}
-              viewport={{ once: true }}
-              className="flex flex-wrap justify-center lg:justify-start gap-4 sm:gap-6 mb-6 sm:mb-8"
+              transition={{ duration: 0.8, delay: 0.5 }}
+              className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-10"
             >
-              <div className="flex items-center space-x-2 sm:space-x-3">
-                <Star className="h-4 w-4 sm:h-5 sm:w-5 text-yellow-400 fill-current" />
-                <span className="text-xs sm:text-sm font-semibold text-gray-800">10K+ Happy Customers</span>
-              </div>
-              <div className="flex items-center space-x-2 sm:space-x-3">
-                <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5 text-[#FFDAB9]" />
-                <span className="text-xs sm:text-sm font-semibold text-gray-800">500+ Products Reviewed</span>
-              </div>
-              <div className="flex items-center space-x-2 sm:space-x-3">
-                <Gift className="h-4 w-4 sm:h-5 sm:w-5 text-[#FFFACD]" />
-                <span className="text-xs sm:text-sm font-semibold text-gray-800">Daily New Deals</span>
-              </div>
-            </motion.div>
+              {[
+                { icon: Star, label: '50K+ Reviews', value: '4.9/5', color: 'from-yellow-400 to-orange-500' },
+                { icon: TrendingUp, label: 'Products', value: '10K+', color: 'from-green-400 to-teal-500' },
+                { icon: Gift, label: 'Daily Deals', value: '100+', color: 'from-purple-400 to-pink-500' }
+              ].map((stat, index) => {
+                const IconComponent = stat.icon;
+                return (
+                  <motion.div
+                    key={index}
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.5, delay: 0.6 + index * 0.1 }}
+                    className="bg-white/80 backdrop-blur-sm rounded-2xl p-4 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 border border-gray-100"
+                  >
+                    <div className={`w-12 h-12 bg-gradient-to-r ${stat.color} rounded-xl flex items-center justify-center mb-3 mx-auto lg:mx-0`}>
+                      <IconComponent className="h-6 w-6 text-white" />
+                    </div>
+                    <div className="text-center lg:text-left">
+                      <div className="text-2xl font-bold text-gray-900">{stat.value}</div>
+                      <div className="text-sm text-gray-600">{stat.label}</div>
+                    </div>
+                  </motion.div>
+                );
+              })}
+            </motion.div> */}
 
-            {/* CTA Buttons */}
+            {/* Enhanced CTA Buttons */}
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.5 }}
-              viewport={{ once: true }}
-              className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center lg:justify-start"
+              transition={{ duration: 0.8, delay: 0.7 }}
+              className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start"
             >
               <Link
                 to="/deals"
-                aria-label="Explore today's deals"
-                className="inline-flex items-center justify-center px-6 sm:px-8 py-3 sm:py-4 bg-[#e72a00] text-white text-sm sm:text-base font-semibold rounded-lg hover:bg-primary-700 transform hover:scale-105 transition-all duration-300 shadow-md hover:shadow-lg"
+                className="group relative inline-flex items-center justify-center px-8 py-4 bg-gradient-to-r from-purple-600 to-blue-600 text-white text-lg font-semibold rounded-2xl overflow-hidden transition-all duration-300 transform hover:scale-105 hover:shadow-2xl"
               >
-                Explore Today's Deals
-                <ArrowRight className="ml-2 h-4 w-4 sm:h-5 sm:w-5" />
+                <span className="absolute inset-0 bg-gradient-to-r from-purple-700 to-blue-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
+                <span className="relative flex items-center">
+                  <Zap className="mr-2 h-5 w-5" />
+                  Explore Today's Deals
+                  <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform duration-300" />
+                </span>
               </Link>
               <Link
                 to="/categories"
-                aria-label="Browse product categories"
-                className="inline-flex items-center justify-center px-6 sm:px-8 py-3 sm:py-4 bg-white text-[#ffb922] text-sm sm:text-base font-semibold rounded-lg border-2 border-[#FFFFE0] hover:border-[#FFFFCC] hover:bg-[#FFFFF0] transition-all duration-300 shadow-md hover:shadow-lg"
+                className="group inline-flex items-center justify-center px-8 py-4 bg-white/90 backdrop-blur-sm text-gray-800 text-lg font-semibold rounded-2xl border-2 border-gray-200 hover:border-purple-300 hover:bg-white transition-all duration-300 transform hover:scale-105 hover:shadow-xl"
               >
+                <ShoppingBag className="mr-2 h-5 w-5" />
                 Browse Categories
+                <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform duration-300" />
               </Link>
             </motion.div>
           </motion.div>
 
-          {/* Carousel */}
+          {/* Modern Carousel Section */}
           <motion.div
-            initial={{ opacity: 0, x: 20 }}
+            initial={{ opacity: 0, x: 50 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.8, delay: 0.3 }}
-            viewport={{ once: true }}
-            className="relative"
+            transition={{ duration: 1, delay: 0.4 }}
+            className="lg:col-span-5 relative"
           >
-            <div className="relative px-4 sm:px-6 lg:px-8">
-              <Slider {...settings}>
-                {products.map((product, index) => (
-                  <div key={index} className="px-2 sm:px-4">
-                    <motion.div
-                      initial={{ opacity: 0, y: 20, rotate: product.rotate }}
-                      animate={{ opacity: 1, y: 0, rotate: 0 }}
-                      whileHover={{ scale: 1.05, rotate: 0 }}
-                      transition={{ duration: 0.6, delay: product.delay }}
-                      className="bg-white rounded-lg shadow-md p-4 sm:p-6 cursor-pointer overflow-hidden hover:shadow-lg transition-all duration-300"
-                    >
-                      <img
-                        src={product.image}
-                        alt={`${product.title} - ${product.category}`}
-                        loading="lazy"
-                        className="w-full h-40 sm:h-48 lg:h-64 object-cover rounded-lg mb-3 sm:mb-4 transition-transform duration-300 hover:scale-105"
-                      />
-                      <h3 className="font-semibold text-gray-900 text-base sm:text-lg mb-2">{product.title}</h3>
-                      <div className="flex items-center justify-between">
-                        <span className="text-primary-600 font-bold text-sm sm:text-base">{product.discount}</span>
-                        <div className="flex text-yellow-400">
-                          {[...Array(5)].map((_, i) => (
-                            <Star key={i} className="h-3 w-3 sm:h-4 sm:w-4 fill-current" />
-                          ))}
+            {/* Carousel Container */}
+            <div className="relative bg-gradient-to-br from-white/90 to-white/70 backdrop-blur-lg rounded-3xl p-6 shadow-2xl border border-white/20 overflow-hidden">
+              {/* Carousel Header */}
+              <div className="text-center mb-6">
+                <motion.div
+                  className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-full text-sm font-semibold mb-4"
+                  animate={{ scale: [1, 1.05, 1] }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                >
+                  <Sparkles className="h-4 w-4 mr-2" />
+                  Featured Deals
+                </motion.div>
+                <h3 className="text-2xl font-bold text-gray-900 mb-2">Today's Hot Picks</h3>
+                <p className="text-gray-600">Handpicked deals just for you</p>
+              </div>
+
+              {/* Carousel Slides */}
+              <div className="relative h-80 mb-6">
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={currentSlide}
+                    initial={{ opacity: 0, x: 300 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -300 }}
+                    transition={{ duration: 0.5, ease: "easeInOut" }}
+                    className="absolute inset-0 bg-white rounded-2xl shadow-lg overflow-hidden"
+                  >
+                    <div className="grid grid-cols-1 md:grid-cols-2 h-full">
+                      {/* Product Image */}
+                      <div className="relative overflow-hidden">
+                        <img
+                          src={slides[currentSlide].image}
+                          alt={slides[currentSlide].title}
+                          className="w-full h-full object-cover transition-transform duration-700 hover:scale-110"
+                        />
+                        <div className="absolute top-4 left-4">
+                          <span className="bg-red-500 text-white px-3 py-1 rounded-full text-sm font-bold">
+                            {slides[currentSlide].discount}
+                          </span>
+                        </div>
+                        <div className="absolute top-4 right-4">
+                          <span className="bg-black/70 text-white px-2 py-1 rounded text-xs">
+                            {slides[currentSlide].category}
+                          </span>
                         </div>
                       </div>
-                      <p className="text-gray-600 text-xs sm:text-sm mt-2">{product.category}</p>
-                    </motion.div>
-                  </div>
+
+                      {/* Product Details */}
+                      <div className="p-6 flex flex-col justify-center">
+                        <h4 className="text-xl font-bold text-gray-900 mb-2">
+                          {slides[currentSlide].title}
+                        </h4>
+                        <p className="text-gray-600 mb-4">
+                          {slides[currentSlide].subtitle}
+                        </p>
+                        
+                        {/* Rating */}
+                        <div className="flex items-center mb-4">
+                          <div className="flex text-yellow-400 mr-2">
+                            {[...Array(5)].map((_, i) => (
+                              <Star
+                                key={i}
+                                className={`h-4 w-4 ${
+                                  i < Math.floor(slides[currentSlide].rating)
+                                    ? 'fill-current'
+                                    : 'stroke-current'
+                                }`}
+                              />
+                            ))}
+                          </div>
+                          <span className="text-sm text-gray-600">
+                            {slides[currentSlide].rating} ({slides[currentSlide].reviews} reviews)
+                          </span>
+                        </div>
+
+                        {/* Pricing */}
+                        <div className="mb-4">
+                          <div className="flex items-center space-x-2">
+                            <span className="text-2xl font-bold text-purple-600">
+                              {slides[currentSlide].salePrice}
+                            </span>
+                            <span className="text-lg text-gray-500 line-through">
+                              {slides[currentSlide].originalPrice}
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* CTA Button */}
+                        <motion.button
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                          className="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-6 py-3 rounded-xl font-semibold hover:shadow-lg transition-all duration-300"
+                        >
+                          Shop Now
+                        </motion.button>
+                      </div>
+                    </div>
+                  </motion.div>
+                </AnimatePresence>
+
+                {/* Navigation Arrows */}
+                <button
+                  onClick={prevSlide}
+                  className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white/90 hover:bg-white text-gray-800 p-2 rounded-full shadow-lg transition-all duration-300 hover:scale-110 z-10"
+                >
+                  <ChevronLeft className="h-5 w-5" />
+                </button>
+                <button
+                  onClick={nextSlide}
+                  className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white/90 hover:bg-white text-gray-800 p-2 rounded-full shadow-lg transition-all duration-300 hover:scale-110 z-10"
+                >
+                  <ChevronRight className="h-5 w-5" />
+                </button>
+              </div>
+
+              {/* Carousel Indicators */}
+              <div className="flex justify-center space-x-2 mb-4">
+                {slides.map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => setCurrentSlide(index)}
+                    className={`w-3 h-3 rounded-full transition-all duration-300 ${
+                      index === currentSlide
+                        ? 'bg-purple-600 scale-125'
+                        : 'bg-gray-300 hover:bg-gray-400'
+                    }`}
+                  />
                 ))}
-              </Slider>
+              </div>
+
+              {/* Feature Highlights - Compact Version */}
+              <div className="grid grid-cols-3 gap-2">
+                {features.map((feature, index) => {
+                  const IconComponent = feature.icon;
+                  return (
+                    <motion.div
+                      key={index}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.5, delay: 0.8 + index * 0.1 }}
+                      className="text-center p-3 bg-white/50 rounded-xl hover:bg-white/70 transition-all duration-300"
+                    >
+                      <div className={`w-8 h-8 bg-gradient-to-r ${feature.color} rounded-lg flex items-center justify-center mx-auto mb-2`}>
+                        <IconComponent className="h-4 w-4 text-white" />
+                      </div>
+                      <h4 className="text-xs font-semibold text-gray-900">{feature.title}</h4>
+                    </motion.div>
+                  );
+                })}
+              </div>
+
+              {/* Floating Elements */}
+              <motion.div
+                className="absolute -top-2 -right-2 w-6 h-6 bg-yellow-400 rounded-full"
+                animate={{ y: [-5, 5, -5] }}
+                transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+              />
+              <motion.div
+                className="absolute -bottom-1 -left-1 w-4 h-4 bg-pink-400 rounded-full"
+                animate={{ y: [5, -5, 5] }}
+                transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+              />
             </div>
           </motion.div>
         </div>
       </div>
 
-      {/* Bottom Wave */}
+      {/* Enhanced Bottom Wave */}
       <motion.div
         className="absolute bottom-0 left-0 right-0"
-        initial={{ y: 50, opacity: 0 }}
+        initial={{ y: 100, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 1, delay: 0.5 }}
-        viewport={{ once: true }}
+        transition={{ duration: 1.2, delay: 0.8 }}
       >
-        <svg viewBox="0 0 1440 100" className="w-full h-12 sm:h-16 lg:h-20 fill-white">
-          <path d="M0,48L48,53.3C96,59,192,69,288,64C384,59,480,43,576,38.7C672,35,768,43,864,48C960,53,1056,53,1152,48C1248,43,1344,32,1392,26.7L1440,21L1440,100L1392,100C1344,100,1248,100,1152,100C1056,100,960,100,864,100C768,100,672,100,576,100C480,100,384,100,288,100C192,100,96,100,48,100L0,100Z"></path>
+        <svg viewBox="0 0 1440 120" className="w-full h-16 sm:h-20 lg:h-24">
+          <defs>
+            <linearGradient id="waveGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stopColor="#ffffff" stopOpacity="0.8" />
+              <stop offset="50%" stopColor="#f8fafc" stopOpacity="0.9" />
+              <stop offset="100%" stopColor="#ffffff" stopOpacity="1" />
+            </linearGradient>
+          </defs>
+          <path
+            fill="url(#waveGradient)"
+            d="M0,64L48,69.3C96,75,192,85,288,80C384,75,480,53,576,48C672,43,768,53,864,64C960,75,1056,85,1152,80C1248,75,1344,53,1392,42.7L1440,32L1440,120L1392,120C1344,120,1248,120,1152,120C1056,120,960,120,864,120C768,120,672,120,576,120C480,120,384,120,288,120C192,120,96,120,48,120L0,120Z"
+          />
         </svg>
       </motion.div>
-
-      {/* Custom Dots Styling */}
-      <style>{`
-        .custom-dots {
-          bottom: -32px;
-          display: flex !important;
-          justify-content: center;
-          gap: 8px;
-        }
-        .custom-dots li {
-          width: 10px;
-          height: 10px;
-        }
-        .custom-dots li button {
-          width: 10px;
-          height: 10px;
-          padding: 0;
-        }
-        .custom-dots li button:before {
-          content: '';
-          width: 10px;
-          height: 10px;
-          background-color: #d1d5db;
-          border-radius: 50%;
-          opacity: 0.5;
-          transition: all 0.3s ease;
-        }
-        .custom-dots li.slick-active button:before {
-          background-color: #1f2937;
-          opacity: 1;
-          transform: scale(1.2);
-        }
-      `}</style>
     </section>
   );
 };

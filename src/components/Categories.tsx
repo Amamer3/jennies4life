@@ -86,7 +86,7 @@ const Categories: React.FC = () => {
   ];
 
   return (
-    <section className="py-8 sm:py-12 lg:py-16 bg-gradient-to-b from-[#FFFACD] to-[#FFE4C4]">
+    <section className="py-8 sm:py-12 lg:py-16 bg-gradient-to-b from-[#fbb53b] to-[#fa6742]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <motion.div
@@ -142,10 +142,10 @@ const Categories: React.FC = () => {
                 {/* Category Content */}
                 <div className="p-4 sm:p-5">
                   <div className="flex items-center justify-between mb-2 sm:mb-3">
-                    <h3 className="text-base sm:text-lg font-semibold text-gray-900 group-hover:text-[#F0E68C] transition-colors">
+                    <h3 className="text-base sm:text-lg font-semibold text-gray-900 group-hover:text-[#ff878700] transition-colors">
                       {category.name}
                     </h3>
-                    <ArrowRight className="h-4 w-4 sm:h-5 sm:w-5 text-gray-600 group-hover:text-[#F0E68C] transform group-hover:translate-x-1 transition-all duration-200" />
+                    <ArrowRight className="h-4 w-4 sm:h-5 sm:w-5 text-gray-600 group-hover:text-[#94f08c] transform group-hover:translate-x-1 transition-all duration-200" />
                   </div>
                   <p className="text-xs sm:text-sm text-gray-600 mb-2 sm:mb-3 line-clamp-2">
                     {category.description}
@@ -155,7 +155,7 @@ const Categories: React.FC = () => {
                       {category.productCount} products
                     </span>
                     <div className="flex items-center gap-1">
-                      <div className="w-1.5 h-1.5 bg-[#FFDAB9] rounded-full"></div>
+                      <div className="w-1.5 h-1.5 bg-[#e02900] rounded-full"></div>
                       <span className="text-xs sm:text-sm text-[#FF8C00] font-medium">Active deals</span>
                     </div>
                   </div>

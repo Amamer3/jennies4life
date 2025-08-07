@@ -2,8 +2,12 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Header from './components/Header';
 import Hero from './components/Hero';
 import FeaturedProducts from './components/FeaturedProducts';
+import TodaysSpecials from './components/TodaysSpecials';
+import TrendingSections from './components/TrendingSections';
+import DealOfDay from './components/DealOfDay';
 import Categories from './components/Categories';
 import BlogSection from './components/BlogSection';
+import Newsletter from './components/Newsletter';
 import Footer from './components/Footer';
 import ProductPage from './pages/ProductPage';
 import BlogPage from './pages/BlogPage';
@@ -31,8 +35,12 @@ function App() {
             <main>
               <Hero />
               <FeaturedProducts />
-              <Categories />
+              <TrendingSections />
+              <TodaysSpecials />
+              <DealOfDay />
               <BlogSection />
+              <Categories />
+              <Newsletter />
             </main>
             <Footer />
           </div>
