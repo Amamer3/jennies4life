@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Mail, Send, Gift, Star, CheckCircle, Sparkles, Heart, TrendingUp, Users, Zap, Crown } from 'lucide-react';
+import { Mail, Send, Gift, Star, CheckCircle, Users } from 'lucide-react';
 
 const Newsletter: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -21,32 +21,7 @@ const Newsletter: React.FC = () => {
     }, 1500);
   };
 
-  const benefits = [
-    {
-      icon: Crown,
-      title: 'VIP Access',
-      description: 'Exclusive early access to sales and limited-edition products',
-      gradient: 'from-yellow-400 to-orange-500'
-    },
-    {
-      icon: Zap,
-      title: 'Flash Deals',
-      description: 'Lightning-fast notifications for time-sensitive offers',
-      gradient: 'from-blue-400 to-cyan-500'
-    },
-    {
-      icon: Heart,
-      title: 'Curated Picks',
-      description: 'Handpicked products tailored to your lifestyle and preferences',
-      gradient: 'from-pink-400 to-rose-500'
-    },
-    {
-      icon: TrendingUp,
-      title: 'Trend Alerts',
-      description: 'Stay ahead with the latest fashion and lifestyle trends',
-      gradient: 'from-purple-400 to-indigo-500'
-    }
-  ];
+  
 
   if (isSubscribed) {
     return (
@@ -144,6 +119,8 @@ const Newsletter: React.FC = () => {
     );
   }
 
+
+  // Newsletter Section
   return (
     <section className="py-12 sm:py-16 lg:py-20 bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 relative overflow-hidden">
       <div className="absolute inset-0">
@@ -163,9 +140,7 @@ const Newsletter: React.FC = () => {
         >
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-0">
             <div className="p-8 sm:p-12 lg:p-16 relative">
-              <div className="absolute top-8 right-8 w-16 h-16 bg-gradient-to-r from-blue-100 to-indigo-100 rounded-full opacity-50 animate-bounce"></div>
-              <div className="absolute bottom-8 left-8 w-12 h-12 bg-gradient-to-r from-purple-100 to-pink-100 rounded-full opacity-50 animate-pulse"></div>
-              
+              {/*  */}
               <motion.div
                 initial={{ opacity: 0, x: -20 }}
                 whileInView={{ opacity: 1, x: 0 }}
@@ -185,7 +160,7 @@ const Newsletter: React.FC = () => {
                       <Mail className="h-7 w-7 text-white" />
                     </div>
                     <div className="flex items-center space-x-2">
-                      <Sparkles className="h-5 w-5 text-yellow-500 animate-pulse" />
+                      {/* <Sparkles className="h-5 w-5 text-yellow-500 animate-pulse" /> */}
                       <span className="text-sm font-semibold text-indigo-600 bg-indigo-50 px-3 py-1 rounded-full">VIP Newsletter</span>
                     </div>
                   </motion.div>
@@ -239,32 +214,7 @@ const Newsletter: React.FC = () => {
                   Plus, enjoy a <span className="font-bold text-emerald-600">20% welcome bonus</span> on your first order!
                 </motion.p>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
-                  {benefits.map((benefit, index) => {
-                    const IconComponent = benefit.icon;
-                    return (
-                      <motion.div
-                        key={index}
-                        initial={{ opacity: 0, y: 20, scale: 0.9 }}
-                        whileInView={{ opacity: 1, y: 0, scale: 1 }}
-                        transition={{ duration: 0.5, delay: 0.6 + index * 0.1 }}
-                        viewport={{ once: true }}
-                        whileHover={{ scale: 1.02, y: -2 }}
-                        className="bg-gradient-to-br from-white to-gray-50 p-4 rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition-all duration-300 group"
-                      >
-                        <div className="flex items-start space-x-3">
-                          <div className={`w-10 h-10 bg-gradient-to-r ${benefit.gradient} rounded-xl flex items-center justify-center flex-shrink-0 shadow-sm group-hover:scale-110 transition-transform duration-300`}>
-                            <IconComponent className="h-5 w-5 text-white" />
-                          </div>
-                          <div className="flex-1">
-                            <h4 className="font-bold text-gray-900 mb-1 group-hover:text-indigo-700 transition-colors">{benefit.title}</h4>
-                            <p className="text-sm text-gray-600 leading-relaxed">{benefit.description}</p>
-                          </div>
-                        </div>
-                      </motion.div>
-                    );
-                  })}
-                </div>
+                
 
                 <motion.form
                   initial={{ opacity: 0, y: 20 }}
@@ -335,48 +285,9 @@ const Newsletter: React.FC = () => {
                 </motion.form>
               </motion.div>
             </div>
-
+            {/* Newsletter Section Background */}
             <div className="bg-gradient-to-br from-indigo-600 via-purple-600 to-blue-700 p-8 sm:p-12 lg:p-16 flex items-center justify-center relative overflow-hidden">
-              <div className="absolute inset-0">
-                <motion.div
-                  animate={{ 
-                    rotate: 360,
-                    scale: [1, 1.1, 1]
-                  }}
-                  transition={{ 
-                    rotate: { duration: 20, repeat: Infinity, ease: "linear" },
-                    scale: { duration: 4, repeat: Infinity, ease: "easeInOut" }
-                  }}
-                  className="absolute top-10 left-10 w-32 h-32 bg-white bg-opacity-10 rounded-full"
-                />
-                <motion.div
-                  animate={{ 
-                    rotate: -360,
-                    scale: [1, 1.2, 1]
-                  }}
-                  transition={{ 
-                    rotate: { duration: 25, repeat: Infinity, ease: "linear" },
-                    scale: { duration: 5, repeat: Infinity, ease: "easeInOut", delay: 1 }
-                  }}
-                  className="absolute bottom-10 right-10 w-24 h-24 bg-white bg-opacity-10 rounded-full"
-                />
-                <motion.div
-                  animate={{ 
-                    y: [-10, 10, -10],
-                    opacity: [0.1, 0.2, 0.1]
-                  }}
-                  transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-                  className="absolute top-1/2 left-0 w-16 h-16 bg-white bg-opacity-10 rounded-full"
-                />
-                <motion.div
-                  animate={{ 
-                    x: [-5, 5, -5],
-                    y: [-5, 5, -5]
-                  }}
-                  transition={{ duration: 4, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
-                  className="absolute bottom-20 left-1/3 w-12 h-12 bg-white bg-opacity-10 rounded-full"
-                />
-              </div>
+              
               
               <motion.div
                 initial={{ opacity: 0, scale: 0.8, y: 20 }}
@@ -385,20 +296,7 @@ const Newsletter: React.FC = () => {
                 viewport={{ once: true }}
                 className="text-center text-white relative z-10 max-w-md"
               >
-                <motion.div
-                  initial={{ scale: 0, rotate: -180 }}
-                  whileInView={{ scale: 1, rotate: 0 }}
-                  transition={{ duration: 0.8, delay: 0.4, type: "spring", bounce: 0.4 }}
-                  viewport={{ once: true }}
-                  className="w-28 h-28 bg-white bg-opacity-20 rounded-full flex items-center justify-center mx-auto mb-6 backdrop-blur-sm border border-white border-opacity-30 shadow-2xl"
-                >
-                  <motion.div
-                    animate={{ rotate: [0, 10, -10, 0] }}
-                    transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-                  >
-                    <Gift className="h-14 w-14 text-white" />
-                  </motion.div>
-                </motion.div>
+                
                 
                 <motion.h3
                   initial={{ opacity: 0, y: 20 }}
@@ -431,29 +329,29 @@ const Newsletter: React.FC = () => {
                     whileHover={{ scale: 1.05 }}
                     className="bg-white bg-opacity-15 rounded-xl p-4 backdrop-blur-sm border border-white border-opacity-20 shadow-lg"
                   >
-                    <div className="text-3xl font-bold mb-1">20%</div>
-                    <div className="text-sm opacity-80">Welcome Bonus</div>
+                    <div className="text-3xl font-bold mb-1 text-amber-400">20%</div>
+                    <div className="text-sm opacity-80 text-amber-400">Welcome Bonus</div>
                   </motion.div>
                   <motion.div
                     whileHover={{ scale: 1.05 }}
                     className="bg-white bg-opacity-15 rounded-xl p-4 backdrop-blur-sm border border-white border-opacity-20 shadow-lg"
                   >
-                    <div className="text-3xl font-bold mb-1">75K+</div>
-                    <div className="text-sm opacity-80">VIP Members</div>
+                    <div className="text-3xl font-bold mb-1 text-amber-400">75K+</div>
+                    <div className="text-sm opacity-80 text-amber-400">VIP Members</div>
                   </motion.div>
                   <motion.div
                     whileHover={{ scale: 1.05 }}
                     className="bg-white bg-opacity-15 rounded-xl p-4 backdrop-blur-sm border border-white border-opacity-20 shadow-lg"
                   >
-                    <div className="text-3xl font-bold mb-1">Daily</div>
-                    <div className="text-sm opacity-80">New Deals</div>
+                    <div className="text-3xl font-bold mb-1 text-amber-400">Daily</div>
+                    <div className="text-sm opacity-80 text-amber-400">New Deals</div>
                   </motion.div>
                   <motion.div
                     whileHover={{ scale: 1.05 }}
                     className="bg-white bg-opacity-15 rounded-xl p-4 backdrop-blur-sm border border-white border-opacity-20 shadow-lg"
                   >
-                    <div className="text-3xl font-bold mb-1">4.9★</div>
-                    <div className="text-sm opacity-80">Rating</div>
+                    <div className="text-3xl font-bold mb-1 text-amber-400">4.9★</div>
+                    <div className="text-sm opacity-80 text-amber-400">Rating</div>
                   </motion.div>
                 </motion.div>
               </motion.div>

@@ -445,7 +445,7 @@ const CategoryPage: React.FC = () => {
       aria-label={`Product: ${product.name}`}
     >
       {/* Glow Effect */}
-      <div className="absolute inset-0 bg-gradient-to-r from-[#FFFACD]/20 to-[#F0E68C]/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-2xl" />
+      <div className="absolute inset-0 bg-gradient-to-r from-[#fc7100]/20 to-[#fc7100]/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-2xl" />
       
       {/* Product Image */}
       <div
@@ -550,7 +550,7 @@ const CategoryPage: React.FC = () => {
         
         <motion.h3
           whileHover={{ x: 5 }}
-          className={`font-bold text-gray-900 mb-3 group-hover:text-[#F0E68C] transition-colors duration-300 ${
+          className={`font-bold text-gray-900 mb-3 group-hover:text-[#fc7100] transition-colors duration-300 ${
             viewMode === 'list' ? 'text-lg sm:text-xl line-clamp-2' : 'text-base sm:text-lg line-clamp-2'
           }`}
         >
@@ -571,7 +571,7 @@ const CategoryPage: React.FC = () => {
             {product.features.slice(0, 2).map((feature, index) => (
               <span
                 key={index}
-                className="inline-flex items-center px-2 py-1 bg-[#FFFACD]/30 text-[#F0E68C] text-xs font-medium rounded-full"
+                className="inline-flex items-center px-2 py-1 bg-[#FFFACD]/30 text-[#fc7100] text-xs font-medium rounded-full"
               >
                 {feature}
               </span>
@@ -665,7 +665,7 @@ const CategoryPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Category Header */}
-      <div className="relative bg-gradient-to-br from-[#FFFACD] via-[#F0E68C] to-[#FFD700] text-white overflow-hidden">
+      <div className="relative bg-gradient-to-br from-[#fc7100] via-[#f85306] to-[#FFD700] text-white overflow-hidden">
         {/* Animated Background Elements */}
         <div className="absolute inset-0">
           <motion.div
@@ -716,7 +716,7 @@ const CategoryPage: React.FC = () => {
           ))}
         </div>
 
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-20">
+        <div className="relative max-w-7xl mx-auto px-7 sm:px-6 lg:px-8 py-8 sm:py-12 lg:py-20">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
@@ -726,7 +726,7 @@ const CategoryPage: React.FC = () => {
             aria-labelledby="category-title"
           >
             {/* Animated Icon */}
-            <motion.div
+            {/* <motion.div
               initial={{ scale: 0, rotate: -180 }}
               animate={{ scale: 1, rotate: 0 }}
               transition={{ duration: 0.8, delay: 0.2 }}
@@ -738,7 +738,7 @@ const CategoryPage: React.FC = () => {
               >
                 <Sparkles className="w-8 h-8 text-white" />
               </motion.div>
-            </motion.div>
+            </motion.div> */}
 
             <motion.h1
               id="category-title"
@@ -793,7 +793,7 @@ const CategoryPage: React.FC = () => {
               <motion.button
                 whileHover={{ scale: 1.05, y: -2 }}
                 whileTap={{ scale: 0.95 }}
-                className="group inline-flex items-center px-8 py-3 bg-white text-[#F0E68C] font-semibold rounded-full shadow-lg hover:shadow-xl transition-all duration-300"
+                className="group inline-flex items-center px-8 py-3 bg-white text-[#fc7100] font-semibold rounded-full shadow-lg hover:shadow-xl transition-all duration-300"
               >
                 <Zap className="w-5 h-5 mr-2 group-hover:animate-pulse" />
                 Shop Now
@@ -835,7 +835,7 @@ const CategoryPage: React.FC = () => {
               <motion.div
                 animate={{ rotate: [0, 5, -5, 0] }}
                 transition={{ duration: 2, repeat: Infinity }}
-                className="p-2 bg-gradient-to-r from-[#FFFACD] to-[#F0E68C] rounded-lg"
+                className="p-2 bg-gradient-to-r from-[#fc7100] to-[#f85306] rounded-lg"
               >
                 <Filter className="w-5 h-5 text-white" />
               </motion.div>
@@ -855,23 +855,23 @@ const CategoryPage: React.FC = () => {
                 >
                   <Link
                     to={`/category/${category.slug}/${subcategory.slug}`}
-                    className="relative block p-4 bg-white border border-gray-200 rounded-xl text-center hover:border-[#FFFACD] hover:shadow-lg transition-all duration-300 overflow-hidden"
+                    className="relative block p-4 bg-white border border-gray-200 rounded-xl text-center hover:border-[#fc7100] hover:shadow-lg transition-all duration-300 overflow-hidden"
                     aria-label={`View subcategory: ${subcategory.name}`}
                   >
                     {/* Glow Effect */}
-                    <div className="absolute inset-0 bg-gradient-to-r from-[#FFFACD]/20 to-[#F0E68C]/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                    <div className="absolute inset-0 bg-gradient-to-r from-[#fc7100]/20 to-[#f85306]/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                     
                     <div className="relative">
                       <motion.div
                         whileHover={{ rotate: 10 }}
-                        className="w-8 h-8 mx-auto mb-2 p-1.5 bg-gradient-to-r from-[#FFFACD] to-[#F0E68C] rounded-lg"
+                        className="w-8 h-8 mx-auto mb-2 p-1.5 bg-gradient-to-r from-[#fc7100] to-[#f85306] rounded-lg"
                       >
                         <TrendingUp className="w-full h-full text-white" />
                       </motion.div>
-                      <h3 className="font-semibold text-gray-900 text-sm group-hover:text-[#F0E68C] transition-colors duration-200 mb-1">
-                        {subcategory.name}
+                      <h3 className="font-semibold text-gray-900 text-sm group-hover:text-[#fc7100] transition-colors duration-200 mb-1">
+                        {subcategory.name}    
                       </h3>
-                      <span className="inline-flex items-center px-2 py-1 bg-gray-100 group-hover:bg-[#FFFACD]/20 text-xs text-gray-600 group-hover:text-[#F0E68C] rounded-full transition-all duration-200">
+                      <span className="inline-flex items-center px-2 py-1 bg-gray-100 group-hover:bg-[#fc7100]/20 text-xs text-gray-600 group-hover:text-[#fc7100] rounded-full transition-all duration-200">
                         {subcategory.productCount} items
                       </span>
                     </div>
@@ -897,7 +897,7 @@ const CategoryPage: React.FC = () => {
             </h2>
             
             {/* Filters Header */}
-            <div className="bg-gradient-to-r from-[#FFFACD] to-[#F0E68C] p-6 rounded-xl text-white">
+            <div className="bg-gradient-to-r from-[#fc7100] to-[#f85306] p-6 rounded-xl text-white">
               <div className="flex items-center gap-3">
                 <motion.div
                   animate={{ rotate: [0, 10, -10, 0] }}
@@ -918,7 +918,7 @@ const CategoryPage: React.FC = () => {
               className="bg-white p-6 rounded-xl shadow-lg border border-gray-100 hover:shadow-xl transition-shadow duration-300"
             >
               <div className="flex items-center gap-2 mb-4">
-                <Search className="w-5 h-5 text-[#F0E68C]" />
+                <Search className="w-5 h-5 text-[#fc7100]" />
                 <h3 className="text-lg font-semibold text-gray-900">Search Products</h3>
               </div>
               <div className="relative">
@@ -930,7 +930,7 @@ const CategoryPage: React.FC = () => {
                   type="text"
                   placeholder="Search products..."
                   onChange={(e) => debouncedSetSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#FFFACD] focus:border-transparent transition-all duration-200 hover:border-[#F0E68C]"
+                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#fc7100] focus:border-transparent transition-all duration-200 hover:border-[#fc7100]"
                   aria-label="Search products"
                 />
               </div>
@@ -944,7 +944,7 @@ const CategoryPage: React.FC = () => {
               className="bg-white p-6 rounded-xl shadow-lg border border-gray-100 hover:shadow-xl transition-shadow duration-300"
             >
               <div className="flex items-center gap-2 mb-4">
-                <Tag className="w-5 h-5 text-[#F0E68C]" />
+                <Tag className="w-5 h-5 text-[#fc7100]" />
                 <h3 className="text-lg font-semibold text-gray-900">Price Range</h3>
               </div>
               <div className="flex items-center gap-3">
@@ -955,7 +955,7 @@ const CategoryPage: React.FC = () => {
                     placeholder="$0"
                     value={priceRange.min || ''}
                     onChange={(e) => setPriceRange((prev) => ({ ...prev, min: Number(e.target.value) || 0 }))}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#FFFACD] focus:border-transparent transition-all duration-200 hover:border-[#F0E68C]"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#fc7100] focus:border-transparent transition-all duration-200 hover:border-[#fc7100]"
                     aria-label="Minimum price"
                   />
                 </div>
@@ -969,7 +969,7 @@ const CategoryPage: React.FC = () => {
                     placeholder="$1000"
                     value={priceRange.max || ''}
                     onChange={(e) => setPriceRange((prev) => ({ ...prev, max: Number(e.target.value) || 1000 }))}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#FFFACD] focus:border-transparent transition-all duration-200 hover:border-[#F0E68C]"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#fc7100] focus:border-transparent transition-all duration-200 hover:border-[#fc7100]"
                     aria-label="Maximum price"
                   />
                 </div>
@@ -984,7 +984,7 @@ const CategoryPage: React.FC = () => {
               className="bg-white p-6 rounded-xl shadow-lg border border-gray-100 hover:shadow-xl transition-shadow duration-300"
             >
               <div className="flex items-center gap-2 mb-4">
-                <Award className="w-5 h-5 text-[#F0E68C]" />
+                <Award className="w-5 h-5 text-[#fc7100]" />
                 <h3 className="text-lg font-semibold text-gray-900">Brands</h3>
               </div>
               <div className="space-y-3 max-h-64 overflow-y-auto custom-scrollbar">
@@ -1004,10 +1004,10 @@ const CategoryPage: React.FC = () => {
                           e.target.checked ? [...prev, brand] : prev.filter((b) => b !== brand)
                         )
                       }
-                      className="w-4 h-4 rounded border-2 border-gray-300 text-[#F0E68C] focus:ring-[#FFFACD] focus:ring-2 transition-colors duration-200"
+                      className="w-4 h-4 rounded border-2 border-gray-300 text-[#fc7100] focus:ring-[#fc7100] focus:ring-2 transition-colors duration-200"
                       aria-label={`Filter by brand: ${brand}`}
                     />
-                    <span className="text-sm text-gray-700 group-hover:text-[#F0E68C] transition-colors duration-200 font-medium">
+                    <span className="text-sm text-gray-700 group-hover:text-[#fc7100] transition-colors duration-200 font-medium">
                       {brand}
                     </span>
                   </motion.label>
@@ -1053,14 +1053,14 @@ const CategoryPage: React.FC = () => {
               className="relative bg-white rounded-2xl shadow-lg border border-gray-100 p-6 mb-8 overflow-hidden"
             >
               {/* Background Elements */}
-              <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-[#F0E68C]/10 to-transparent rounded-full -translate-y-16 translate-x-16" />
-              <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-[#FFD700]/10 to-transparent rounded-full translate-y-12 -translate-x-12" />
+              <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-[#fc7100]/10 to-transparent rounded-full -translate-y-16 translate-x-16" />
+              <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-[#fc7100]/10 to-transparent rounded-full translate-y-12 -translate-x-12" />
               
               <div className="relative flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
                 <div className="flex flex-col sm:flex-row sm:items-center gap-4">
                   <button
                     onClick={() => setShowFilters(!showFilters)}
-                    className="sm:hidden inline-flex items-center px-4 py-2 bg-gradient-to-r from-[#F0E68C] to-[#FFD700] text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300"
+                    className="sm:hidden inline-flex items-center px-4 py-2 bg-gradient-to-r from-[#fc7100] to-[#f85306] text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300"
                     aria-label={showFilters ? 'Hide filters' : 'Show filters'}
                   >
                     <SlidersHorizontal className="h-4 w-4 mr-2" />
@@ -1069,11 +1069,11 @@ const CategoryPage: React.FC = () => {
                   
                   <motion.div
                     whileHover={{ scale: 1.02 }}
-                    className="flex items-center gap-3 px-4 py-2 bg-gradient-to-r from-[#F0E68C]/10 to-[#FFD700]/10 rounded-xl border border-[#F0E68C]/20"
+                    className="flex items-center gap-3 px-4 py-2 bg-gradient-to-r from-[#fc7100]/10 to-[#fc7100]/10 rounded-xl border border-[#fc7100]/20"
                   >
-                    <TrendingUp className="w-5 h-5 text-[#F0E68C]" />
+                    <TrendingUp className="w-5 h-5 text-[#fc7100]" />
                     <p className="text-sm font-semibold text-gray-700">
-                      Showing <span className="text-[#F0E68C]">{(currentPage - 1) * productsPerPage + 1}-{Math.min(currentPage * productsPerPage, filteredProducts.length)}</span> of <span className="text-[#F0E68C]">{filteredProducts.length}</span> products
+                      Showing <span className="text-[#fc7100]">{(currentPage - 1) * productsPerPage + 1}-{Math.min(currentPage * productsPerPage, filteredProducts.length)}</span> of <span className="text-[#fc7100]">{filteredProducts.length}</span> products
                     </p>
                   </motion.div>
                   
@@ -1086,8 +1086,8 @@ const CategoryPage: React.FC = () => {
                         whileTap={{ scale: 0.95 }}
                         className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-all duration-200 ${
                           viewMode === 'grid' 
-                            ? 'bg-white text-[#F0E68C] shadow-md' 
-                            : 'text-gray-600 hover:text-gray-800'
+                            ? 'bg-white text-[#fc7100] shadow-md' 
+                            : 'text-gray-600 hover:text-[#fc7100]'
                         }`}
                         aria-label="Grid view"
                       >
@@ -1100,8 +1100,8 @@ const CategoryPage: React.FC = () => {
                         whileTap={{ scale: 0.95 }}
                         className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-all duration-200 ${
                           viewMode === 'list' 
-                            ? 'bg-white text-[#F0E68C] shadow-md' 
-                            : 'text-gray-600 hover:text-gray-800'
+                            ? 'bg-white text-[#fc7100] shadow-md' 
+                            : 'text-gray-600 hover:text-[#fc7100]'
                         }`}
                         aria-label="List view"
                       >
@@ -1117,7 +1117,7 @@ const CategoryPage: React.FC = () => {
                   className="flex items-center gap-3"
                 >
                   <div className="flex items-center gap-2">
-                    <Filter className="w-4 h-4 text-[#F0E68C]" />
+                    <Filter className="w-4 h-4 text-[#fc7100]" />
                     <label htmlFor="sort" className="text-sm font-semibold text-gray-700">
                       Sort by:
                     </label>
@@ -1126,7 +1126,7 @@ const CategoryPage: React.FC = () => {
                     id="sort"
                     value={sortBy}
                     onChange={(e) => setSortBy(e.target.value)}
-                    className="bg-white border-2 border-gray-200 rounded-xl px-4 py-2 text-sm font-medium text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#F0E68C] focus:border-[#F0E68C] transition-all duration-200 hover:border-[#F0E68C]/50"
+                    className="bg-white border-2 border-gray-200 rounded-xl px-4 py-2 text-sm font-medium text-gray-700 focus:outline-none focus:ring-1 focus:ring-[#fc7100] focus:border-[#fc7100] transition-all duration-200 hover:border-[#fc7100]/50"
                     aria-label="Sort products"
                   >
                     {[
@@ -1197,7 +1197,7 @@ const CategoryPage: React.FC = () => {
               >
                 <div className="relative bg-white rounded-2xl shadow-lg border border-gray-100 p-6 overflow-hidden">
                   {/* Background Elements */}
-                  <div className="absolute top-0 left-1/2 w-20 h-20 bg-gradient-to-br from-[#F0E68C]/10 to-transparent rounded-full -translate-y-10 -translate-x-10" />
+                  <div className="absolute top-0 left-1/2 w-20 h-20 bg-gradient-to-br from-[#fc7100]/10 to-transparent rounded-full -translate-y-10 -translate-x-10" />
                   
                   <div className="relative flex items-center gap-2">
                     <motion.button
@@ -1205,7 +1205,7 @@ const CategoryPage: React.FC = () => {
                       disabled={currentPage === 1}
                       whileHover={{ scale: currentPage === 1 ? 1 : 1.05 }}
                       whileTap={{ scale: currentPage === 1 ? 1 : 0.95 }}
-                      className="flex items-center justify-center w-10 h-10 text-gray-600 bg-gray-100 rounded-xl hover:bg-[#F0E68C] hover:text-white transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-gray-100 disabled:hover:text-gray-600"
+                      className="flex items-center justify-center w-10 h-10 text-gray-600 bg-gray-100 rounded-xl hover:bg-[#fc7100] hover:text-white transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-gray-100 disabled:hover:text-gray-600"
                       aria-label="Previous page"
                     >
                       <ChevronLeft className="h-5 w-5" />
@@ -1232,8 +1232,8 @@ const CategoryPage: React.FC = () => {
                             whileTap={{ scale: 0.9 }}
                             className={`flex items-center justify-center w-10 h-10 text-sm font-semibold rounded-xl transition-all duration-200 ${
                               currentPage === page
-                                ? 'bg-gradient-to-r from-[#F0E68C] to-[#FFD700] text-white shadow-lg'
-                                : 'text-gray-700 bg-gray-100 hover:bg-[#F0E68C]/20 hover:text-[#F0E68C]'
+                                ? 'bg-gradient-to-r from-[#fc7100] to-[#fc7100] text-white shadow-lg'
+                                : 'text-gray-700 bg-gray-100 hover:bg-[#fc7100]/20 hover:text-[#fc7100]'
                             }`}
                             aria-current={currentPage === page ? 'page' : undefined}
                             aria-label={`Go to page ${page}`}
@@ -1249,7 +1249,7 @@ const CategoryPage: React.FC = () => {
                       disabled={currentPage === totalPages}
                       whileHover={{ scale: currentPage === totalPages ? 1 : 1.05 }}
                       whileTap={{ scale: currentPage === totalPages ? 1 : 0.95 }}
-                      className="flex items-center justify-center w-10 h-10 text-gray-600 bg-gray-100 rounded-xl hover:bg-[#F0E68C] hover:text-white transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-gray-100 disabled:hover:text-gray-600"
+                      className="flex items-center justify-center w-10 h-10 text-gray-600 bg-gray-100 rounded-xl hover:bg-[#fc7100] hover:text-white transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-[#fc7100] disabled:hover:text-white"
                       aria-label="Next page"
                     >
                       <ChevronRight className="h-5 w-5" />
@@ -1259,7 +1259,7 @@ const CategoryPage: React.FC = () => {
                   {/* Page Info */}
                   <div className="flex items-center justify-center mt-4 pt-4 border-t border-gray-100">
                     <span className="text-sm text-gray-600 font-medium">
-                      Page <span className="text-[#F0E68C] font-bold">{currentPage}</span> of <span className="text-[#F0E68C] font-bold">{totalPages}</span>
+                      Page <span className="text-[#fc7100] font-bold">{currentPage}</span> of <span className="text-[#fc7100] font-bold">{totalPages}</span>
                     </span>
                   </div>
                 </div>

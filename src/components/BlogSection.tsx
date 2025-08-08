@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Calendar, Clock, ArrowRight, BookOpen, Sparkles, Eye, Heart, Share2, User, Star, Zap } from 'lucide-react';
+import { Calendar, Clock, ArrowRight, BookOpen, Sparkles, Eye, Heart, Share2, User, Star } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 interface BlogPost {
@@ -337,7 +337,7 @@ const BlogSection: React.FC = () => {
             className="text-center mb-8"
           >
             <div className="flex items-center justify-center mb-4">
-              <Zap className="h-5 w-5 text-[#F0E68C] mr-2" />
+              {/* <Zap className="h-5 w-5 text-[#F0E68C] mr-2" /> */}
               <span className="text-[#DAA520] font-semibold text-lg">More Articles</span>
             </div>
           </motion.div>
@@ -521,13 +521,6 @@ const BlogSection: React.FC = () => {
               to="/blog"
               className="relative inline-flex items-center px-8 py-4 bg-gradient-to-r from-[#F0E68C] to-[#DAA520] text-black font-semibold rounded-xl hover:from-[#DAA520] hover:to-[#F0E68C] transition-all duration-300 shadow-lg hover:shadow-2xl group"
             >
-              <motion.div
-                animate={{ rotate: [0, 10, -10, 0] }}
-                transition={{ duration: 2, repeat: Infinity }}
-                className="mr-2"
-              >
-                <BookOpen className="h-5 w-5" />
-              </motion.div>
               
               <span className="relative">
                 View All Articles
@@ -546,14 +539,7 @@ const BlogSection: React.FC = () => {
                 <ArrowRight className="h-5 w-5" />
               </motion.div>
               
-              {/* Sparkle Effect */}
-              <motion.div
-                animate={{ scale: [0, 1, 0], rotate: [0, 180, 360] }}
-                transition={{ duration: 2, repeat: Infinity, delay: 0.5 }}
-                className="absolute -top-1 -right-1"
-              >
-                <Sparkles className="h-4 w-4 text-black" />
-              </motion.div>
+              
             </Link>
           </motion.div>
           
