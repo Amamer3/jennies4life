@@ -7,7 +7,6 @@ import {
   DollarSign,
   Package
 } from 'lucide-react';
-import AdminLayout from '../../components/AdminLayout';
 
 const stats = [
   {
@@ -46,8 +45,7 @@ const stats = [
 
 const AdminDashboard: React.FC = () => {
   return (
-    <AdminLayout>
-      <div className="space-y-6">
+    <div className="space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <h1 className="text-2xl lg:text-3xl font-bold text-gray-900">Dashboard Overview</h1>
           <div className="flex items-center space-x-4">
@@ -144,8 +142,7 @@ const AdminDashboard: React.FC = () => {
             </div>
           </motion.div>
         </div>
-      </div>
-    </AdminLayout>
+    </div>
   );
 };
 

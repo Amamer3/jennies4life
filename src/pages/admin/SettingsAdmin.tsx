@@ -16,7 +16,7 @@ import {
   AlertTriangle,
   Info
 } from 'lucide-react';
-import AdminLayout from '../../components/AdminLayout';
+
 
 interface SettingSection {
   id: string;
@@ -700,8 +700,7 @@ const SettingsAdmin: React.FC = () => {
   };
 
   return (
-    <AdminLayout>
-      <div className="space-y-6">
+    <div className="space-y-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
         <div>
@@ -784,8 +783,7 @@ const SettingsAdmin: React.FC = () => {
           </motion.div>
         </div>
       </div>
-      </div>
-    </AdminLayout>
+    </div>
   );
 };
 

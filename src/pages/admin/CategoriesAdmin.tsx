@@ -11,7 +11,7 @@ import {
   TrendingUp,
   MoreHorizontal
 } from 'lucide-react';
-import AdminLayout from '../../components/AdminLayout';
+
 
 interface Category {
   id: string;
@@ -208,8 +208,7 @@ const CategoriesAdmin: React.FC = () => {
   };
 
   return (
-    <AdminLayout>
-      <div className="space-y-6">
+    <div className="space-y-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
         <div>
@@ -469,8 +468,7 @@ const CategoriesAdmin: React.FC = () => {
           }}
         />
       )}
-      </div>
-    </AdminLayout>
+    </div>
   );
 };
 
