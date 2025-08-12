@@ -63,7 +63,7 @@ const CategoryPage: React.FC = () => {
   const [sortBy, setSortBy] = useState('featured');
   const [priceRange, setPriceRange] = useState({ min: 0, max: 1000 });
   const [selectedBrands, setSelectedBrands] = useState<string[]>([]);
-  const [showFilters, setShowFilters] = useState(true);
+
   const [currentPage, setCurrentPage] = useState(1);
   const productsPerPage = 12;
   

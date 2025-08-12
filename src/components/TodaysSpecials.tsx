@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Star, Heart, ExternalLink, Clock, Zap, Flame, TrendingUp, ShoppingCart, Gift, Sparkles, Loader2, AlertCircle } from 'lucide-react';
+import { Heart, ExternalLink, Clock, Flame, TrendingUp, Gift, Sparkles, Loader2, AlertCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { publicDealsAPI, type PublicDeal } from '../services/publicDealsApi';
 

@@ -15,6 +15,10 @@ export interface PublicDeal {
   endDate: string;
   createdAt?: string;
   updatedAt?: string;
+  // Product-like properties for compatibility
+  rating?: number;
+  reviewCount?: number;
+  features?: string[];
   // Legacy fields for backward compatibility
   discountType?: 'percentage' | 'fixed';
   productName?: string;

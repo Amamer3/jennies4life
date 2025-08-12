@@ -2,8 +2,6 @@ import type { ReactNode } from 'react';
 
 // Product Types
 export interface Product {
-  createdAt: number;
-  createdAt: number;
   id: string;
   name: string;
   description: string;
@@ -12,6 +10,7 @@ export interface Product {
   discount?: number;
   rating: number;
   reviewCount: number;
+  reviews?: number; // Alternative name for reviewCount
   image: string;
   images?: string[];
   category: string;
@@ -19,6 +18,7 @@ export interface Product {
   brand: string;
   inStock: boolean;
   features: string[];
+  featured?: boolean; // Add featured property
   specifications?: { [key: string]: string };
   affiliateLink: string;
   tags: string[];
@@ -26,6 +26,8 @@ export interface Product {
   isBestseller?: boolean;
   isFeatured?: boolean;
   slug: string;
+  createdAt: number;
+  updatedAt?: number;
 }
 
 // Category Types
