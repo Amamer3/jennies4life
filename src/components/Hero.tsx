@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Star, Sparkles, ShoppingBag, Zap, Users, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ArrowRight, Star, Sparkles, ShoppingBag, Zap, Users, ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { publicDealsAPI, type PublicDeal } from '../services/publicDealsApi';
 
 // Define types for feature data
 interface Feature {
@@ -11,74 +12,10 @@ interface Feature {
   color: string;
 }
 
-// Define types for carousel slide data
-interface CarouselSlide {
-  id: number;
-  title: string;
-  subtitle: string;
-  discount: string;
-  image: string;
-  category: string;
-  originalPrice: string;
-  salePrice: string;
-  rating: number;
-  reviews: number;
-}
-
 const Hero: React.FC = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
-
-  // Carousel slides data
-  const slides: CarouselSlide[] = [
-    {
-      id: 1,
-      title: 'Premium Wireless Headphones',
-      subtitle: 'Noise-Cancelling Technology',
-      discount: '45% OFF',
-      image: 'https://images.pexels.com/photos/3394650/pexels-photo-3394650.jpeg',
-      category: 'Electronics',
-      originalPrice: '$299.99',
-      salePrice: '$164.99',
-      rating: 4.8,
-      reviews: 2847
-    },
-    {
-      id: 2,
-      title: 'Organic Skincare Set',
-      subtitle: 'Natural Beauty Collection',
-      discount: '35% OFF',
-      image: 'https://images.pexels.com/photos/5076516/pexels-photo-5076516.jpeg',
-      category: 'Beauty',
-      originalPrice: '$89.99',
-      salePrice: '$58.49',
-      rating: 4.9,
-      reviews: 1523
-    },
-    {
-      id: 3,
-      title: 'Smart Fitness Tracker',
-      subtitle: 'Health & Wellness Monitor',
-      discount: '50% OFF',
-      image: 'https://images.pexels.com/photos/267394/pexels-photo-267394.jpeg',
-      category: 'Health',
-      originalPrice: '$199.99',
-      salePrice: '$99.99',
-      rating: 4.7,
-      reviews: 3621
-    },
-    {
-      id: 4,
-      title: 'Designer Handbag',
-      subtitle: 'Luxury Fashion Accessory',
-      discount: '40% OFF',
-      image: 'https://images.pexels.com/photos/1152077/pexels-photo-1152077.jpeg',
-      category: 'Fashion',
-      originalPrice: '$249.99',
-      salePrice: '$149.99',
-      rating: 4.6,
-      reviews: 987
-    }
-  ];
+  const [slides, setSlides] = useState<PublicDeal[]>([]);
+  const [loading, setLoading] = useState(true);
 
   // Feature highlights
   const features: Feature[] = [
@@ -102,8 +39,37 @@ const Hero: React.FC = () => {
     }
   ];
 
+  // Fetch carousel slides from API
+  useEffect(() => {
+    const fetchCarouselDeals = async () => {
+      try {
+        setLoading(true);
+        
+        // Fetch active deals from API for carousel
+        const response = await publicDealsAPI.getActiveDeals();
+        
+        if (response.success && response.data) {
+          // Limit to first 4 deals for carousel
+          setSlides(response.data.slice(0, 4));
+        } else {
+          // Fallback to empty array if no deals
+          setSlides([]);
+        }
+      } catch (err) {
+        console.error('Error fetching carousel deals:', err);
+        setSlides([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCarouselDeals();
+  }, []);
+
   // Auto-advance carousel
   useEffect(() => {
+    if (slides.length === 0) return;
+    
     const timer = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % slides.length);
     }, 5000);
@@ -111,11 +77,18 @@ const Hero: React.FC = () => {
   }, [slides.length]);
 
   const nextSlide = () => {
+    if (slides.length === 0) return;
     setCurrentSlide((prev) => (prev + 1) % slides.length);
   };
 
   const prevSlide = () => {
+    if (slides.length === 0) return;
     setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
+  };
+
+  const calculateDiscount = (originalPrice?: number, discountedPrice?: number) => {
+    if (!originalPrice || !discountedPrice || originalPrice <= discountedPrice) return 0;
+    return Math.round(((originalPrice - discountedPrice) / originalPrice) * 100);
   };
 
   return (
@@ -228,39 +201,6 @@ const Hero: React.FC = () => {
               across health, wellness, electronics, fashion, and lifestyle essentials.
             </motion.p>
 
-            {/* Enhanced Stats Cards */}
-            {/* <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.5 }}
-              className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-10"
-            >
-              {[
-                { icon: Star, label: '50K+ Reviews', value: '4.9/5', color: 'from-yellow-400 to-orange-500' },
-                { icon: TrendingUp, label: 'Products', value: '10K+', color: 'from-green-400 to-teal-500' },
-                { icon: Gift, label: 'Daily Deals', value: '100+', color: 'from-purple-400 to-pink-500' }
-              ].map((stat, index) => {
-                const IconComponent = stat.icon;
-                return (
-                  <motion.div
-                    key={index}
-                    initial={{ opacity: 0, scale: 0.8 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ duration: 0.5, delay: 0.6 + index * 0.1 }}
-                    className="bg-white/80 backdrop-blur-sm rounded-2xl p-4 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 border border-gray-100"
-                  >
-                    <div className={`w-12 h-12 bg-gradient-to-r ${stat.color} rounded-xl flex items-center justify-center mb-3 mx-auto lg:mx-0`}>
-                      <IconComponent className="h-6 w-6 text-white" />
-                    </div>
-                    <div className="text-center lg:text-left">
-                      <div className="text-2xl font-bold text-gray-900">{stat.value}</div>
-                      <div className="text-sm text-gray-600">{stat.label}</div>
-                    </div>
-                  </motion.div>
-                );
-              })}
-            </motion.div> */}
-
             {/* Enhanced CTA Buttons */}
             <motion.div
               initial={{ opacity: 0, y: 30 }}
@@ -315,117 +255,146 @@ const Hero: React.FC = () => {
 
               {/* Carousel Slides */}
               <div className="relative h-80 mb-6">
-                <AnimatePresence mode="wait">
-                  <motion.div
-                    key={currentSlide}
-                    initial={{ opacity: 0, x: 300 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: -300 }}
-                    transition={{ duration: 0.5, ease: "easeInOut" }}
-                    className="absolute inset-0 bg-white rounded-2xl shadow-lg overflow-hidden"
-                  >
-                    <div className="grid grid-cols-1 md:grid-cols-2 h-full">
-                      {/* Product Image */}
-                      <div className="relative overflow-hidden">
-                        <img
-                          src={slides[currentSlide].image}
-                          alt={slides[currentSlide].title}
-                          className="w-full h-full object-cover transition-transform duration-700 hover:scale-110"
-                        />
-                        <div className="absolute top-4 left-4">
-                          <span className="bg-red-500 text-white px-3 py-1 rounded-full text-sm font-bold">
-                            {slides[currentSlide].discount}
-                          </span>
-                        </div>
-                        <div className="absolute top-4 right-4">
-                          <span className="bg-black/70 text-white px-2 py-1 rounded text-xs">
-                            {slides[currentSlide].category}
-                          </span>
-                        </div>
-                      </div>
-
-                      {/* Product Details */}
-                      <div className="p-6 flex flex-col justify-center">
-                        <h4 className="text-xl font-bold text-gray-900 mb-2">
-                          {slides[currentSlide].title}
-                        </h4>
-                        <p className="text-gray-600 mb-4">
-                          {slides[currentSlide].subtitle}
-                        </p>
-                        
-                        {/* Rating */}
-                        <div className="flex items-center mb-4">
-                          <div className="flex text-yellow-400 mr-2">
-                            {[...Array(5)].map((_, i) => (
-                              <Star
-                                key={i}
-                                className={`h-4 w-4 ${
-                                  i < Math.floor(slides[currentSlide].rating)
-                                    ? 'fill-current'
-                                    : 'stroke-current'
-                                }`}
-                              />
-                            ))}
-                          </div>
-                          <span className="text-sm text-gray-600">
-                            {slides[currentSlide].rating} ({slides[currentSlide].reviews} reviews)
-                          </span>
-                        </div>
-
-                        {/* Pricing */}
-                        <div className="mb-4">
-                          <div className="flex items-center space-x-2">
-                            <span className="text-2xl font-bold text-purple-600">
-                              {slides[currentSlide].salePrice}
-                            </span>
-                            <span className="text-lg text-gray-500 line-through">
-                              {slides[currentSlide].originalPrice}
-                            </span>
-                          </div>
-                        </div>
-
-                        {/* CTA Button */}
-                        <motion.button
-                          whileHover={{ scale: 1.05 }}
-                          whileTap={{ scale: 0.95 }}
-                          className="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-6 py-3 rounded-xl font-semibold hover:shadow-lg transition-all duration-300"
-                        >
-                          Shop Now
-                        </motion.button>
-                      </div>
+                {loading ? (
+                  <div className="absolute inset-0 flex items-center justify-center bg-white rounded-2xl">
+                    <Loader2 className="h-8 w-8 animate-spin text-purple-600" />
+                    <span className="ml-2 text-gray-600">Loading deals...</span>
+                  </div>
+                ) : slides.length === 0 ? (
+                  <div className="absolute inset-0 flex items-center justify-center bg-white rounded-2xl">
+                    <div className="text-center">
+                      <p className="text-gray-600 mb-4">No featured deals available</p>
+                      <Link
+                        to="/deals"
+                        className="inline-flex items-center px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+                      >
+                        Browse All Deals
+                        <ArrowRight className="ml-2 h-4 w-4" />
+                      </Link>
                     </div>
-                  </motion.div>
-                </AnimatePresence>
+                  </div>
+                ) : (
+                  <AnimatePresence mode="wait">
+                    <motion.div
+                      key={currentSlide}
+                      initial={{ opacity: 0, x: 300 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: -300 }}
+                      transition={{ duration: 0.5, ease: "easeInOut" }}
+                      className="absolute inset-0 bg-white rounded-2xl shadow-lg overflow-hidden"
+                    >
+                      <div className="grid grid-cols-1 md:grid-cols-2 h-full">
+                        {/* Product Image */}
+                        <div className="relative overflow-hidden">
+                          <img
+                            src={slides[currentSlide].imageUrl || 'https://via.placeholder.com/400x300'}
+                            alt={slides[currentSlide].title}
+                            className="w-full h-full object-cover transition-transform duration-700 hover:scale-110"
+                          />
+                          <div className="absolute top-4 left-4">
+                            <span className="bg-red-500 text-white px-3 py-1 rounded-full text-sm font-bold">
+                              {calculateDiscount(slides[currentSlide].originalPrice, slides[currentSlide].discountedPrice)}% OFF
+                            </span>
+                          </div>
+                          <div className="absolute top-4 right-4">
+                            <span className="bg-black/70 text-white px-2 py-1 rounded text-xs">
+                              {slides[currentSlide].category}
+                            </span>
+                          </div>
+                        </div>
 
-                {/* Navigation Arrows */}
-                <button
-                  onClick={prevSlide}
-                  className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white/90 hover:bg-white text-gray-800 p-2 rounded-full shadow-lg transition-all duration-300 hover:scale-110 z-10"
-                >
-                  <ChevronLeft className="h-5 w-5" />
-                </button>
-                <button
-                  onClick={nextSlide}
-                  className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white/90 hover:bg-white text-gray-800 p-2 rounded-full shadow-lg transition-all duration-300 hover:scale-110 z-10"
-                >
-                  <ChevronRight className="h-5 w-5" />
-                </button>
+                        {/* Product Details */}
+                        <div className="p-6 flex flex-col justify-center">
+                          <h4 className="text-xl font-bold text-gray-900 mb-2">
+                            {slides[currentSlide].title}
+                          </h4>
+                          <p className="text-gray-600 mb-4 line-clamp-2">
+                            {slides[currentSlide].description}
+                          </p>
+                          
+                          {/* Rating - Show if available */}
+                          {slides[currentSlide].rating && slides[currentSlide].reviewCount && (
+                            <div className="flex items-center mb-4">
+                              <div className="flex text-yellow-400 mr-2">
+                                {[...Array(5)].map((_, i) => (
+                                  <Star
+                                    key={i}
+                                    className={`h-4 w-4 ${
+                                      i < Math.floor(slides[currentSlide].rating || 0)
+                                        ? 'fill-current'
+                                        : 'stroke-current'
+                                    }`}
+                                  />
+                                ))}
+                              </div>
+                              <span className="text-sm text-gray-600">
+                                {slides[currentSlide].rating?.toFixed(1)} ({slides[currentSlide].reviewCount} reviews)
+                              </span>
+                            </div>
+                          )}
+
+                          {/* Pricing */}
+                          <div className="mb-4">
+                            <div className="flex items-center space-x-2">
+                              <span className="text-2xl font-bold text-purple-600">
+                                ${(slides[currentSlide].discountedPrice || 0).toFixed(2)}
+                              </span>
+                              {slides[currentSlide].originalPrice && (
+                                <span className="text-lg text-gray-500 line-through">
+                                  ${slides[currentSlide].originalPrice.toFixed(2)}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+
+                          {/* CTA Button */}
+                          <Link
+                            to={`/deals/${slides[currentSlide].id}`}
+                            className="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-6 py-3 rounded-xl font-semibold hover:shadow-lg transition-all duration-300 text-center block"
+                          >
+                            Shop Now
+                          </Link>
+                        </div>
+                      </div>
+                    </motion.div>
+                  </AnimatePresence>
+                )}
+
+                {/* Navigation Arrows - Only show if we have slides */}
+                {slides.length > 1 && (
+                  <>
+                    <button
+                      onClick={prevSlide}
+                      className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white/90 hover:bg-white text-gray-800 p-2 rounded-full shadow-lg transition-all duration-300 hover:scale-110 z-10"
+                    >
+                      <ChevronLeft className="h-5 w-5" />
+                    </button>
+                    <button
+                      onClick={nextSlide}
+                      className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white/90 hover:bg-white text-gray-800 p-2 rounded-full shadow-lg transition-all duration-300 hover:scale-110 z-10"
+                    >
+                      <ChevronRight className="h-5 w-5" />
+                    </button>
+                  </>
+                )}
               </div>
 
-              {/* Carousel Indicators */}
-              <div className="flex justify-center space-x-2 mb-4">
-                {slides.map((_, index) => (
-                  <button
-                    key={index}
-                    onClick={() => setCurrentSlide(index)}
-                    className={`w-3 h-3 rounded-full transition-all duration-300 ${
-                      index === currentSlide
-                        ? 'bg-purple-600 scale-125'
-                        : 'bg-gray-300 hover:bg-gray-400'
-                    }`}
-                  />
-                ))}
-              </div>
+              {/* Carousel Indicators - Only show if we have slides */}
+              {slides.length > 1 && (
+                <div className="flex justify-center space-x-2 mb-4">
+                  {slides.map((_, index) => (
+                    <button
+                      key={index}
+                      onClick={() => setCurrentSlide(index)}
+                      className={`w-3 h-3 rounded-full transition-all duration-300 ${
+                        index === currentSlide
+                          ? 'bg-purple-600 scale-125'
+                          : 'bg-gray-300 hover:bg-gray-400'
+                      }`}
+                    />
+                  ))}
+                </div>
+              )}
 
               {/* Feature Highlights - Compact Version */}
               <div className="grid grid-cols-3 gap-2">

@@ -16,61 +16,8 @@ import {
 import { motion } from 'framer-motion';
 import type { Product } from '../types';
 import { publicProductAPI } from '../services/publicProductApi';
-import { getProductById, getProductBySlug } from '../data';
 
-// Mock data (replace with actual implementation)
-
-const mockProducts: Product[] = [
-  {
-    id: 'p1',
-    name: 'Protein Powder',
-    description: 'High-quality whey protein for muscle recovery.',
-    price: 29.99,
-    originalPrice: 39.99,
-    discount: 25,
-    rating: 4.8,
-    reviewCount: 1247,
-    image: 'https://images.pexels.com/photos/416717/pexels-photo-416717.jpeg',
-    images: [
-      'https://images.pexels.com/photos/416717/pexels-photo-416717.jpeg',
-      'https://images.pexels.com/photos/416718/pexels-photo-416718.jpeg',
-      'https://images.pexels.com/photos/416719/pexels-photo-416719.jpeg',
-    ],
-    category: 'Health & Wellness',
-    brand: 'Optimum Nutrition',
-    inStock: true,
-    features: ['20g protein', 'Low carb', 'Gluten-free'],
-    affiliateLink: 'https://example.com/protein',
-    tags: ['protein', 'fitness'],
-    isNew: true,
-    isBestseller: true,
-    isFeatured: true,
-    slug: 'protein-powder',
-  },
-  {
-    id: 'p2',
-    name: 'Yoga Mat',
-    description: 'Non-slip yoga mat for all fitness levels.',
-    price: 19.99,
-    rating: 4.5,
-    reviewCount: 892,
-    image: 'https://images.pexels.com/photos/3823039/pexels-photo-3823039.jpeg',
-    images: [
-      'https://images.pexels.com/photos/3823039/pexels-photo-3823039.jpeg',
-      'https://images.pexels.com/photos/3823040/pexels-photo-3823040.jpeg',
-    ],
-    category: 'Health & Wellness',
-    brand: 'Gaiam',
-    inStock: true,
-    features: ['Non-slip', 'Eco-friendly'],
-    affiliateLink: 'https://example.com/yoga-mat',
-    tags: ['yoga', 'fitness'],
-    isFeatured: true,
-    slug: 'yoga-mat',
-  },
-];
-
-const products = mockProducts;
+// ProductPage component - fetches product data from API
 
 const ProductPage: React.FC = () => {
   const { id, slug } = useParams<{ id?: string; slug?: string }>();
@@ -89,17 +36,25 @@ const ProductPage: React.FC = () => {
         let fetchedProduct: Product | null = null;
         
         if (slug) {
-          // Try API first, fallback to local data
-          try {
-            const response = await publicProductAPI.getProductBySlug(slug);
-            fetchedProduct = response.product || null;
-          } catch (apiError) {
-            console.warn('API failed, using local data:', apiError);
-            fetchedProduct = getProductBySlug(slug) || null;
+          // Fetch product by slug from API
+          const response = await publicProductAPI.getProductBySlug(slug);
+          if (response.success && response.product) {
+            fetchedProduct = response.product;
+          } else {
+            setError(response.message || 'Product not found');
           }
         } else if (id) {
-          // For ID-based routing, use local data (legacy support)
-          fetchedProduct = getProductById(id) || null;
+          // For ID-based routing, try to fetch from API using ID
+          // Note: This assumes the API can handle ID-based lookups
+          const response = await publicProductAPI.getProducts({ limit: 1000 });
+          if (response.success && response.products) {
+            fetchedProduct = response.products.find(p => p.id === id) || null;
+            if (!fetchedProduct) {
+              setError('Product not found');
+            }
+          } else {
+            setError('Failed to load product');
+          }
         }
         
         setProduct(fetchedProduct);
@@ -137,12 +92,8 @@ const ProductPage: React.FC = () => {
         
         setRelatedProducts(filtered);
       } catch (error) {
-        console.warn('Failed to fetch related products from API, using local data:', error);
-        // Fallback to local data
-        const localRelated = products
-          .filter((p) => p.category === product?.category && p.id !== product?.id)
-          .slice(0, 4);
-        setRelatedProducts(localRelated);
+        console.warn('Failed to fetch related products from API:', error);
+        setRelatedProducts([]);
       }
     };
 

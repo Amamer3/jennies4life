@@ -1,89 +1,57 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Calendar, Clock, ArrowRight, BookOpen, Sparkles, Eye, Heart, Share2, User, Star } from 'lucide-react';
 import { motion } from 'framer-motion';
-
-interface BlogPost {
-  id: string;
-  title: string;
-  excerpt: string;
-  category: string;
-  author: string;
-  publishDate: string;
-  readTime: string;
-  image: string;
-  slug: string;
-}
+import { blogApi, type BlogPost } from '../services/blogApi';
 
 const BlogSection: React.FC = () => {
-  const blogPosts: BlogPost[] = [
-    {
-      id: '1',
-      title: 'What Are the Latest Trends in Virtual Reality Headsets?',
-      excerpt: 'Embark on a journey into the future of VR headsets with cutting-edge technologies that are revolutionizing entertainment and productivity.',
-      category: 'Electronics',
-      author: 'Tech Expert',
-      publishDate: '2024-01-15',
-      readTime: '5 min read',
-      image: "https://images.pexels.com/photos/1640777/pexels-photo-1640777.jpeg",
-      slug: 'latest-vr-headset-trends'
-    },
-    {
-      id: '2',
-      title: 'How Do I Establish a Bedtime Routine for My Baby?',
-      excerpt: 'Optimize your baby\'s sleep routine with a consistent bedtime and soothing techniques that promote better rest for the whole family.',
-      category: 'Baby',
-      author: 'Parenting Specialist',
-      publishDate: '2024-01-12',
-      readTime: '7 min read',
-      image: 'https://images.pexels.com/photos/994197/pexels-photo-994197.jpeg',
-      slug: 'baby-bedtime-routine-guide'
-    },
-    {
-      id: '3',
-      title: 'What Are the Best Books for Escaping Reality?',
-      excerpt: 'Nestle into worlds of wonder and enchantment with the best books for escaping reality and finding your next literary adventure.',
-      category: 'Books',
-      author: 'Literary Critic',
-      publishDate: '2024-01-10',
-      readTime: '6 min read',
-      image: 'https://images.pexels.com/photos/994197/pexels-photo-994197.jpeg',
-      slug: 'best-escapist-books'
-    },
-    {
-      id: '4',
-      title: 'How Can I Improve My Gaming Performance and Reflexes?',
-      excerpt: 'Dive into techniques and gear upgrades to enhance your reflexes and gaming prowess, taking your skills to the next level.',
-      category: 'Gaming',
-      author: 'Gaming Pro',
-      publishDate: '2024-01-08',
-      readTime: '8 min read',
-      image: 'https://images.pexels.com/photos/994197/pexels-photo-994197.jpeg',
-      slug: 'improve-gaming-performance'
-    },
-    {
-      id: '5',
-      title: 'How Do I Know When It\'s Time to Replace My Car\'s Tires?',
-      excerpt: 'Only by recognizing key signs of tire wear can you ensure safety and optimal performance on the road.',
-      category: 'Automotive',
-      author: 'Auto Expert',
-      publishDate: '2024-01-05',
-      readTime: '4 min read',
-      image: 'https://images.pexels.com/photos/994197/pexels-photo-994197.jpeg',
-      slug: 'when-to-replace-car-tires'
-    },
-    {
-      id: '6',
-      title: 'How Do I Choose the Perfect Book to Read Next?',
-      excerpt: 'Journey into the ideal book selection based on your mood, setting the stage for an unforgettable reading experience.',
-      category: 'Books',
-      author: 'Book Curator',
-      publishDate: '2024-01-03',
-      readTime: '5 min read',
-      image: 'https://images.pexels.com/photos/994197/pexels-photo-994197.jpeg',
-      slug: 'choose-perfect-book'
-    }
-  ];
+  const [blogPosts, setBlogPosts] = useState<BlogPost[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchBlogPosts = async () => {
+      try {
+        setLoading(true);
+        const posts = await blogApi.getAllPosts();
+        setBlogPosts(Array.isArray(posts) ? posts.slice(0, 4) : []); // Limit to 4 posts for homepage
+      } catch (error) {
+        console.error('Failed to fetch blog posts:', error);
+        setBlogPosts([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchBlogPosts();
+  }, []);
+
+  // Show loading state
+  if (loading) {
+    return (
+      <section className="py-12 sm:py-16 lg:py-20 bg-gradient-to-br from-gray-50 to-white relative overflow-hidden">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#DAA520] mx-auto mb-4"></div>
+            <p className="text-gray-600">Loading blog posts...</p>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  // Don't render if no posts
+  if (blogPosts.length === 0) {
+    return null;
+  }
+
+  // Helper function to calculate read time
+  const calculateReadTime = (content: string) => {
+    if (!content) return '5 min read';
+    const wordsPerMinute = 200;
+    const wordCount = content.split(' ').length;
+    const readTime = Math.ceil(wordCount / wordsPerMinute);
+    return `${readTime} min read`;
+  };
 
   const getCategoryColor = (category: string) => {
     const colors: { [key: string]: string } = {
@@ -98,7 +66,12 @@ const BlogSection: React.FC = () => {
     return colors[category] || 'bg-gray-100 text-gray-800';
   };
 
-  const formatDate = (dateString: string) => {
+  // Get default image if none provided
+  const getDefaultImage = () => {
+    return 'https://images.pexels.com/photos/994197/pexels-photo-994197.jpeg';
+  };
+
+  const formatDateForDisplay = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleDateString('en-US', {
       year: 'numeric',
@@ -224,7 +197,7 @@ const BlogSection: React.FC = () => {
                   transition={{ duration: 0.6, delay: 0.3 }}
                   className="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-heading font-bold mb-3 sm:mb-4 leading-tight hover:text-[#F0E68C] transition-colors duration-300"
                 >
-                  {blogPosts[0].title}
+                  {blogPosts[0]?.title || 'No Title'}
                 </motion.h3>
                 
                 <motion.p
@@ -233,7 +206,7 @@ const BlogSection: React.FC = () => {
                   transition={{ duration: 0.6, delay: 0.4 }}
                   className="text-sm sm:text-base lg:text-lg text-black mb-4 sm:mb-6 leading-relaxed"
                 >
-                  {blogPosts[0].excerpt}
+                  {blogPosts[0]?.excerpt || blogPosts[0]?.content?.substring(0, 150) + '...' || 'No content available'}
                 </motion.p>
                 
                 <motion.div
@@ -245,15 +218,15 @@ const BlogSection: React.FC = () => {
                   <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-4 space-y-2 sm:space-y-0 text-xs sm:text-sm text-black">
                     <div className="flex items-center">
                       <Calendar className="h-3 w-3 sm:h-4 sm:w-4 mr-1 text-[#DAA520]" />
-                      {formatDate(blogPosts[0].publishDate)}
+                      {formatDateForDisplay(blogPosts[0]?.publishedAt || blogPosts[0]?.createdAt || '')}
                     </div>
                     <div className="flex items-center">
                       <Clock className="h-3 w-3 sm:h-4 sm:w-4 mr-1 text-[#DAA520]" />
-                      {blogPosts[0].readTime}
+                      {calculateReadTime(blogPosts[0]?.content || '')}
                     </div>
                     <div className="flex items-center">
                       <User className="h-3 w-3 sm:h-4 sm:w-4 mr-1 text-[#DAA520]" />
-                      {blogPosts[0].author}
+                      {blogPosts[0]?.author || 'Admin'}
                     </div>
                   </div>
                   
@@ -274,7 +247,7 @@ const BlogSection: React.FC = () => {
                     </motion.button>
                     
                     <Link
-                      to={`/blog/${blogPosts[0].slug}`}
+                      to={`/blog/${blogPosts[0]?.slug || blogPosts[0]?._id}`}
                       className="inline-flex items-center px-4 sm:px-6 py-2 sm:py-3 bg-gradient-to-r from-[#F0E68C] to-[#DAA520] text-black text-sm sm:text-base font-semibold rounded-lg sm:rounded-xl hover:from-[#DAA520] hover:to-[#F0E68C] transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl"
                     >
                       Read Article
@@ -289,8 +262,8 @@ const BlogSection: React.FC = () => {
                 <motion.img
                   whileHover={{ scale: 1.05 }}
                   transition={{ duration: 0.5 }}
-                  src={blogPosts[0].image}
-                  alt={blogPosts[0].title}
+                  src={blogPosts[0]?.coverImage || getDefaultImage()}
+                  alt={blogPosts[0]?.title || 'Blog post'}
                   className="w-full h-full object-cover"
                 />
                 <div className="absolute inset-0 bg-gradient-to-br from-[#FFFFE0] to-[#FFDAB9] opacity-30 group-hover:opacity-20 transition-opacity duration-300"></div>
@@ -312,8 +285,8 @@ const BlogSection: React.FC = () => {
                 
                 {/* Category Badge */}
                 <div className="absolute top-4 left-4">
-                  <span className={`${getCategoryColor(blogPosts[0].category)} text-xs font-medium px-3 py-1.5 rounded-full shadow-lg`}>
-                    {blogPosts[0].category}
+                  <span className={`${getCategoryColor(blogPosts[0]?.category || 'General')} text-xs font-medium px-3 py-1.5 rounded-full shadow-lg`}>
+                    {blogPosts[0]?.category || 'General'}
                   </span>
                 </div>
               </div>
@@ -345,7 +318,7 @@ const BlogSection: React.FC = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 md:gap-8">
             {blogPosts.slice(1).map((post, index) => (
               <motion.article
-                key={post.id}
+                key={post._id || post.id}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: (index + 1) * 0.1 }}
@@ -366,8 +339,8 @@ const BlogSection: React.FC = () => {
                     <motion.img
                       whileHover={{ scale: 1.1 }}
                       transition={{ duration: 0.5 }}
-                      src={post.image}
-                      alt={post.title}
+                      src={post.coverImage || getDefaultImage()}
+                      alt={post.title || 'Blog post'}
                       className="w-full h-full object-cover"
                     />
                     
@@ -382,9 +355,9 @@ const BlogSection: React.FC = () => {
                     <motion.div
                       initial={{ scale: 1 }}
                       whileHover={{ scale: 1.05 }}
-                      className={`absolute top-2 sm:top-3 left-2 sm:left-3 ${getCategoryColor(post.category)} text-xs font-medium px-2 sm:px-3 py-1 rounded-full shadow-lg`}
+                      className={`absolute top-2 sm:top-3 left-2 sm:left-3 ${getCategoryColor(post.category || 'General')} text-xs font-medium px-2 sm:px-3 py-1 rounded-full shadow-lg`}
                     >
-                      {post.category}
+                      {post.category || 'General'}
                     </motion.div>
                     
                     {/* Hover Actions */}
@@ -418,8 +391,8 @@ const BlogSection: React.FC = () => {
                       transition={{ duration: 0.5, delay: 0.1 }}
                       className="text-lg sm:text-xl font-semibold text-gray-900 mb-2 sm:mb-3 line-clamp-2 group-hover:text-[#DAA520] transition-colors duration-300"
                     >
-                      <Link to={`/blog/${post.slug}`}>
-                        {post.title}
+                      <Link to={`/blog/${post.slug || post._id}`}>
+                        {post.title || 'No Title'}
                       </Link>
                     </motion.h3>
                     
@@ -429,7 +402,7 @@ const BlogSection: React.FC = () => {
                       transition={{ duration: 0.5, delay: 0.2 }}
                       className="text-gray-600 mb-3 sm:mb-4 line-clamp-3 text-sm leading-relaxed"
                     >
-                      {post.excerpt}
+                      {post.excerpt || post.content?.substring(0, 100) + '...' || 'No content available'}
                     </motion.p>
                     
                     {/* Article Meta */}
@@ -442,16 +415,16 @@ const BlogSection: React.FC = () => {
                       <div className="flex items-center space-x-3">
                         <div className="flex items-center">
                           <Calendar className="h-3 w-3 mr-1 text-[#DAA520]" />
-                          {formatDate(post.publishDate)}
+                          {formatDateForDisplay(post.publishedAt || post.createdAt || '')}
                         </div>
                         <div className="flex items-center">
                           <Clock className="h-3 w-3 mr-1 text-[#DAA520]" />
-                          {post.readTime}
+                          {calculateReadTime(post.content || '')}
                         </div>
                       </div>
                       <div className="flex items-center">
                         <User className="h-3 w-3 mr-1 text-[#DAA520]" />
-                        <span className="text-[#DAA520] font-medium">{post.author}</span>
+                        <span className="text-[#DAA520] font-medium">{post.author || 'Admin'}</span>
                       </div>
                     </motion.div>
                     
@@ -463,7 +436,7 @@ const BlogSection: React.FC = () => {
                       className="flex items-center justify-between"
                     >
                       <Link
-                        to={`/blog/${post.slug}`}
+                        to={`/blog/${post.slug || post._id}`}
                         className="inline-flex items-center text-[#DAA520] hover:text-[#F0E68C] font-medium text-sm group-hover:translate-x-2 transition-all duration-300"
                       >
                         Read More
@@ -475,7 +448,7 @@ const BlogSection: React.FC = () => {
                         className="flex items-center space-x-1 text-gray-400"
                       >
                         <Eye className="h-3 w-3" />
-                        <span className="text-xs">{Math.floor(Math.random() * 500) + 100}</span>
+                        <span className="text-xs">{post.views || Math.floor(Math.random() * 500) + 100}</span>
                       </motion.div>
                     </motion.div>
                   </div>

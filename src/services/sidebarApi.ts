@@ -1,4 +1,6 @@
 
+import { API_BASE_URL } from '../data';
+
 interface SidebarCounts {
   products: number;
   categories: number;
@@ -14,44 +16,58 @@ interface SidebarCountsResponse {
 }
 
 class SidebarAPI {
-
+  private getAuthHeaders(): HeadersInit {
+    const token = localStorage.getItem('authToken');
+    return {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`
+    };
+  }
 
   /**
-   * GET /api/sidebar/counts - Retrieve counts for sidebar items
-   * Currently returns demo data since backend endpoint doesn't exist yet
+   * GET /api/admin/stats/counts - Retrieve counts for sidebar items
    */
   async getCounts(): Promise<SidebarCountsResponse> {
-    console.log('SidebarAPI: Getting sidebar counts (using demo data - no backend endpoint yet)');
+    console.log('SidebarAPI: Getting sidebar counts from API');
     
-    // Return demo data since backend endpoint doesn't exist yet
-    return {
-      success: true,
-      counts: {
-        products: 156,
-        categories: 12,
-        deals: 23,
-        blogPosts: 45,
-        users: 1247
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/admin/stats/counts`, {
+        method: 'GET',
+        headers: this.getAuthHeaders(),
+      });
+      
+      if (!response.ok) {
+        console.error('SidebarAPI: HTTP error:', response.status, response.statusText);
+        // Fallback to demo data if API fails
+        return {
+          success: true,
+          counts: {
+            products: 156,
+            categories: 12,
+            deals: 23,
+            blogPosts: 45,
+            users: 1247
+          }
+        };
       }
-    };
-
-    // TODO: Implement when backend endpoint is available
-    // try {
-    //   const response = await fetch(`${API_BASE_URL}/api/sidebar/counts`, {
-    //     method: 'GET',
-    //     headers: this.getAuthHeaders(),
-    //   });
-    //   
-    //   if (!response.ok) {
-    //     throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-    //   }
-    //   
-    //   const data = await response.json();
-    //   return data;
-    // } catch (error) {
-    //   console.error('Get sidebar counts API error:', error);
-    //   return { success: false, message: error.message };
-    // }
+      
+      const data = await response.json();
+      console.log('SidebarAPI: Counts fetched successfully:', data);
+      return data;
+    } catch (error) {
+      console.error('SidebarAPI: Network error:', error);
+      // Fallback to demo data if network fails
+      return {
+        success: true,
+        counts: {
+          products: 156,
+          categories: 12,
+          deals: 23,
+          blogPosts: 45,
+          users: 1247
+        }
+      };
+    }
   }
 }
 

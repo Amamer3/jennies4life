@@ -1,24 +1,35 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Mail, Send, Gift, Star, CheckCircle, Users } from 'lucide-react';
+import { newsletterAPI } from '../services/newsletterApi';
 
 const Newsletter: React.FC = () => {
   const [email, setEmail] = useState('');
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email) return;
 
     setIsLoading(true);
+    setError(null);
     
-    // Simulate API call
-    setTimeout(() => {
-      setIsSubscribed(true);
+    try {
+      const response = await newsletterAPI.subscribe(email);
+      
+      if (response.success) {
+        setIsSubscribed(true);
+        setEmail('');
+      } else {
+        setError(response.message || 'Failed to subscribe. Please try again.');
+      }
+    } catch (error) {
+      setError('Network error. Please check your connection and try again.');
+    } finally {
       setIsLoading(false);
-      setEmail('');
-    }, 1500);
+    }
   };
 
   
@@ -256,6 +267,16 @@ const Newsletter: React.FC = () => {
                       </motion.button>
                     </div>
                   </div>
+                  
+                  {error && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="bg-red-50 border border-red-200 rounded-lg p-3 mb-4"
+                    >
+                      <p className="text-red-600 text-sm font-medium">{error}</p>
+                    </motion.div>
+                  )}
                   
                   <div className="flex items-center justify-between text-xs text-gray-500">
                     <div className="flex items-center space-x-1">

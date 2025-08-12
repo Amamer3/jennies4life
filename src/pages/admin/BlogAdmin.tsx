@@ -8,7 +8,6 @@ import {
   Trash2,
   Eye,
   FileText,
-  TrendingUp,
   MessageSquare,
   Heart,
   MoreHorizontal
@@ -21,7 +20,7 @@ import { blogApi, type BlogPost } from '../../services/blogApi';
 const BlogAdmin: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedStatus, setSelectedStatus] = useState('all');
-  const [selectedCategory, setSelectedCategory] = useState('all');
+
   const [showAddModal, setShowAddModal] = useState(false);
   const [selectedPost, setSelectedPost] = useState<BlogPost | null>(null);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
@@ -38,9 +37,10 @@ const BlogAdmin: React.FC = () => {
     try {
       setLoading(true);
       const posts = await blogApi.getAllPosts();
-      setBlogPosts(posts);
+      setBlogPosts(Array.isArray(posts) ? posts : []);
     } catch (error) {
       console.error('Failed to fetch blog posts:', error);
+      setBlogPosts([]); // Ensure it's always an array
     } finally {
       setLoading(false);
     }
@@ -58,17 +58,56 @@ const BlogAdmin: React.FC = () => {
     }
   };
 
+  const handleCreatePost = async (formData: FormData) => {
+    try {
+      const postData = {
+        title: formData.get('title') as string,
+        content: formData.get('content') as string,
+        coverImage: formData.get('coverImage') as string,
+        tags: (formData.get('tags') as string).split(',').map(tag => tag.trim()).filter(tag => tag),
+        status: formData.get('status') as 'draft' | 'published'
+      };
+      
+      const newPost = await blogApi.createPost(postData);
+      setBlogPosts([newPost, ...blogPosts]);
+      setShowAddModal(false);
+      alert('Blog post created successfully!');
+    } catch (error) {
+      console.error('Failed to create blog post:', error);
+      alert('Failed to create blog post. Please try again.');
+    }
+  };
+
+  const handleUpdatePost = async (id: string, formData: FormData) => {
+    try {
+      const postData = {
+        title: formData.get('title') as string,
+        content: formData.get('content') as string,
+        coverImage: formData.get('coverImage') as string,
+        tags: (formData.get('tags') as string).split(',').map(tag => tag.trim()).filter(tag => tag),
+        status: formData.get('status') as 'draft' | 'published' | 'archived'
+      };
+      
+      const updatedPost = await blogApi.updatePost(id, postData);
+      setBlogPosts(blogPosts.map(post => post.id === id ? updatedPost : post));
+      setSelectedPost(null);
+      alert('Blog post updated successfully!');
+    } catch (error) {
+      console.error('Failed to update blog post:', error);
+      alert('Failed to update blog post. Please try again.');
+    }
+  };
 
 
-  const categories = ['all', 'Technology', 'Beauty', 'Health', 'Fashion', 'Lifestyle'];
+
   const statuses = ['all', 'published', 'draft', 'scheduled'];
 
-  const filteredPosts = blogPosts.filter(post => {
+  const filteredPosts = (Array.isArray(blogPosts) ? blogPosts : []).filter(post => {
     const matchesSearch = post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         post.excerpt.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         (post.excerpt && post.excerpt.toLowerCase().includes(searchTerm.toLowerCase())) ||
                          post.author.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = selectedStatus === 'all' || post.status === selectedStatus;
-    const matchesCategory = selectedCategory === 'all' || post.category === selectedCategory;
+    const matchesCategory = true; // No category filtering
     return matchesSearch && matchesStatus && matchesCategory;
   });
 
@@ -83,6 +122,22 @@ const BlogAdmin: React.FC = () => {
 
   const BlogPostModal = ({ post, onClose }: { post: BlogPost | null; onClose: () => void }) => {
     if (!post && !showAddModal) return null;
+
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>, isDraft: boolean = false) => {
+      e.preventDefault();
+      const formData = new FormData(e.currentTarget);
+      
+      // Override status if saving as draft
+      if (isDraft) {
+        formData.set('status', 'draft');
+      }
+      
+      if (post) {
+        await handleUpdatePost(post.id || post._id || '', formData);
+      } else {
+        await handleCreatePost(formData);
+      }
+    };
 
     return (
       <div className="fixed inset-0 z-50 overflow-y-auto">
@@ -99,24 +154,29 @@ const BlogAdmin: React.FC = () => {
               {post ? 'Edit Blog Post' : 'Create New Blog Post'}
             </h3>
             
+            <form onSubmit={(e) => handleSubmit(e, false)}>
+            
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Title</label>
                 <input
                   type="text"
+                  name="title"
                   defaultValue={post?.title || ''}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#e72a00]"
                   placeholder="Enter blog post title"
+                  required
                 />
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Excerpt</label>
-                <textarea
-                  rows={3}
-                  defaultValue={post?.excerpt || ''}
+                <label className="block text-sm font-medium text-gray-700 mb-1">Cover Image URL</label>
+                <input
+                  type="url"
+                  name="coverImage"
+                  defaultValue={post?.featuredImage || ''}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#e72a00]"
-                  placeholder="Enter a brief excerpt"
+                  placeholder="https://example.com/cover.jpg"
                 />
               </div>
               
@@ -124,25 +184,15 @@ const BlogAdmin: React.FC = () => {
                 <label className="block text-sm font-medium text-gray-700 mb-1">Content</label>
                 <textarea
                   rows={10}
+                  name="content"
                   defaultValue={post?.content || ''}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#e72a00]"
                   placeholder="Write your blog post content here..."
+                  required
                 />
               </div>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
-                  <select
-                    defaultValue={post?.category || ''}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#e72a00]"
-                  >
-                    <option value="">Select Category</option>
-                    {categories.slice(1).map(cat => (
-                      <option key={cat} value={cat}>{cat}</option>
-                    ))}
-                  </select>
-                </div>
                 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Author</label>
@@ -159,6 +209,7 @@ const BlogAdmin: React.FC = () => {
                 <label className="block text-sm font-medium text-gray-700 mb-1">Tags (comma separated)</label>
                 <input
                   type="text"
+                  name="tags"
                   defaultValue={post?.tags.join(', ') || ''}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#e72a00]"
                   placeholder="tag1, tag2, tag3"
@@ -179,12 +230,13 @@ const BlogAdmin: React.FC = () => {
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
                   <select
+                    name="status"
                     defaultValue={post?.status || 'draft'}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#e72a00]"
                   >
                     <option value="draft">Draft</option>
                     <option value="published">Published</option>
-                    <option value="scheduled">Scheduled</option>
+                    <option value="archived">Archived</option>
                   </select>
                 </div>
                 
@@ -213,18 +265,33 @@ const BlogAdmin: React.FC = () => {
             
             <div className="flex justify-end space-x-3 mt-6">
               <button
+                type="button"
                 onClick={onClose}
                 className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors"
               >
                 Cancel
               </button>
-              <button className="px-4 py-2 text-sm font-medium text-white bg-gray-600 rounded-md hover:bg-gray-700 transition-colors">
+              <button 
+                 type="button"
+                 onClick={(e) => {
+                   const form = e.currentTarget.closest('form') as HTMLFormElement;
+                   if (form) {
+                     const formEvent = { preventDefault: () => {}, currentTarget: form } as React.FormEvent<HTMLFormElement>;
+                     handleSubmit(formEvent, true);
+                   }
+                 }}
+                 className="px-4 py-2 text-sm font-medium text-white bg-gray-600 rounded-md hover:bg-gray-700 transition-colors"
+               >
                 Save as Draft
               </button>
-              <button className="px-4 py-2 text-sm font-medium text-white bg-[#e72a00] rounded-md hover:bg-[#d12400] transition-colors">
+              <button 
+                type="submit"
+                className="px-4 py-2 text-sm font-medium text-white bg-[#e72a00] rounded-md hover:bg-[#d12400] transition-colors"
+              >
                 {post ? 'Update Post' : 'Publish Post'}
               </button>
             </div>
+            </form>
           </motion.div>
         </div>
       </div>
@@ -269,7 +336,7 @@ const BlogAdmin: React.FC = () => {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      {/* <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         {[
           { label: 'Total Posts', value: '45', icon: FileText, color: 'bg-blue-500' },
           { label: 'Published', value: '32', icon: TrendingUp, color: 'bg-green-500' },
@@ -294,7 +361,7 @@ const BlogAdmin: React.FC = () => {
             </div>
           </motion.div>
         ))}
-      </div>
+      </div> */}
 
       {/* Filters */}
       <div className="bg-white rounded-lg shadow-sm p-4 border border-gray-200">
@@ -322,17 +389,7 @@ const BlogAdmin: React.FC = () => {
             ))}
           </select>
           
-          <select
-            value={selectedCategory}
-            onChange={(e) => setSelectedCategory(e.target.value)}
-            className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#e72a00]"
-          >
-            {categories.map(cat => (
-              <option key={cat} value={cat}>
-                {cat === 'all' ? 'All Categories' : cat}
-              </option>
-            ))}
-          </select>
+
           
           <button className="inline-flex items-center px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors">
             <Filter className="h-4 w-4 mr-2" />
@@ -354,7 +411,7 @@ const BlogAdmin: React.FC = () => {
             >
               <div className="relative">
                 <img
-                  src={post.featuredImage}
+                  src={post.featuredImage || '/api/placeholder/400/200'}
                   alt={post.title}
                   className="w-full h-48 object-cover"
                 />
@@ -372,13 +429,11 @@ const BlogAdmin: React.FC = () => {
               
               <div className="p-4">
                 <div className="flex items-center space-x-2 mb-2">
-                  <span className="text-xs text-[#e72a00] font-medium">{post.category}</span>
-                  <span className="text-xs text-gray-500">•</span>
                   <span className="text-xs text-gray-500">{post.publishedAt ? new Date(post.publishedAt).toLocaleDateString() : 'Not published'}</span>
                 </div>
                 
                 <h3 className="text-lg font-semibold text-gray-900 mb-2 line-clamp-2">{post.title}</h3>
-                <p className="text-sm text-gray-600 mb-3 line-clamp-3">{post.excerpt}</p>
+                {post.excerpt && <p className="text-sm text-gray-600 mb-3 line-clamp-3">{post.excerpt}</p>}
                 
                 <div className="flex items-center space-x-2 mb-3">
                   <img
@@ -431,7 +486,7 @@ const BlogAdmin: React.FC = () => {
                     </button>
                     <button 
                       className="text-red-600 hover:text-red-800 transition-colors"
-                      onClick={() => handleDeletePost(post.id)}
+                      onClick={() => handleDeletePost(post.id || post._id || '')}
                       title="Delete post"
                     >
                       <Trash2 className="h-4 w-4" />
@@ -455,7 +510,7 @@ const BlogAdmin: React.FC = () => {
                     Author
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Category
+                    Tags
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Status
@@ -482,13 +537,13 @@ const BlogAdmin: React.FC = () => {
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <img
-                          src={post.featuredImage}
+                          src={post.featuredImage || '/api/placeholder/40/40'}
                           alt={post.title}
                           className="h-10 w-10 rounded-lg object-cover"
                         />
                         <div className="ml-4">
                           <div className="text-sm font-medium text-gray-900 line-clamp-1">{post.title}</div>
-                          <div className="text-sm text-gray-500 line-clamp-1">{post.excerpt}</div>
+                          {post.excerpt && <div className="text-sm text-gray-500 line-clamp-1">{post.excerpt}</div>}
                         </div>
                       </div>
                     </td>
@@ -503,8 +558,17 @@ const BlogAdmin: React.FC = () => {
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {post.category}
-                    </td>
+                       <div className="flex flex-wrap gap-1">
+                         {post.tags.slice(0, 2).map(tag => (
+                           <span key={tag} className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-gray-100 text-gray-800">
+                             {tag}
+                           </span>
+                         ))}
+                         {post.tags.length > 2 && (
+                           <span className="text-xs text-gray-500">+{post.tags.length - 2} more</span>
+                         )}
+                       </div>
+                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(post.status)}`}>
                         {post.status.charAt(0).toUpperCase() + post.status.slice(1)}
@@ -534,7 +598,7 @@ const BlogAdmin: React.FC = () => {
                         </button>
                         <button 
                           className="text-red-600 hover:text-red-900"
-                          onClick={() => handleDeletePost(post.id)}
+                          onClick={() => handleDeletePost(post.id || post._id || '')}
                           title="Delete post"
                         >
                           <Trash2 className="h-4 w-4" />

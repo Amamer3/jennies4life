@@ -1,9 +1,10 @@
-import { API_BASE_URL } from './authApi';
+import { API_BASE_URL } from '../data';
 
 // Public category interface (only active categories)
 export interface PublicCategory {
   id: string;
   name: string;
+  slug?: string;
   description: string;
   image: string;
   color: string;
@@ -29,7 +30,7 @@ class PublicCategoryAPI {
     try {
       console.log('🔄 Fetching active categories for public display...');
       
-      const response = await fetch(`${this.baseUrl}/api/categories/public`, {
+      const response = await fetch(`${this.baseUrl}/api/categories`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',

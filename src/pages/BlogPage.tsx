@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import {
   Search,
@@ -20,7 +20,7 @@ import {
   Star
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { blogPosts } from '../data';
+import { blogApi, type BlogPost } from '../services/blogApi';
 
 
 const BlogPage: React.FC = () => {
@@ -28,6 +28,38 @@ const BlogPage: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [sortBy, setSortBy] = useState('newest');
+  const [blogPosts, setBlogPosts] = useState<BlogPost[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Fetch blog posts from API
+  useEffect(() => {
+    const fetchBlogPosts = async () => {
+      try {
+        setLoading(true);
+        const posts = await blogApi.getAllPosts();
+        setBlogPosts(Array.isArray(posts) ? posts : []);
+        setError(null);
+      } catch (error) {
+        console.error('Failed to fetch blog posts:', error);
+        setError('Failed to load blog posts. Please try again later.');
+        setBlogPosts([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchBlogPosts();
+  }, []);
+
+  // Helper function to calculate read time
+  const calculateReadTime = (content: string) => {
+    if (!content) return '5 min read';
+    const wordsPerMinute = 200;
+    const wordCount = content.split(' ').length;
+    const readTime = Math.ceil(wordCount / wordsPerMinute);
+    return `${readTime} min read`;
+  };
 
   const blogCategories = ['All', ...Array.from(new Set(blogPosts.map((post) => post.category)))];
 
@@ -35,7 +67,7 @@ const BlogPage: React.FC = () => {
     .filter((post) => {
       const matchesSearch =
         post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        post.excerpt.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        post.excerpt?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         post.tags.some((tag) => tag.toLowerCase().includes(searchTerm.toLowerCase()));
       const matchesCategory = selectedCategory === 'All' || post.category === selectedCategory;
       return matchesSearch && matchesCategory;
@@ -43,11 +75,11 @@ const BlogPage: React.FC = () => {
     .sort((a, b) => {
       switch (sortBy) {
         case 'newest':
-          return new Date(b.publishDate).getTime() - new Date(a.publishDate).getTime();
+          return new Date(b.publishedAt || b.createdAt).getTime() - new Date(a.publishedAt || a.createdAt).getTime();
         case 'oldest':
-          return new Date(a.publishDate).getTime() - new Date(b.publishDate).getTime();
+          return new Date(a.publishedAt || a.createdAt).getTime() - new Date(b.publishedAt || b.createdAt).getTime();
         case 'popular':
-          return b.title.length - a.title.length; // Placeholder for popularity
+          return (b.views || 0) - (a.views || 0); // Use actual views for popularity
         default:
           return 0;
       }
@@ -76,6 +108,36 @@ const BlogPage: React.FC = () => {
     };
     return colors[category] || 'bg-gray-100 text-gray-800';
   };
+
+  // Loading state
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#e72a00] mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading blog posts...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-red-500 text-xl mb-4">⚠️</div>
+          <p className="text-gray-600 mb-4">{error}</p>
+          <button 
+            onClick={() => window.location.reload()} 
+            className="px-4 py-2 bg-[#e72a00] text-white rounded-md hover:bg-[#d12400] transition-colors"
+          >
+            Try Again
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -224,13 +286,14 @@ const BlogPage: React.FC = () => {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
         {/* Featured Article */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.1 }}
-          viewport={{ once: true }}
-          className="mb-8 sm:mb-12 relative group"
-        >
+        {featuredPost && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.1 }}
+            viewport={{ once: true }}
+            className="mb-8 sm:mb-12 relative group"
+          >
           {/* Background Glow Effect */}
           <motion.div
             animate={{ scale: [1, 1.02, 1], opacity: [0.5, 0.8, 0.5] }}
@@ -300,11 +363,11 @@ const BlogPage: React.FC = () => {
                 >
                   <div className="flex items-center">
                     <User className="h-3 w-3 sm:h-4 sm:w-4 mr-1 text-blue-500" />
-                    {featuredPost.author.name}
+                    {typeof featuredPost.author === 'string' ? featuredPost.author : (featuredPost.author as any)?.name || 'Unknown Author'}
                   </div>
                   <div className="flex items-center">
                     <Calendar className="h-3 w-3 sm:h-4 sm:w-4 mr-1 text-blue-500" />
-                    {formatDate(featuredPost.publishDate)}
+                    {formatDate(featuredPost.publishedAt || featuredPost.publishDate || featuredPost.createdAt)}
                   </div>
                   <div className="flex items-center">
                     <Clock className="h-3 w-3 sm:h-4 sm:w-4 mr-1 text-blue-500" />
@@ -356,8 +419,8 @@ const BlogPage: React.FC = () => {
                   transition={{ duration: 0.5 }}
                   className="w-full h-full bg-cover bg-center"
                   style={{
-                    backgroundImage: featuredPost.image
-                      ? `url(${featuredPost.image})`
+                    backgroundImage: featuredPost.coverImage || featuredPost.featuredImage || featuredPost.image
+                              ? `url(${featuredPost.coverImage || featuredPost.featuredImage || featuredPost.image})`
                       : 'linear-gradient(to bottom right, #3b82f6, #06b6d4)',
                   }}
                 />
@@ -384,7 +447,7 @@ const BlogPage: React.FC = () => {
                   whileHover={{ scale: 1.05 }}
                   className="absolute top-4 left-4"
                 >
-                  <span className={`${getCategoryColor(featuredPost.category)} text-xs sm:text-sm font-medium px-3 py-1.5 rounded-full shadow-lg`}>
+                  <span className={`${getCategoryColor(featuredPost.category || 'General')} text-xs sm:text-sm font-medium px-3 py-1.5 rounded-full shadow-lg`}>
                     {featuredPost.category}
                   </span>
                 </motion.div>
@@ -404,6 +467,7 @@ const BlogPage: React.FC = () => {
             </div>
           </div>
         </motion.div>
+        )}
 
         {/* Filters and Controls */}
         <motion.div
@@ -453,7 +517,7 @@ const BlogPage: React.FC = () => {
                       transition={{ duration: 0.3, delay: index * 0.05 }}
                       whileHover={{ scale: 1.05, y: -2 }}
                       whileTap={{ scale: 0.95 }}
-                      onClick={() => setSelectedCategory(category)}
+                      onClick={() => setSelectedCategory(category || 'All')}
                       aria-label={`Filter by ${category} category`}
                       className={`relative px-3 sm:px-4 py-2 rounded-full text-xs sm:text-sm font-medium transition-all duration-300 overflow-hidden ${
                         selectedCategory === category
@@ -620,8 +684,8 @@ const BlogPage: React.FC = () => {
                         <div
                           className="w-full h-full bg-cover bg-center transition-transform duration-500 group-hover:scale-110"
                           style={{
-                            backgroundImage: post.image
-                              ? `url(${post.image})`
+                            backgroundImage: post.coverImage || post.featuredImage || post.image
+                              ? `url(${post.coverImage || post.featuredImage || post.image})`
                               : 'linear-gradient(to bottom right, #e5e7eb, #d1d5db)',
                           }}
                         />
@@ -643,7 +707,7 @@ const BlogPage: React.FC = () => {
                         <motion.span
                           whileHover={{ scale: 1.1 }}
                           whileTap={{ scale: 0.95 }}
-                          className={`${getCategoryColor(post.category)} text-xs sm:text-sm font-medium px-2 sm:px-3 py-1 rounded-full backdrop-blur-sm shadow-lg`}
+                          className={`${getCategoryColor(post.category || 'General')} text-xs sm:text-sm font-medium px-2 sm:px-3 py-1 rounded-full backdrop-blur-sm shadow-lg`}
                         >
                           {post.category}
                         </motion.span>
@@ -738,14 +802,14 @@ const BlogPage: React.FC = () => {
                             className="flex items-center hover:text-blue-600 transition-colors duration-200"
                           >
                             <User className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
-                            {post.author.name}
+                            {typeof post.author === 'string' ? post.author : (post.author as any)?.name || 'Unknown Author'}
                           </motion.div>
                           <motion.div
                             whileHover={{ scale: 1.05 }}
                             className="flex items-center hover:text-blue-600 transition-colors duration-200"
                           >
                             <Calendar className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
-                            {formatDate(post.publishDate)}
+                            {formatDate(post.publishedAt || post.publishDate || post.createdAt)}
                           </motion.div>
                         </div>
                         <motion.div
@@ -753,7 +817,7 @@ const BlogPage: React.FC = () => {
                           className="flex items-center hover:text-blue-600 transition-colors duration-200"
                         >
                           <Clock className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
-                          {post.readTime}
+                          {post.readTime || calculateReadTime(post.content)}
                         </motion.div>
                       </motion.div>
                       

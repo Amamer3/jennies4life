@@ -62,25 +62,26 @@ const DealsAdmin: React.FC = () => {
     fetchDeals();
   }, []);
 
-  const statuses = ['all', 'active', 'inactive', 'expired', 'scheduled'];
+  const statuses = ['all', 'active', 'inactive'];
   const types = ['all', 'percentage', 'fixed'];
 
   const filteredDeals = deals.filter(deal => {
     const matchesSearch = deal.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         deal.productName.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = selectedStatus === 'all' || deal.status === selectedStatus;
+                         deal.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         deal.category.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesStatus = selectedStatus === 'all' || 
+                         (selectedStatus === 'active' && deal.isActive) ||
+                         (selectedStatus === 'inactive' && !deal.isActive);
     const matchesType = selectedType === 'all' || deal.discountType === selectedType;
     return matchesSearch && matchesStatus && matchesType;
   });
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'active': return 'bg-green-100 text-green-800';
-      case 'inactive': return 'bg-gray-100 text-gray-800';
-      case 'expired': return 'bg-red-100 text-red-800';
-      case 'scheduled': return 'bg-blue-100 text-blue-800';
-      default: return 'bg-gray-100 text-gray-800';
-    }
+  const getStatusColor = (isActive: boolean) => {
+    return isActive ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800';
+  };
+
+  const getStatusText = (isActive: boolean) => {
+    return isActive ? 'Active' : 'Inactive';
   };
 
   const getDaysRemaining = (endDate: string) => {
@@ -131,17 +132,13 @@ const DealsAdmin: React.FC = () => {
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Product</label>
-                <select
-                  defaultValue={deal?.id || ''}
+                <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
+                <input
+                  type="text"
+                  defaultValue={deal?.category || ''}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#e72a00]"
-                >
-                  <option value="">Select Product</option>
-                  <option value="p1">Smart Wireless Headphones</option>
-                  <option value="p2">Organic Skincare Set</option>
-                  <option value="p3">Fitness Tracker Pro</option>
-                  <option value="p4">Designer Handbag</option>
-                </select>
+                  placeholder="Enter product category"
+                />
               </div>
               
               <div>
@@ -156,13 +153,13 @@ const DealsAdmin: React.FC = () => {
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Discount Value</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Discounted Price</label>
                 <input
                   type="number"
                   step="0.01"
-                  defaultValue={deal?.discountValue || ''}
+                  defaultValue={deal?.discountedPrice || ''}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#e72a00]"
-                  placeholder="Enter discount value"
+                  placeholder="Enter discounted price"
                 />
               </div>
               
@@ -206,15 +203,35 @@ const DealsAdmin: React.FC = () => {
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
-                <select
-                  defaultValue={deal?.status || 'active'}
+                <label className="block text-sm font-medium text-gray-700 mb-1">Image URL</label>
+                <input
+                  type="url"
+                  defaultValue={deal?.imageUrl || ''}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#e72a00]"
-                >
-                  <option value="active">Active</option>
-                  <option value="inactive">Inactive</option>
-                  <option value="scheduled">Scheduled</option>
-                </select>
+                  placeholder="Enter image URL"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Affiliate Link</label>
+                <input
+                  type="url"
+                  defaultValue={deal?.affiliateLink || ''}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#e72a00]"
+                  placeholder="Enter affiliate link"
+                />
+              </div>
+              
+              <div className="flex items-center">
+                <input
+                  type="checkbox"
+                  id="isActive"
+                  defaultChecked={deal?.isActive ?? true}
+                  className="h-4 w-4 text-[#e72a00] focus:ring-[#e72a00] border-gray-300 rounded"
+                />
+                <label htmlFor="isActive" className="ml-2 block text-sm text-gray-700">
+                  Active Deal
+                </label>
               </div>
               
               <div className="md:col-span-2 flex items-center">
@@ -351,13 +368,13 @@ const DealsAdmin: React.FC = () => {
               <div className="flex items-start justify-between mb-4">
                 <div className="flex items-center space-x-3">
                   <img
-                    src={deal.productImage}
-                    alt={deal.productName}
+                    src={deal.imageUrl || deal.image || '/placeholder-image.jpg'}
+                    alt={deal.title}
                     className="h-12 w-12 rounded-lg object-cover"
                   />
                   <div>
                     <h3 className="text-lg font-semibold text-gray-900">{deal.title}</h3>
-                    <p className="text-sm text-gray-600">{deal.productName}</p>
+                    <p className="text-sm text-gray-600">{deal.category}</p>
                   </div>
                 </div>
                 
@@ -367,8 +384,8 @@ const DealsAdmin: React.FC = () => {
                       Featured
                     </span>
                   )}
-                  <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(deal.status)}`}>
-                    {deal.status.charAt(0).toUpperCase() + deal.status.slice(1)}
+                  <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(deal.isActive)}`}>
+                    {getStatusText(deal.isActive)}
                   </span>
                 </div>
               </div>
@@ -382,7 +399,9 @@ const DealsAdmin: React.FC = () => {
                     <span className="text-sm font-medium text-gray-700">Discount</span>
                   </div>
                   <p className="text-lg font-bold text-[#e72a00] mt-1">
-                    {deal.discountType === 'percentage' ? `${deal.discountValue}%` : `$${deal.discountValue}`}
+                    {deal.discountType === 'percentage' 
+                      ? `${Math.round(((deal.originalPrice - deal.discountedPrice) / deal.originalPrice) * 100)}%`
+                      : `$${deal.originalPrice - deal.discountedPrice}`}
                   </p>
                 </div>
                 
@@ -392,7 +411,7 @@ const DealsAdmin: React.FC = () => {
                     <span className="text-sm font-medium text-gray-700">Price</span>
                   </div>
                   <div className="mt-1">
-                    <span className="text-lg font-bold text-green-600">${deal.salePrice}</span>
+                    <span className="text-lg font-bold text-green-600">${deal.discountedPrice}</span>
                     {deal.originalPrice && (
                       <span className="text-sm text-gray-500 line-through ml-2">${deal.originalPrice}</span>
                     )}
@@ -407,9 +426,9 @@ const DealsAdmin: React.FC = () => {
                     <span className="text-xs text-gray-500">Duration</span>
                   </div>
                   <p className="text-sm text-gray-900">
-                    {new Date(deal.startDate).toLocaleDateString()} - {new Date(deal.endDate).toLocaleDateString()}
+                    {deal.startDate ? new Date(deal.startDate).toLocaleDateString() : 'N/A'} - {deal.endDate ? new Date(deal.endDate).toLocaleDateString() : 'N/A'}
                   </p>
-                  {deal.status === 'active' && (
+                  {deal.isActive && (
                     <p className="text-xs text-orange-600 mt-1">
                       {getDaysRemaining(deal.endDate)} days remaining
                     </p>
@@ -422,13 +441,13 @@ const DealsAdmin: React.FC = () => {
                     <span className="text-xs text-gray-500">Usage</span>
                   </div>
                   <p className="text-sm text-gray-900">
-                    {deal.usageCount}{deal.maxUsage ? ` / ${deal.maxUsage}` : ''}
+                    {deal.usageCount || 0}{deal.maxUsage ? ` / ${deal.maxUsage}` : ''}
                   </p>
-                  {deal.maxUsage && deal.maxUsage > 0 && (
+                  {deal.maxUsage && deal.maxUsage > 0 && deal.usageCount !== undefined && (
                     <div className="w-full bg-gray-200 rounded-full h-2 mt-1">
                       <div 
                         className="bg-[#e72a00] h-2 rounded-full" 
-                        style={{ width: `${Math.min((deal.usageCount / deal.maxUsage) * 100, 100)}%` }}
+                        style={{ width: `${Math.min(((deal.usageCount || 0) / deal.maxUsage) * 100, 100)}%` }}
                       />
                     </div>
                   )}
@@ -437,7 +456,7 @@ const DealsAdmin: React.FC = () => {
               
               <div className="flex items-center justify-between pt-4 border-t border-gray-200">
                 <div className="text-xs text-gray-500">
-                  Created: {new Date(deal.createdAt).toLocaleDateString()}
+                  Created: {deal.createdAt ? new Date(deal.createdAt).toLocaleDateString() : 'N/A'}
                 </div>
                 
                 <div className="flex items-center space-x-2">

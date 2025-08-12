@@ -15,6 +15,7 @@ import {
   AlertCircle
 } from 'lucide-react';
 import { publicProductAPI } from '../services/publicProductApi';
+import { publicCategoryAPI } from '../services/publicCategoryApi';
 import type { Product } from '../types';
 import type { ProductQueryParams as APIProductQueryParams } from '../services/publicProductApi';
 
@@ -31,9 +32,24 @@ const ProductsListPage: React.FC = () => {
   const [totalProducts, setTotalProducts] = useState(0);
   const [showFilters, setShowFilters] = useState(false);
   const [wishlist, setWishlist] = useState<Set<string>>(new Set());
+  const [categories, setCategories] = useState<string[]>([]);
   
   const productsPerPage = 12;
-  const categories = ['Electronics', 'Beauty', 'Health & Fitness', 'Books', 'Sports'];
+
+  // Fetch categories from API
+  const fetchCategories = async () => {
+    try {
+      const response = await publicCategoryAPI.getActiveCategories();
+      if (response.success && response.data) {
+        const categoryNames = response.data.map(cat => cat.name);
+        setCategories(categoryNames);
+      }
+    } catch (err) {
+      console.error('Error fetching categories:', err);
+      // Fallback to default categories if API fails
+      setCategories(['Electronics', 'Beauty', 'Health & Fitness', 'Books', 'Sports']);
+    }
+  };
 
   // Fetch products from API
   const fetchProducts = async () => {
@@ -71,6 +87,11 @@ const ProductsListPage: React.FC = () => {
       setLoading(false);
     }
   };
+
+  // Effect to fetch categories and products when component mounts
+  useEffect(() => {
+    fetchCategories();
+  }, []);
 
   // Effect to fetch products when filters change
   useEffect(() => {

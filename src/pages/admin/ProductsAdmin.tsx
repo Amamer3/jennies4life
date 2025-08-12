@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import { productAPI } from '../../services/productApi';
 import type { CreateProductRequest } from '../../services/productApi';
+import { publicCategoryAPI } from '../../services/publicCategoryApi';
 
 
 interface Product {
@@ -37,7 +38,23 @@ const ProductsAdmin: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [categories, setCategories] = useState<string[]>(['all']);
   const formRef = useRef<HTMLFormElement>(null);
+
+  // Fetch categories from API
+  const fetchCategories = async () => {
+    try {
+      const response = await publicCategoryAPI.getActiveCategories();
+      if (response.success && response.data) {
+        const categoryNames = ['all', ...response.data.map(cat => cat.name)];
+        setCategories(categoryNames);
+      }
+    } catch (err) {
+      console.error('Error fetching categories:', err);
+      // Fallback to default categories if API fails
+      setCategories(['all', 'Electronics', 'Beauty', 'Health', 'Fashion']);
+    }
+  };
 
   // Fetch products from API
   const fetchProducts = async () => {
@@ -66,10 +83,10 @@ const ProductsAdmin: React.FC = () => {
   };
 
   useEffect(() => {
+    fetchCategories();
     fetchProducts();
   }, []);
 
-  const categories = ['all', 'Electronics', 'Beauty', 'Health', 'Fashion'];
   const statuses = ['all', 'published', 'draft', 'archived'];
 
   const filteredProducts = products.filter(product => {

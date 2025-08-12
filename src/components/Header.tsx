@@ -1,6 +1,7 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Search, Menu, X, ShoppingBag, Heart } from 'lucide-react';
+import { publicCategoryAPI } from '../services/publicCategoryApi';
 
 interface Category {
   name: string;
@@ -10,15 +11,36 @@ interface Category {
 const Header: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [categories, setCategories] = useState<Category[]>([]);
 
-  const categories: Category[] = [
-    { name: 'Health & Wellness', path: '/category/health' },
-    { name: 'Electronics', path: '/category/electronics' },
-    { name: 'Fashion', path: '/category/fashion' },
-    { name: 'Home & Garden', path: '/category/home' },
-    { name: 'Sports & Fitness', path: '/category/sports' },
-    { name: 'Beauty', path: '/category/beauty' },
-  ];
+  // Fetch categories from API
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await publicCategoryAPI.getActiveCategories();
+        if (response.success && response.data) {
+          const categoryData = response.data.slice(0, 6).map(cat => ({
+            name: cat.name,
+            path: `/category/${cat.slug || cat.name.toLowerCase().replace(/\s+/g, '-')}`
+          }));
+          setCategories(categoryData);
+        }
+      } catch (err) {
+        console.error('Error fetching categories for header:', err);
+        // Fallback to default categories if API fails
+        setCategories([
+          { name: 'Health & Wellness', path: '/category/health' },
+          { name: 'Electronics', path: '/category/electronics' },
+          { name: 'Fashion', path: '/category/fashion' },
+          { name: 'Home & Garden', path: '/category/home' },
+          { name: 'Sports & Fitness', path: '/category/sports' },
+          { name: 'Beauty', path: '/category/beauty' },
+        ]);
+      }
+    };
+
+    fetchCategories();
+  }, []);
 
   const toggleMenu = useCallback(() => setIsMenuOpen((prev) => !prev), []);
   const toggleSearch = useCallback(() => setIsSearchOpen((prev) => !prev), []);

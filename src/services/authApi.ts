@@ -179,7 +179,26 @@ class AuthAPI {
         console.log('✅ AuthAPI - backend token refresh successful');
         
         if (data.token) {
-          localStorage.setItem('authToken', data.token);
+          // Check if the returned token is a custom token that needs to be exchanged
+          if (data.token.startsWith('eyJ') && data.token.split('.').length === 3) {
+            // This looks like a JWT/ID token, store it directly
+            localStorage.setItem('authToken', data.token);
+          } else {
+            // This is likely a custom token, exchange it for an ID token
+            console.log('🔄 AuthAPI - exchanging backend custom token for Firebase ID token');
+            try {
+              const userCredential = await signInWithCustomToken(auth, data.token);
+              const idToken = await userCredential.user.getIdToken();
+              localStorage.setItem('authToken', idToken);
+              console.log('✅ AuthAPI - custom token exchange successful');
+            } catch (error) {
+              console.error('❌ AuthAPI - custom token exchange failed:', error);
+              return {
+                success: false,
+                message: 'Failed to exchange custom token for ID token'
+              };
+            }
+          }
         }
         
         if (data.refreshToken) {

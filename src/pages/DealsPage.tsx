@@ -1,59 +1,36 @@
-import React, { useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Clock, ShoppingBag, Star, Flame, Zap, Gift, TrendingUp, Sparkles, Timer, Tag } from 'lucide-react';
+import { Clock, ShoppingBag, Flame, Zap, Gift, TrendingUp, Sparkles, Tag } from 'lucide-react';
 import { motion } from 'framer-motion';
-
-// Mock getActiveDeals function (replace with actual implementation)
-interface Product {
-  id: string;
-  price: number;
-  originalPrice?: number;
-  rating: number;
-  reviewCount: number;
-}
-
-interface Deal {
-  id: string;
-  title: string;
-  description: string;
-  type: string;
-  endDate: string;
-  discountPercentage: number;
-  product: Product;
-}
-
-const getActiveDeals = (): Deal[] => [
-  {
-    id: '1',
-    title: 'Cooling Towels 3 Pack',
-    description: 'Lightweight microfiber towels for gym and sports',
-    type: 'flash',
-    endDate: '2025-08-01',
-    discountPercentage: 33,
-    product: { id: 'p1', price: 19.99, originalPrice: 29.99, rating: 4.8, reviewCount: 1247 },
-  },
-  {
-    id: '2',
-    title: 'Wireless Bluetooth Headphones',
-    description: 'Premium sound with noise cancellation',
-    type: 'limited',
-    endDate: '2025-07-30',
-    discountPercentage: 38,
-    product: { id: 'p2', price: 79.99, originalPrice: 129.99, rating: 4.6, reviewCount: 892 },
-  },
-  {
-    id: '3',
-    title: 'Organic Skincare Set',
-    description: 'Natural ingredients for glowing skin',
-    type: 'exclusive',
-    endDate: '2025-08-05',
-    discountPercentage: 30,
-    product: { id: 'p3', price: 45.99, originalPrice: 65.99, rating: 4.9, reviewCount: 634 },
-  },
-];
+import { publicDealsAPI, type PublicDeal } from '../services/publicDealsApi';
 
 const DealsPage: React.FC = () => {
-  const activeDeals = useMemo(() => getActiveDeals(), []);
+  const [activeDeals, setActiveDeals] = useState<PublicDeal[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchDeals = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const response = await publicDealsAPI.getActiveDeals();
+        
+        if (response.success) {
+          setActiveDeals(response.data);
+        } else {
+          setError(response.message || 'Failed to fetch deals');
+        }
+      } catch (err) {
+        setError('An error occurred while fetching deals');
+        console.error('Error fetching deals:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDeals();
+  }, []);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -206,7 +183,37 @@ const DealsPage: React.FC = () => {
           </p>
         </motion.div>
 
-        {activeDeals.length === 0 ? (
+        {loading ? (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="text-center py-12"
+          >
+            <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full mx-auto mb-4 animate-spin">
+              <div className="w-8 h-8 bg-white rounded-full"></div>
+            </div>
+            <h3 className="text-xl font-semibold text-gray-900 mb-2">Loading Deals...</h3>
+            <p className="text-gray-600">Please wait while we fetch the latest offers</p>
+          </motion.div>
+        ) : error ? (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="text-center py-12"
+          >
+            <div className="inline-flex items-center justify-center w-16 h-16 bg-red-100 rounded-full mx-auto mb-4">
+              <Tag className="h-8 w-8 text-red-500" />
+            </div>
+            <h3 className="text-xl font-semibold text-gray-900 mb-2">Error Loading Deals</h3>
+            <p className="text-gray-600 mb-4">{error}</p>
+            <button
+              onClick={() => window.location.reload()}
+              className="px-6 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+            >
+              Try Again
+            </button>
+          </motion.div>
+        ) : activeDeals.length === 0 ? (
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -249,23 +256,17 @@ const DealsPage: React.FC = () => {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
             {activeDeals.map((deal, index) => {
-              const getDealTypeIcon = (type: string) => {
-                switch (type) {
-                  case 'flash': return <Zap className="h-4 w-4" />;
-                  case 'limited': return <Timer className="h-4 w-4" />;
-                  case 'exclusive': return <Sparkles className="h-4 w-4" />;
-                  default: return <Tag className="h-4 w-4" />;
-                }
+              const getDealTypeIcon = (featured: boolean) => {
+                if (featured) return <Sparkles className="h-4 w-4" />;
+                return <Tag className="h-4 w-4" />;
               };
               
-              const getDealTypeColor = (type: string) => {
-                switch (type) {
-                  case 'flash': return 'from-red-500 to-orange-500';
-                  case 'limited': return 'from-purple-500 to-pink-500';
-                  case 'exclusive': return 'from-blue-500 to-cyan-500';
-                  default: return 'from-gray-500 to-gray-600';
-                }
+              const getDealTypeColor = (featured: boolean) => {
+                if (featured) return 'from-purple-500 to-pink-500';
+                return 'from-blue-500 to-cyan-500';
               };
+              
+              const dealType = (deal.featured ?? false) ? 'featured' : 'regular';
               
               return (
                 <motion.div
@@ -296,7 +297,7 @@ const DealsPage: React.FC = () => {
                       whileInView={{ scale: 1, rotate: 0 }}
                       transition={{ duration: 0.5, delay: index * 0.1 + 0.3 }}
                       viewport={{ once: true }}
-                      className={`w-16 h-16 rounded-full bg-gradient-to-br ${getDealTypeColor(deal.type)} flex items-center justify-center shadow-lg`}
+                      className={`w-16 h-16 rounded-full bg-gradient-to-br ${getDealTypeColor(deal.featured ?? false)} flex items-center justify-center shadow-lg`}
                     >
                       <span className="text-white font-bold text-sm">-{deal.discountPercentage}%</span>
                     </motion.div>
@@ -307,10 +308,10 @@ const DealsPage: React.FC = () => {
                     <div className="flex items-center justify-between mb-6">
                       <motion.div
                         whileHover={{ scale: 1.05 }}
-                        className={`inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r ${getDealTypeColor(deal.type)} text-white text-sm font-bold rounded-full shadow-lg`}
+                        className={`inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r ${getDealTypeColor(deal.featured ?? false)} text-white text-sm font-bold rounded-full shadow-lg`}
                       >
-                        {getDealTypeIcon(deal.type)}
-                        {deal.type.charAt(0).toUpperCase() + deal.type.slice(1)} Deal
+                        {getDealTypeIcon(deal.featured ?? false)}
+                        {dealType.charAt(0).toUpperCase() + dealType.slice(1)} Deal
                       </motion.div>
                     </div>
                     
@@ -324,11 +325,11 @@ const DealsPage: React.FC = () => {
                     >
                       <Clock className="h-4 w-4 text-red-500" />
                       <span className="text-sm font-medium">
-                        Ends {new Date(deal.endDate).toLocaleDateString('en-US', {
+                        Ends {deal.endDate ? new Date(deal.endDate).toLocaleDateString('en-US', {
                           month: 'short',
                           day: 'numeric',
                           year: 'numeric',
-                        })}
+                        }) : 'N/A'}
                       </span>
                     </motion.div>
                     
@@ -337,7 +338,7 @@ const DealsPage: React.FC = () => {
                       className="text-xl sm:text-2xl font-bold text-gray-900 mb-3 group-hover:text-purple-600 transition-colors duration-300"
                       whileHover={{ scale: 1.02 }}
                     >
-                      <Link to={`/products/${deal.product.id}`} aria-label={`View deal: ${deal.title}`}>
+                      <Link to={`/products/${deal.id}`} aria-label={`View deal: ${deal.title}`}>
                         {deal.title}
                       </Link>
                     </motion.h3>
@@ -351,51 +352,30 @@ const DealsPage: React.FC = () => {
                     <div className="flex items-center justify-between mb-6">
                       <div className="flex items-center gap-3">
                         <span className="text-2xl sm:text-3xl font-bold text-gray-900">
-                          ${deal.product.price.toFixed(2)}
+                          ${deal.discountedPrice.toFixed(2)}
                         </span>
-                        {deal.product.originalPrice && (
-                          <span className="text-lg text-gray-500 line-through">
-                            ${deal.product.originalPrice.toFixed(2)}
-                          </span>
-                        )}
+                        <span className="text-lg text-gray-500 line-through">
+                          ${deal.originalPrice.toFixed(2)}
+                        </span>
                       </div>
                       <motion.div
                         whileHover={{ scale: 1.1 }}
                         className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-bold"
                       >
-                        Save ${(deal.product.originalPrice! - deal.product.price).toFixed(2)}
+                        Save ${(deal.originalPrice - deal.discountedPrice).toFixed(2)}
                       </motion.div>
                     </div>
                     
-                    {/* Rating */}
-                    <div className="flex items-center gap-3 mb-6">
-                      <div className="flex items-center">
-                        {Array.from({ length: 5 }, (_, i) => {
-                          const ratingValue = i + 1;
-                          return (
-                            <motion.div
-                              key={i}
-                              initial={{ opacity: 0, scale: 0 }}
-                              whileInView={{ opacity: 1, scale: 1 }}
-                              transition={{ duration: 0.3, delay: index * 0.1 + i * 0.05 }}
-                              viewport={{ once: true }}
-                            >
-                              <Star
-                                className={`h-5 w-5 ${
-                                  ratingValue <= Math.floor(deal.product.rating)
-                                    ? 'text-yellow-400 fill-current'
-                                    : ratingValue <= deal.product.rating
-                                    ? 'text-yellow-400 fill-current text-opacity-50'
-                                    : 'text-gray-300'
-                                }`}
-                              />
-                            </motion.div>
-                          );
-                        })}
+                    {/* Stats */}
+                    <div className="flex items-center gap-4 mb-6">
+                      <div className="flex items-center gap-2 bg-blue-50 px-3 py-1 rounded-full">
+                        <TrendingUp className="h-4 w-4 text-blue-500" />
+                        <span className="text-sm font-medium text-blue-700">{deal.views} views</span>
                       </div>
-                      <span className="text-gray-600 font-medium">
-                        {deal.product.rating.toFixed(1)} ({deal.product.reviewCount} reviews)
-                      </span>
+                      <div className="flex items-center gap-2 bg-green-50 px-3 py-1 rounded-full">
+                        <ShoppingBag className="h-4 w-4 text-green-500" />
+                        <span className="text-sm font-medium text-green-700">{deal.purchases} sold</span>
+                      </div>
                     </div>
                     
                     {/* CTA Button */}
@@ -404,7 +384,7 @@ const DealsPage: React.FC = () => {
                       whileTap={{ scale: 0.98 }}
                     >
                       <Link
-                        to={`/products/${deal.product.id}`}
+                        to={`/products/${deal.id}`}
                         className="w-full text-center px-6 py-4 bg-gradient-to-r from-purple-600 to-blue-600 text-white font-bold rounded-2xl hover:from-purple-700 hover:to-blue-700 transition-all duration-300 shadow-lg hover:shadow-xl group-hover:scale-105 flex items-center justify-center gap-2"
                         aria-label={`View deal: ${deal.title}`}
                       >

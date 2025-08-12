@@ -1,42 +1,44 @@
 import { API_BASE_URL } from '../data';
 
 interface BlogPost {
-  comments: number;
-  authorAvatar: string;
-  featured: boolean;
-  id: string;
+  _id?: string;
+  id?: string;
+  slug?: string;
   title: string;
   content: string;
-  excerpt: string;
+  excerpt?: string;
   author: string;
   status: 'draft' | 'published' | 'archived';
-  category: string;
+  category?: string;
   tags: string[];
+  coverImage?: string;
   featuredImage?: string;
+  image?: string; // For backward compatibility
   publishedAt?: string;
+  publishDate?: string; // For backward compatibility
   createdAt: string;
   updatedAt: string;
-  views: number;
-  likes: number;
+  views?: number;
+  likes?: number;
+  comments?: number;
+  authorAvatar?: string;
+  featured?: boolean;
+  readTime?: string; // For backward compatibility
 }
 
 interface CreateBlogPostRequest {
   title: string;
   content: string;
-  excerpt: string;
-  category: string;
+  coverImage?: string;
   tags: string[];
-  featuredImage?: string;
   status: 'draft' | 'published';
 }
 
 interface UpdateBlogPostRequest {
   title?: string;
   content?: string;
-  excerpt?: string;
-  category?: string;
+  coverImage?: string;
   tags?: string[];
-  featuredImage?: string;
   status?: 'draft' | 'published' | 'archived';
 }
 
@@ -50,26 +52,23 @@ class BlogAPI {
   }
 
   async getAllPosts(): Promise<BlogPost[]> {
-    try {
-      const response = await fetch(`${API_BASE_URL}/api/admin/blog/posts`, {
-        method: 'GET',
-        headers: this.getAuthHeaders()
-      });
-
-      if (!response.ok) {
-        throw new Error(`Failed to fetch blog posts: ${response.statusText}`);
+    const response = await fetch(`${API_BASE_URL}/api/posts`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json'
       }
+    });
 
-      return await response.json();
-    } catch (error) {
-      console.error('Error fetching blog posts:', error);
-      throw error;
+    if (!response.ok) {
+      throw new Error(`Failed to fetch blog posts: ${response.statusText}`);
     }
+
+    return await response.json();
   }
 
   async createPost(postData: CreateBlogPostRequest): Promise<BlogPost> {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/admin/blog/posts`, {
+      const response = await fetch(`${API_BASE_URL}/api/posts`, {
         method: 'POST',
         headers: this.getAuthHeaders(),
         body: JSON.stringify(postData)
@@ -88,7 +87,7 @@ class BlogAPI {
 
   async getPostById(id: string): Promise<BlogPost> {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/admin/blog/posts/${id}`, {
+      const response = await fetch(`${API_BASE_URL}/api/posts/${id}`, {
         method: 'GET',
         headers: this.getAuthHeaders()
       });
@@ -106,7 +105,7 @@ class BlogAPI {
 
   async updatePost(id: string, postData: UpdateBlogPostRequest): Promise<BlogPost> {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/admin/blog/posts/${id}`, {
+      const response = await fetch(`${API_BASE_URL}/api/posts/${id}`, {
         method: 'PUT',
         headers: this.getAuthHeaders(),
         body: JSON.stringify(postData)
@@ -125,7 +124,7 @@ class BlogAPI {
 
   async deletePost(id: string): Promise<void> {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/admin/blog/posts/${id}`, {
+      const response = await fetch(`${API_BASE_URL}/api/posts/${id}`, {
         method: 'DELETE',
         headers: this.getAuthHeaders()
       });

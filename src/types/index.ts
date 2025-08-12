@@ -2,6 +2,8 @@ import type { ReactNode } from 'react';
 
 // Product Types
 export interface Product {
+  createdAt: number;
+  createdAt: number;
   id: string;
   name: string;
   description: string;

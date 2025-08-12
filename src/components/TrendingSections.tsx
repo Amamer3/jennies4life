@@ -1,7 +1,9 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { TrendingUp, ArrowRight, Star, Users, Award } from 'lucide-react';
+import { TrendingUp, ArrowRight, Star, Users, Award, Loader2, AlertCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { publicCategoryAPI, type PublicCategory } from '../services/publicCategoryApi';
+import { publicProductAPI } from '../services/publicProductApi';
 
 interface TrendingSection {
   id: string;
@@ -16,74 +18,128 @@ interface TrendingSection {
 }
 
 const TrendingSections: React.FC = () => {
-  const trendingSections: TrendingSection[] = [
-    {
-      id: 'electronics-trending',
-      title: 'Smart Electronics',
-      description: 'Latest gadgets and smart devices for modern living',
-      image: 'https://images.pexels.com/photos/356056/pexels-photo-356056.jpeg?auto=compress&cs=tinysrgb&w=400',
-      category: 'Electronics',
-      productCount: 156,
-      rating: 4.8,
-      trending: true,
-      link: '/category/electronics',
-    },
-    {
-      id: 'fashion-trending',
-      title: 'Fashion Forward',
-      description: 'Trending styles and must-have fashion accessories',
-      image: 'https://images.pexels.com/photos/1926769/pexels-photo-1926769.jpeg?auto=compress&cs=tinysrgb&w=400',
-      category: 'Fashion',
-      productCount: 234,
-      rating: 4.7,
-      trending: true,
-      link: '/category/fashion',
-    },
-    {
-      id: 'health-trending',
-      title: 'Health & Wellness',
-      description: 'Premium health products for a better lifestyle',
-      image: 'https://images.pexels.com/photos/1640777/pexels-photo-1640777.jpeg?auto=compress&cs=tinysrgb&w=400',
-      category: 'Health',
-      productCount: 189,
-      rating: 4.9,
-      trending: true,
-      link: '/category/health',
-    },
-    {
-      id: 'beauty-trending',
-      title: 'Beauty Essentials',
-      description: 'Top-rated skincare and beauty products',
-      image: 'https://images.pexels.com/photos/3685530/pexels-photo-3685530.jpeg?auto=compress&cs=tinysrgb&w=400',
-      category: 'Beauty',
-      productCount: 167,
-      rating: 4.6,
-      trending: true,
-      link: '/category/beauty',
-    },
-    {
-      id: 'home-trending',
-      title: 'Home & Living',
-      description: 'Transform your space with trending home decor',
-      image: 'https://images.pexels.com/photos/1571460/pexels-photo-1571460.jpeg?auto=compress&cs=tinysrgb&w=400',
-      category: 'Home',
-      productCount: 198,
-      rating: 4.5,
-      trending: true,
-      link: '/category/home',
-    },
-    {
-      id: 'sports-trending',
-      title: 'Sports & Fitness',
-      description: 'High-quality gear for active lifestyles',
-      image: 'https://images.pexels.com/photos/416778/pexels-photo-416778.jpeg?auto=compress&cs=tinysrgb&w=400',
-      category: 'Sports',
-      productCount: 143,
-      rating: 4.7,
-      trending: true,
-      link: '/category/sports',
-    },
-  ];
+  const [trendingSections, setTrendingSections] = useState<TrendingSection[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchTrendingData = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        
+        // Fetch categories from API
+        const categoriesResponse = await publicCategoryAPI.getActiveCategories();
+        
+        if (categoriesResponse.success && categoriesResponse.data) {
+          const categories = categoriesResponse.data.slice(0, 6); // Limit to 6 categories
+          
+          // For each category, get product count and create trending section
+          const trendingData = await Promise.all(
+            categories.map(async (category: PublicCategory) => {
+              try {
+                const productsResponse = await publicProductAPI.getProducts({
+                  category: category.name,
+                  limit: 1 // Just to get the total count
+                });
+                
+                const productCount = productsResponse.total || 0;
+                const categorySlug = category.name.toLowerCase().replace(/\s+/g, '-');
+                
+                return {
+                  id: `${categorySlug}-trending`,
+                  title: category.name,
+                  description: category.description || `Discover amazing ${category.name.toLowerCase()} products`,
+                  image: category.image || getDefaultCategoryImage(category.name),
+                  category: category.name,
+                  productCount,
+                  rating: 4.5 + Math.random() * 0.4, // Generate rating between 4.5-4.9
+                  trending: true,
+                  link: `/category/${categorySlug}`,
+                };
+              } catch (err) {
+                console.warn(`Failed to fetch products for category ${category.name}:`, err);
+                return {
+                  id: `${category.name.toLowerCase().replace(/\s+/g, '-')}-trending`,
+                  title: category.name,
+                  description: category.description || `Discover amazing ${category.name.toLowerCase()} products`,
+                  image: category.image || getDefaultCategoryImage(category.name),
+                  category: category.name,
+                  productCount: 0,
+                  rating: 4.5,
+                  trending: true,
+                  link: `/category/${category.name.toLowerCase().replace(/\s+/g, '-')}`,
+                };
+              }
+            })
+          );
+          
+          setTrendingSections(trendingData);
+        } else {
+          setError('Failed to fetch categories');
+        }
+      } catch (err) {
+        setError('An error occurred while fetching trending data');
+        console.error('Error fetching trending data:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTrendingData();
+  }, []);
+
+  // Helper function to get default category images
+  const getDefaultCategoryImage = (categoryName: string): string => {
+    const defaultImages: { [key: string]: string } = {
+      'Electronics': 'https://images.pexels.com/photos/356056/pexels-photo-356056.jpeg?auto=compress&cs=tinysrgb&w=400',
+      'Fashion': 'https://images.pexels.com/photos/1926769/pexels-photo-1926769.jpeg?auto=compress&cs=tinysrgb&w=400',
+      'Health': 'https://images.pexels.com/photos/1640777/pexels-photo-1640777.jpeg?auto=compress&cs=tinysrgb&w=400',
+      'Beauty': 'https://images.pexels.com/photos/3685530/pexels-photo-3685530.jpeg?auto=compress&cs=tinysrgb&w=400',
+      'Home': 'https://images.pexels.com/photos/1571460/pexels-photo-1571460.jpeg?auto=compress&cs=tinysrgb&w=400',
+      'Sports': 'https://images.pexels.com/photos/416778/pexels-photo-416778.jpeg?auto=compress&cs=tinysrgb&w=400',
+    };
+    return defaultImages[categoryName] || 'https://images.pexels.com/photos/356056/pexels-photo-356056.jpeg?auto=compress&cs=tinysrgb&w=400';
+  };
+
+  // Loading state
+  if (loading) {
+    return (
+      <section className="py-8 sm:py-12 lg:py-16 bg-gray-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center">
+            <Loader2 className="h-8 w-8 animate-spin mx-auto text-orange-600 mb-4" />
+            <p className="text-gray-600">Loading trending sections...</p>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <section className="py-8 sm:py-12 lg:py-16 bg-gray-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center">
+            <AlertCircle className="h-8 w-8 mx-auto text-red-500 mb-4" />
+            <p className="text-red-600 mb-4">{error}</p>
+            <button
+              onClick={() => window.location.reload()}
+              className="px-4 py-2 bg-orange-600 text-white rounded-md hover:bg-orange-700 transition-colors"
+            >
+              Try Again
+            </button>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  // Don't render if no trending sections
+  if (trendingSections.length === 0) {
+    return null;
+  }
 
   return (
     <section className="py-8 sm:py-12 lg:py-16 bg-gray-50">

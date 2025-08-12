@@ -1,31 +1,35 @@
 import { API_BASE_URL } from '../data';
 
 interface Deal {
-  discountType: 'percentage' | 'fixed';
-  productName: string;
-  productImage: string;
-  featured: boolean;
-  discountValue: number;
-  salePrice: number;
-  usageCount: number;
-  maxUsage: number | null;
   id: string;
   title: string;
   description: string;
   originalPrice: number;
   discountedPrice: number;
-  discountPercentage: number;
+  affiliateLink: string;
+  imageUrl: string;
   category: string;
-  brand: string;
-  image: string;
-  status: 'active' | 'inactive' | 'expired';
+  isActive: boolean;
   startDate: string;
   endDate: string;
-  createdAt: string;
-  updatedAt: string;
-  views: number;
-  clicks: number;
-  purchases: number;
+  createdAt?: string;
+  updatedAt?: string;
+  // Legacy fields for backward compatibility
+  discountType?: 'percentage' | 'fixed';
+  productName?: string;
+  productImage?: string;
+  featured?: boolean;
+  discountValue?: number;
+  salePrice?: number;
+  usageCount?: number;
+  maxUsage?: number | null;
+  discountPercentage?: number;
+  brand?: string;
+  image?: string;
+  status?: 'active' | 'inactive' | 'expired';
+  views?: number;
+  clicks?: number;
+  purchases?: number;
 }
 
 interface CreateDealRequest {
@@ -33,12 +37,12 @@ interface CreateDealRequest {
   description: string;
   originalPrice: number;
   discountedPrice: number;
+  affiliateLink: string;
+  imageUrl: string;
   category: string;
-  brand: string;
-  image: string;
+  isActive: boolean;
   startDate: string;
   endDate: string;
-  status: 'active' | 'inactive';
 }
 
 interface UpdateDealRequest {
@@ -46,17 +50,17 @@ interface UpdateDealRequest {
   description?: string;
   originalPrice?: number;
   discountedPrice?: number;
+  affiliateLink?: string;
+  imageUrl?: string;
   category?: string;
-  brand?: string;
-  image?: string;
+  isActive?: boolean;
   startDate?: string;
   endDate?: string;
-  status?: 'active' | 'inactive' | 'expired';
 }
 
 class DealsAPI {
   private getAuthHeaders(): HeadersInit {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('authToken');
     return {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${token}`
@@ -65,7 +69,7 @@ class DealsAPI {
 
   async getAllDeals(): Promise<Deal[]> {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/admin/deals`, {
+      const response = await fetch(`${API_BASE_URL}/api/deals`, {
         method: 'GET',
         headers: this.getAuthHeaders()
       });
@@ -74,7 +78,19 @@ class DealsAPI {
         throw new Error(`Failed to fetch deals: ${response.statusText}`);
       }
 
-      return await response.json();
+      const data = await response.json();
+      
+      // Handle different response structures
+      if (Array.isArray(data)) {
+        return data;
+      } else if (data && Array.isArray(data.data)) {
+        return data.data;
+      } else if (data && Array.isArray(data.deals)) {
+        return data.deals;
+      } else {
+        console.warn('Unexpected API response structure:', data);
+        return [];
+      }
     } catch (error) {
       console.error('Error fetching deals:', error);
       throw error;
@@ -83,7 +99,7 @@ class DealsAPI {
 
   async createDeal(dealData: CreateDealRequest): Promise<Deal> {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/admin/deals`, {
+      const response = await fetch(`${API_BASE_URL}/api/deals`, {
         method: 'POST',
         headers: this.getAuthHeaders(),
         body: JSON.stringify(dealData)
@@ -102,7 +118,7 @@ class DealsAPI {
 
   async getDealById(id: string): Promise<Deal> {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/admin/deals/${id}`, {
+      const response = await fetch(`${API_BASE_URL}/api/deals/${id}`, {
         method: 'GET',
         headers: this.getAuthHeaders()
       });
@@ -120,7 +136,7 @@ class DealsAPI {
 
   async updateDeal(id: string, dealData: UpdateDealRequest): Promise<Deal> {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/admin/deals/${id}`, {
+      const response = await fetch(`${API_BASE_URL}/api/deals/${id}`, {
         method: 'PUT',
         headers: this.getAuthHeaders(),
         body: JSON.stringify(dealData)
@@ -139,7 +155,7 @@ class DealsAPI {
 
   async deleteDeal(id: string): Promise<void> {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/admin/deals/${id}`, {
+      const response = await fetch(`${API_BASE_URL}/api/deals/${id}`, {
         method: 'DELETE',
         headers: this.getAuthHeaders()
       });
@@ -154,15 +170,11 @@ class DealsAPI {
   }
 
   async activateDeal(id: string): Promise<Deal> {
-    return this.updateDeal(id, { status: 'active' });
+    return this.updateDeal(id, { isActive: true });
   }
 
   async deactivateDeal(id: string): Promise<Deal> {
-    return this.updateDeal(id, { status: 'inactive' });
-  }
-
-  async expireDeal(id: string): Promise<Deal> {
-    return this.updateDeal(id, { status: 'expired' });
+    return this.updateDeal(id, { isActive: false });
   }
 }
 

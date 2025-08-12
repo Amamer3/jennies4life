@@ -66,6 +66,20 @@ class PublicProductAPI {
       
       const data = await response.json();
       console.log('✅ Products fetched successfully:', data);
+      
+      // Transform response to match expected interface
+      // Backend returns { success, data: [...] } but frontend expects { success, products: [...] }
+      if (data.success && data.data && Array.isArray(data.data)) {
+        return {
+          success: data.success,
+          products: data.data,
+          total: data.total,
+          page: data.page,
+          limit: data.limit,
+          message: data.message
+        };
+      }
+      
       return data;
     } catch (error) {
       console.error('🚨 Error fetching products:', error);
@@ -107,6 +121,17 @@ class PublicProductAPI {
       
       const data = await response.json();
       console.log('✅ Product fetched successfully:', data);
+      
+      // Transform response to match expected interface
+      // Backend returns { success, data: product } but frontend expects { success, product }
+      if (data.success && data.data) {
+        return {
+          success: data.success,
+          product: data.data,
+          message: data.message
+        };
+      }
+      
       return data;
     } catch (error) {
       console.error('🚨 Error fetching product:', error);

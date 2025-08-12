@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Star, Heart, ExternalLink, Clock, Zap, ShoppingCart, TrendingUp } from 'lucide-react';
+import { Star, Heart, ExternalLink, Clock, Zap, ShoppingCart, TrendingUp, Loader2, AlertCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { publicDealsAPI, type PublicDeal } from '../services/publicDealsApi';
 
 interface TimeLeft {
   days: number;
@@ -10,50 +11,37 @@ interface TimeLeft {
   seconds: number;
 }
 
-interface DealProduct {
-  id: string;
-  name: string;
-  category: string;
-  price: number;
-  originalPrice: number;
-  rating: number;
-  reviews: number;
-  image: string;
-  discount: number;
-  affiliateLink: string;
-  description: string;
-  features: string[];
-  sold: number;
-  available: number;
-  endTime: Date;
-}
-
 const DealOfDay: React.FC = () => {
   const [timeLeft, setTimeLeft] = useState<TimeLeft>({ days: 0, hours: 18, minutes: 53, seconds: 45 });
+  const [dealOfDay, setDealOfDay] = useState<PublicDeal | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const dealOfDay: DealProduct = {
-    id: 'deal-of-day-1',
-    name: 'Under Armour Hustle Sport Backpack',
-    category: 'Sports & Fitness',
-    price: 33.75,
-    originalPrice: 45.00,
-    rating: 4.8,
-    reviews: 324,
-    image: 'https://images.pexels.com/photos/2529148/pexels-photo-2529148.jpeg?auto=compress&cs=tinysrgb&w=600',
-    discount: 25,
-    affiliateLink: '#',
-    description: 'Durable and spacious backpack perfect for sports and daily use. Features multiple compartments, water-resistant material, and ergonomic design.',
-    features: [
-      'Water-resistant material',
-      'Multiple compartments',
-      'Ergonomic shoulder straps',
-      'Laptop compartment',
-      'Side water bottle pockets'
-    ],
-    sold: 12,
-    available: 16,
-    endTime: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours from now
-  };
+  useEffect(() => {
+    const fetchDealOfDay = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        
+        // Fetch active deals from API and get the first one as deal of the day
+        const response = await publicDealsAPI.getActiveDeals();
+        
+        if (response.success && response.data && response.data.length > 0) {
+          // Get the first deal as the deal of the day
+          setDealOfDay(response.data[0]);
+        } else {
+          setError(response.message || 'No deals available today');
+        }
+      } catch (err) {
+        setError('An error occurred while fetching today\'s deal');
+        console.error('Error fetching deal of the day:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDealOfDay();
+  }, []);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -74,10 +62,51 @@ const DealOfDay: React.FC = () => {
     return () => clearInterval(timer);
   }, []);
 
+  const calculateDiscount = (originalPrice?: number, discountedPrice?: number) => {
+    if (!originalPrice || !discountedPrice || originalPrice <= discountedPrice) return 0;
+    return Math.round(((originalPrice - discountedPrice) / originalPrice) * 100);
+  };
+
   const getProgressPercentage = (sold: number, available: number) => {
     const total = sold + available;
-    return (sold / total) * 100;
+    return total > 0 ? (sold / total) * 100 : 0;
   };
+
+  if (loading) {
+    return (
+      <section className="py-8 sm:py-12 lg:py-16 bg-gradient-to-br from-red-50 to-orange-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-8 sm:mb-12">
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
+              Deal of the Day
+            </h2>
+          </div>
+          <div className="flex justify-center items-center py-12">
+            <Loader2 className="h-8 w-8 animate-spin text-red-500" />
+            <span className="ml-2 text-gray-600">Loading today's featured deal...</span>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  if (error || !dealOfDay) {
+    return (
+      <section className="py-8 sm:py-12 lg:py-16 bg-gradient-to-br from-red-50 to-orange-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-8 sm:mb-12">
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
+              Deal of the Day
+            </h2>
+          </div>
+          <div className="flex justify-center items-center py-12">
+            <AlertCircle className="h-8 w-8 text-red-500" />
+            <span className="ml-2 text-gray-600">{error || 'No deal available today'}</span>
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="py-8 sm:py-12 lg:py-16 bg-gradient-to-br from-red-50 to-orange-50">
@@ -111,14 +140,14 @@ const DealOfDay: React.FC = () => {
             {/* Product Image */}
             <div className="relative overflow-hidden bg-gray-100">
               <img
-                src={dealOfDay.image}
-                alt={dealOfDay.name}
+                src={dealOfDay.imageUrl || 'https://via.placeholder.com/600x400'}
+                alt={dealOfDay.title}
                 loading="lazy"
                 className="w-full h-64 sm:h-80 lg:h-full object-cover hover:scale-105 transition-transform duration-500"
               />
               {/* Discount Badge */}
               <div className="absolute top-4 left-4 bg-red-500 text-white text-lg font-bold px-4 py-2 rounded-full shadow-lg">
-                -{dealOfDay.discount}%
+                -{calculateDiscount(dealOfDay.originalPrice, dealOfDay.discountedPrice)}%
               </div>
               {/* Trending Badge */}
               <div className="absolute top-4 right-4 bg-orange-500 text-white text-sm font-semibold px-3 py-1 rounded-full flex items-center shadow-lg">
@@ -134,7 +163,7 @@ const DealOfDay: React.FC = () => {
               
               {/* Product Name */}
               <h3 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 mb-3">
-                {dealOfDay.name}
+                {dealOfDay.title}
               </h3>
               
               {/* Description */}
@@ -142,67 +171,77 @@ const DealOfDay: React.FC = () => {
                 {dealOfDay.description}
               </p>
 
-              {/* Features */}
-              <div className="mb-6">
-                <h4 className="text-sm font-semibold text-gray-900 mb-2">Key Features:</h4>
-                <ul className="space-y-1">
-                  {dealOfDay.features.slice(0, 3).map((feature, index) => (
-                    <li key={index} className="text-sm text-gray-600 flex items-center">
-                      <div className="w-1.5 h-1.5 bg-red-500 rounded-full mr-2"></div>
-                      {feature}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              {/* Rating */}
-              <div className="flex items-center mb-4">
-                <div className="flex text-yellow-400 mr-2">
-                  {[...Array(5)].map((_, i) => (
-                    <Star
-                      key={i}
-                      className={`h-4 w-4 sm:h-5 sm:w-5 ${
-                        i < Math.floor(dealOfDay.rating) ? 'fill-current' : 'stroke-current fill-transparent'
-                      }`}
-                    />
-                  ))}
+              {/* Features - Show some key features if available */}
+              {dealOfDay.features && dealOfDay.features.length > 0 && (
+                <div className="mb-6">
+                  <h4 className="text-sm font-semibold text-gray-900 mb-2">Key Features:</h4>
+                  <ul className="space-y-1">
+                    {dealOfDay.features.slice(0, 3).map((feature, index) => (
+                      <li key={index} className="text-sm text-gray-600 flex items-center">
+                        <div className="w-1.5 h-1.5 bg-red-500 rounded-full mr-2"></div>
+                        {feature}
+                      </li>
+                    ))}
+                  </ul>
                 </div>
-                <span className="text-sm text-gray-600">
-                  {dealOfDay.rating.toFixed(1)} ({dealOfDay.reviews} reviews)
-                </span>
-              </div>
+              )}
+
+              {/* Rating - Show if available */}
+              {dealOfDay.rating && dealOfDay.reviewCount && (
+                <div className="flex items-center mb-4">
+                  <div className="flex text-yellow-400 mr-2">
+                    {[...Array(5)].map((_, i) => (
+                      <Star
+                        key={i}
+                        className={`h-4 w-4 sm:h-5 sm:w-5 ${
+                          i < Math.floor(dealOfDay.rating || 0) ? 'fill-current' : 'stroke-current fill-transparent'
+                        }`}
+                      />
+                    ))}
+                  </div>
+                  <span className="text-sm text-gray-600">
+                    {dealOfDay.rating.toFixed(1)} ({dealOfDay.reviewCount} reviews)
+                  </span>
+                </div>
+              )}
 
               {/* Price */}
               <div className="flex items-center gap-3 mb-6">
                 <span className="text-2xl sm:text-3xl font-bold text-red-600">
-                  ${dealOfDay.price.toFixed(2)}
+                  ${(dealOfDay.discountedPrice || 0).toFixed(2)}
                 </span>
-                <span className="text-lg text-gray-500 line-through">
-                  ${dealOfDay.originalPrice.toFixed(2)}
-                </span>
-                <span className="bg-red-100 text-red-800 text-sm font-semibold px-2 py-1 rounded">
-                  Save ${(dealOfDay.originalPrice - dealOfDay.price).toFixed(2)}
-                </span>
+                {dealOfDay.originalPrice && (
+                  <>
+                    <span className="text-lg text-gray-500 line-through">
+                      ${dealOfDay.originalPrice.toFixed(2)}
+                    </span>
+                    <span className="bg-red-100 text-red-800 text-sm font-semibold px-2 py-1 rounded">
+                      Save ${(dealOfDay.originalPrice - (dealOfDay.discountedPrice || 0)).toFixed(2)}
+                    </span>
+                  </>
+                )}
               </div>
 
-              {/* Progress Bar */}
-              <div className="mb-6">
-                <div className="flex justify-between text-sm text-gray-600 mb-2">
-                  <span>Already Sold: {dealOfDay.sold}</span>
-                  <span>Available: {dealOfDay.available}</span>
+              {/* Progress Bar - Show if usage data is available */}
+              {dealOfDay.usageCount !== undefined && dealOfDay.maxUsage && (
+                <div className="mb-6">
+                  <div className="flex justify-between text-sm text-gray-600 mb-2">
+                    <span>Already Used: {dealOfDay.usageCount}</span>
+                    <span>Available: {dealOfDay.maxUsage - dealOfDay.usageCount}</span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-3">
+                    <div
+                      className="bg-gradient-to-r from-red-500 to-red-600 h-3 rounded-full transition-all duration-300"
+                      style={{ width: `${getProgressPercentage(dealOfDay.usageCount, dealOfDay.maxUsage - dealOfDay.usageCount)}%` }}
+                    ></div>
+                  </div>
+                  <div className="text-center mt-2">
+                    <span className="text-sm font-semibold text-red-600">
+                      {Math.round(getProgressPercentage(dealOfDay.usageCount, dealOfDay.maxUsage - dealOfDay.usageCount))}% Used
+                    </span>
+                  </div>
                 </div>
-                <div className="w-full bg-gray-200 rounded-full h-3">
-                  <div
-                    className="bg-gradient-to-r from-red-500 to-red-600 h-3 rounded-full transition-all duration-300"
-                    style={{ width: `${getProgressPercentage(dealOfDay.sold, dealOfDay.available)}%` }}
-                  ></div>
-                </div>
-                <div className="text-center mt-2">
-                  <span className="text-sm font-semibold text-red-600">
-                    {Math.round(getProgressPercentage(dealOfDay.sold, dealOfDay.available))}% Sold
-                  </span>
-                </div>
-              </div>
+              )}
 
               {/* Countdown Timer */}
               <div className="bg-gradient-to-r from-red-500 to-red-600 text-white rounded-lg p-4 mb-6">
@@ -241,9 +280,9 @@ const DealOfDay: React.FC = () => {
               {/* Action Buttons */}
               <div className="flex flex-col sm:flex-row gap-3">
                 <Link
-                  to={`/products/${dealOfDay.id}`}
+                  to={`/deals/${dealOfDay.id}`}
                   className="flex-1 bg-red-600 hover:bg-red-700 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-200 text-center flex items-center justify-center"
-                  aria-label={`View details for ${dealOfDay.name}`}
+                  aria-label={`View details for ${dealOfDay.title}`}
                 >
                   <ShoppingCart className="h-5 w-5 mr-2" />
                   View Details
@@ -253,14 +292,14 @@ const DealOfDay: React.FC = () => {
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex-1 bg-orange-600 hover:bg-orange-700 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-200 text-center flex items-center justify-center"
-                  aria-label={`Buy ${dealOfDay.name} now`}
+                  aria-label={`Buy ${dealOfDay.title} now`}
                 >
                   <ExternalLink className="h-5 w-5 mr-2" />
                   Buy Now
                 </a>
                 <button
                   className="w-12 h-12 bg-gray-100 hover:bg-red-50 text-gray-600 hover:text-red-500 rounded-lg transition-colors duration-200 flex items-center justify-center"
-                  aria-label={`Add ${dealOfDay.name} to wishlist`}
+                  aria-label={`Add ${dealOfDay.title} to wishlist`}
                 >
                   <Heart className="h-5 w-5" />
                 </button>
