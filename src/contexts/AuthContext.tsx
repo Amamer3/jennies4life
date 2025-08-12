@@ -34,61 +34,68 @@ interface AuthProviderProps {
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
   // Check for existing session on mount
   useEffect(() => {
     const checkAuthStatus = async () => {
       try {
-        // Add a small delay to ensure any ongoing login process completes
-        await new Promise(resolve => setTimeout(resolve, 100));
+        console.log('🔍 AuthContext - checking auth status on mount');
         
         const token = localStorage.getItem('authToken');
-        console.log('🔍 AuthContext checkAuthStatus - token found:', token ? `${token.substring(0, 20)}...` : 'null');
+        console.log('🔍 AuthContext - stored token exists:', !!token);
         
         if (token) {
-          console.log('✅ AuthContext - token found, skipping verification for now');
-          // Temporarily skip token verification to prevent localStorage clearing
-          // TODO: Re-enable once backend verify endpoint is working
+          console.log('🔍 AuthContext - token found, checking authentication');
           
-          // Try to get user profile instead of verifying token
-          try {
-            const profileResponse = await authAPI.getProfile();
-            if (profileResponse.success && profileResponse.user) {
-              console.log('✅ AuthContext - got user profile successfully');
-              setUser(profileResponse.user);
-            } else {
-              console.log('⚠️ AuthContext - profile fetch failed, but keeping token and setting basic user');
-              // Set a basic user state to maintain authentication
-              setUser({
-                id: 'admin',
-                username: 'Admin',
-                email: 'admin@jennies4life.com',
-                role: 'admin'
-              });
-            }
-          } catch (error) {
-            console.log('⚠️ AuthContext - profile fetch error, but keeping token and setting basic user:', error);
-            // Set a basic user state to maintain authentication even on error
-            setUser({
-              id: 'admin',
-              username: 'Admin', 
-              email: 'admin@jennies4life.com',
-              role: 'admin'
-            });
+          // First try to get user profile with existing token
+          const profileResponse = await authAPI.getProfile();
+          
+          if (profileResponse.success && profileResponse.user) {
+             console.log('✅ AuthContext - profile verification successful with existing token');
+             setUser(profileResponse.user);
+             setIsAuthenticated(true);
+             setIsLoading(false);
+             return;
+           }
+          
+          console.log('⚠️ AuthContext - profile verification failed, attempting token refresh');
+          
+          // If profile fails, try to refresh the token
+          const refreshSuccess = await refreshToken();
+          
+          if (refreshSuccess) {
+            console.log('✅ AuthContext - token refresh successful, retrying profile');
+            const retryProfileResponse = await authAPI.getProfile();
+            
+            if (retryProfileResponse.success && retryProfileResponse.user) {
+               console.log('✅ AuthContext - profile verification successful after refresh');
+               setUser(retryProfileResponse.user);
+               setIsAuthenticated(true);
+               setIsLoading(false);
+               return;
+             }
           }
-        } else {
-          // No token found - user must authenticate
-          console.log('No auth token found - user must login');
-        }
-      } catch (error) {
-        console.error('Error checking auth status:', error);
-        console.log('❌ AuthContext - error occurred, clearing tokens');
-        localStorage.removeItem('authToken');
-        localStorage.removeItem('refreshToken');
-      } finally {
-        setIsLoading(false);
-      }
+          
+          console.log('❌ AuthContext - authentication failed, clearing tokens');
+           localStorage.removeItem('authToken');
+           localStorage.removeItem('refreshToken');
+           setIsAuthenticated(false);
+         } else {
+           // No token found - user must authenticate
+           console.log('No auth token found - user must login');
+           setIsAuthenticated(false);
+         }
+       } catch (error) {
+         console.error('Error checking auth status:', error);
+         console.log('❌ AuthContext - error occurred, clearing tokens');
+         localStorage.removeItem('authToken');
+         localStorage.removeItem('refreshToken');
+         setIsAuthenticated(false);
+       } finally {
+         setIsLoading(false);
+       }
     };
 
     checkAuthStatus();
@@ -108,11 +115,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       
       if (isLoginSuccessful && loginResponse.user) {
         setUser(loginResponse.user);
+        setIsAuthenticated(true);
         return true;
       } else if (isLoginSuccessful && !loginResponse.user) {
         // Success but no user data - try to get profile
         const profile = await getProfile();
         if (profile) {
+          setIsAuthenticated(true);
           return true;
         }
       }
@@ -134,6 +143,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       console.error('Logout error:', error);
     } finally {
       setUser(null);
+      setIsAuthenticated(false);
       // authAPI.logout() already clears localStorage, but ensure it's cleared
       localStorage.removeItem('authToken');
       localStorage.removeItem('refreshToken');
@@ -146,6 +156,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       
       if (profileResponse.success && profileResponse.user) {
         setUser(profileResponse.user);
+        setIsAuthenticated(true);
         return profileResponse.user;
       } else {
         console.error('Failed to get profile:', profileResponse.message);
@@ -175,7 +186,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const value: AuthContextType = {
     user,
-    isAuthenticated: !!user,
+    isAuthenticated,
     isLoading,
     login,
     logout,

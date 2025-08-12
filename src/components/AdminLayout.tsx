@@ -58,7 +58,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
       {sidebarOpen && isMobile && (
         <div className="fixed inset-0 z-40 lg:hidden">
           <div 
-            className="fixed inset-0 bg-gray-600 bg-opacity-75 transition-opacity" 
+            className="fixed inset-0 transition-opacity" 
             onClick={() => setSidebarOpen(false)}
             onTouchStart={() => setSidebarOpen(false)}
           />
@@ -173,15 +173,9 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
       
       {/* Logout Confirmation Modal */}
       {showLogoutConfirm && (
-        <div className="fixed inset-0 z-50 overflow-y-auto">
+        <div className="fixed inset-0 z-[9999] overflow-y-auto">
           <div className="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"
-              onClick={() => setShowLogoutConfirm(false)}
-            />
+
             
             <span className="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">
               &#8203;

@@ -1,4 +1,7 @@
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
+import { signInWithCustomToken } from 'firebase/auth';
+import { auth } from '../config/firebase';
+
+export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
 
 interface LoginRequest {
   username: string;
@@ -13,7 +16,7 @@ interface LoginResponse {
     email: string;
     role: 'admin' | 'user';
   };
-  token?: string;
+  customToken?: string;
   refreshToken?: string;
   message?: string;
 }
@@ -57,7 +60,9 @@ class AuthAPI {
 
   async login(credentials: LoginRequest): Promise<LoginResponse> {
     try {
-      // Map username to email for API compatibility
+      console.log('🔐 AuthAPI - attempting login with:', { username: credentials.username });
+      
+      // Map username to email for backend compatibility
       const apiCredentials = {
         email: credentials.username,
         password: credentials.password
@@ -71,75 +76,132 @@ class AuthAPI {
         body: JSON.stringify(apiCredentials),
       });
 
-      const responseData = await response.json();
+      console.log('🔐 AuthAPI - login response status:', response.status);
       
-      // Handle successful login response
-      if (response.ok && responseData.success) {
-        // Extract data from nested structure if present
-        const loginData = responseData.data || responseData;
+      const data = await response.json();
+      console.log('🔐 AuthAPI - backend login response:', data);
+      console.log('🔍 AuthAPI - response data keys:', Object.keys(data));
+      if (data.data) {
+        console.log('🔍 AuthAPI - nested data keys:', Object.keys(data.data));
+      }
+      
+      if (response.ok && data.success) {
+        console.log('🔐 AuthAPI - backend login successful, extracting custom token');
         
-        // Store tokens if provided (check both levels and common field names)
-        const token = loginData.token || loginData.accessToken || loginData.customToken || responseData.token || responseData.accessToken || responseData.customToken;
-        const refreshToken = loginData.refreshToken || loginData.refresh_token || responseData.refreshToken || responseData.refresh_token;
+        // Extract the custom token from backend response (prioritize correct path)
+        const customToken = data.data?.customToken || data.data?.token || data.customToken || data.token;
+        console.log('🔍 AuthAPI - extracted customToken:', customToken ? 'found' : 'not found');
+        console.log('🔍 AuthAPI - customToken value:', customToken ? customToken.substring(0, 20) + '...' : 'null');
         
-        console.log('🔍 AuthAPI login - extracted token:', token ? `${token.substring(0, 20)}...` : 'null');
-        console.log('🔍 AuthAPI login - extracted refreshToken:', refreshToken ? `${refreshToken.substring(0, 20)}...` : 'null');
-        
-        if (token) {
-          localStorage.setItem('authToken', token);
-          console.log('✅ AuthAPI login - token stored in localStorage');
+        if (!customToken) {
+          console.error('🔐 AuthAPI - no custom token received from backend');
+          return {
+            success: false,
+            message: 'No custom token received from backend'
+          };
         }
-        if (refreshToken) {
-          localStorage.setItem('refreshToken', refreshToken);
-          console.log('✅ AuthAPI login - refreshToken stored in localStorage');
+        
+        console.log('🔐 AuthAPI - exchanging custom token for Firebase ID token');
+        
+        // Exchange custom token for Firebase ID token
+        const userCredential = await signInWithCustomToken(auth, customToken);
+        const idToken = await userCredential.user.getIdToken();
+        
+        console.log('🔐 AuthAPI - Firebase authentication successful');
+        
+        // Store the Firebase ID token
+        localStorage.setItem('authToken', idToken);
+        
+        // Store refresh token if provided
+        if (data.refreshToken) {
+          localStorage.setItem('refreshToken', data.refreshToken);
         }
         
-        console.log('🔍 AuthAPI login - localStorage after storing:', Object.keys(localStorage));
-        
-        // Return normalized response structure
         return {
-          success: responseData.success,
-          user: loginData.user || loginData,
-          token: token,
-          refreshToken: refreshToken,
-          message: responseData.message
+          success: true,
+          user: data.data?.user || data.user,
+          customToken: customToken
         };
       }
 
-      return responseData;
-    } catch (error) {
-      console.error('Login API error:', error);
       return {
         success: false,
-        message: 'Network error occurred during login'
+        message: data.message || 'Login failed'
+      };
+    } catch (error) {
+      console.error('🔐 AuthAPI - login error:', error);
+      return {
+        success: false,
+        message: error instanceof Error ? error.message : 'Authentication failed'
       };
     }
   }
 
   async refresh(): Promise<RefreshResponse> {
     try {
+      // For Firebase authentication, we can refresh the ID token directly
+      if (auth.currentUser) {
+        console.log('🔄 AuthAPI - refreshing Firebase ID token');
+        const newIdToken = await auth.currentUser.getIdToken(true); // Force refresh
+        localStorage.setItem('authToken', newIdToken);
+        
+        console.log('✅ AuthAPI - Firebase token refresh successful');
+        return {
+          success: true,
+          token: newIdToken
+        };
+      }
+      
+      // Fallback to backend refresh if no Firebase user
       const refreshToken = localStorage.getItem('refreshToken');
       
+      if (!refreshToken) {
+        console.log('❌ AuthAPI - no refresh token available and no Firebase user');
+        return {
+          success: false,
+          message: 'Refresh token is required'
+        };
+      }
+      
+      console.log('🔄 AuthAPI - attempting backend token refresh');
+      
       const response = await fetch(`${API_BASE_URL}/api/auth/refresh`, {
-        method: 'GET',
+        method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          ...(refreshToken && { 'Authorization': `Bearer ${refreshToken}` })
         },
+        body: JSON.stringify({ refreshToken }),
       });
 
       const data = await response.json();
       
-      if (response.ok && data.success && data.token) {
-        localStorage.setItem('authToken', data.token);
+      if (response.ok && data.success) {
+        console.log('✅ AuthAPI - backend token refresh successful');
+        
+        if (data.token) {
+          localStorage.setItem('authToken', data.token);
+        }
+        
+        if (data.refreshToken) {
+          localStorage.setItem('refreshToken', data.refreshToken);
+        }
+        
+        return {
+          success: true,
+          token: data.token
+        };
       }
 
-      return data;
-    } catch (error) {
-      console.error('Refresh API error:', error);
+      console.log('❌ AuthAPI - backend token refresh failed:', data.message);
       return {
         success: false,
-        message: 'Network error occurred during token refresh'
+        message: data.message || 'Token refresh failed'
+      };
+    } catch (error) {
+      console.error('❌ AuthAPI - refresh error:', error);
+      return {
+        success: false,
+        message: 'Network error occurred during refresh'
       };
     }
   }
@@ -164,6 +226,14 @@ class AuthAPI {
 
   async logout(): Promise<{ success: boolean; message?: string }> {
     try {
+      console.log('🚪 AuthAPI - logging out');
+      
+      // Sign out from Firebase
+      if (auth.currentUser) {
+        await auth.signOut();
+        console.log('✅ AuthAPI - Firebase sign out successful');
+      }
+      
       const token = localStorage.getItem('authToken');
       
       // Clear local storage first
@@ -182,6 +252,7 @@ class AuthAPI {
 
         // Handle 401 errors gracefully (token already invalid)
         if (response.status === 401) {
+          console.log('✅ AuthAPI - logout completed');
           return {
             success: true,
             message: 'Logged out successfully (token was already invalid)'
@@ -190,6 +261,7 @@ class AuthAPI {
 
         if (response.ok) {
           const data = await response.json();
+          console.log('✅ AuthAPI - logout completed');
           return data.success ? data : {
             success: true,
             message: 'Logged out successfully'
@@ -197,12 +269,13 @@ class AuthAPI {
         }
       }
 
+      console.log('✅ AuthAPI - logout completed');
       return {
         success: true,
         message: 'Logged out successfully'
       };
     } catch (error) {
-      console.error('Logout API error:', error);
+      console.error('❌ AuthAPI - logout error:', error);
       // Ensure local storage is cleared on error
       localStorage.removeItem('authToken');
       localStorage.removeItem('refreshToken');

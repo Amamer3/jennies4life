@@ -2,57 +2,36 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import {
   TrendingUp,
-  ShoppingCart,
-  Star,
-  DollarSign,
+  FileText,
   Package,
   Loader2
 } from 'lucide-react';
-import { dashboardAPI } from '../../services/dashboardApi';
-import type {
-  DashboardStats,
-  DashboardProduct,
-  RecentOrder
-} from '../../services/dashboardApi';
+import { dashboardAPI, type DashboardStats, type DashboardProduct, type DashboardPost } from '../../services/dashboardApi';
 
 const AdminDashboard: React.FC = () => {
   const [stats, setStats] = useState<DashboardStats | null>(null);
-  const [topProducts, setTopProducts] = useState<DashboardProduct[]>([]);
-  const [recentOrders, setRecentOrders] = useState<RecentOrder[]>([]);
+  const [products, setProducts] = useState<DashboardProduct[]>([]);
+  const [posts, setPosts] = useState<DashboardPost[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Fetch dashboard data
   const fetchDashboardData = async () => {
     try {
       setLoading(true);
       setError(null);
       
-      const [statsResponse, productsResponse, ordersResponse] = await Promise.all([
+      const [statsResponse, productsResponse, postsResponse] = await Promise.all([
         dashboardAPI.getStats(),
         dashboardAPI.getProducts(),
-        dashboardAPI.getRecentOrders()
+        dashboardAPI.getPosts()
       ]);
-
-      if (statsResponse.success && statsResponse.stats) {
-        setStats(statsResponse.stats);
-      } else {
-        console.error('Failed to fetch stats:', statsResponse.message);
-      }
-
-      if (productsResponse.success && productsResponse.products) {
-        setTopProducts(productsResponse.products);
-      } else {
-        console.error('Failed to fetch products:', productsResponse.message);
-      }
-
-      if (ordersResponse.success && ordersResponse.orders) {
-        setRecentOrders(ordersResponse.orders);
-      } else {
-        console.error('Failed to fetch orders:', ordersResponse.message);
-      }
+      
+      setStats(statsResponse);
+      setProducts(productsResponse.data || []);
+      setPosts(postsResponse.data || []);
     } catch (err) {
-      setError('Network error occurred while fetching dashboard data');
+      setError('Failed to load dashboard data');
+      console.error('Dashboard data fetch error:', err);
     } finally {
       setLoading(false);
     }
@@ -64,36 +43,25 @@ const AdminDashboard: React.FC = () => {
 
   const statsConfig = [
     {
-      title: 'Total Revenue',
-      value: stats?.totalRevenue || '$0',
-      change: stats?.revenueChange || '+0%',
-      icon: DollarSign,
-      color: 'bg-green-500',
-      trend: 'up'
-    },
-    {
-      title: 'Total Orders',
-      value: stats?.totalOrders || '0',
-      change: stats?.ordersChange || '+0%',
-      icon: ShoppingCart,
-      color: 'bg-blue-500',
-      trend: 'up'
-    },
-    {
-      title: 'Active Products',
-      value: stats?.activeProducts || '0',
-      change: stats?.productsChange || '+0%',
+      title: 'Total Products',
+      value: stats?.totalProducts.toString() || '0',
+      change: '+0%',
       icon: Package,
-      color: 'bg-purple-500',
-      trend: 'up'
+      color: 'bg-green-500',
     },
     {
-      title: 'Customer Rating',
-      value: stats?.customerRating || '0.0',
-      change: stats?.ratingChange || '+0',
-      icon: Star,
-      color: 'bg-yellow-500',
-      trend: 'up'
+      title: 'Published Products',
+      value: stats?.publishedProducts.toString() || '0',
+      change: '+0%',
+      icon: TrendingUp,
+      color: 'bg-blue-500',
+    },
+    {
+      title: 'Total Posts',
+      value: stats?.totalPosts.toString() || '0',
+      change: '+0%',
+      icon: FileText,
+      color: 'bg-purple-500',
     },
   ];
 
@@ -174,27 +142,27 @@ const AdminDashboard: React.FC = () => {
             transition={{ duration: 0.5, delay: 0.4 }}
             className="bg-white rounded-lg shadow-sm p-6 lg:p-8 border border-gray-200"
           >
-            <h3 className="text-lg lg:text-xl font-semibold text-gray-900 mb-6">Recent Orders</h3>
+            <h3 className="text-lg lg:text-xl font-semibold text-gray-900 mb-6">Recent Posts</h3>
             <div className="space-y-4">
-              {recentOrders.length === 0 ? (
+              {posts.length === 0 ? (
                 <div className="text-center py-8">
-                  <p className="text-gray-500">No recent orders found</p>
+                  <p className="text-gray-500">No recent posts found</p>
                 </div>
               ) : (
-                recentOrders.slice(0, 3).map((order) => (
-                <div key={order.id} className="flex items-center justify-between py-3">
+                posts.slice(0, 3).map((post) => (
+                <div key={post.id} className="flex items-center justify-between py-3">
                   <div className="min-w-0 flex-1">
-                    <p className="font-medium text-gray-900">{order.id}</p>
-                    <p className="text-sm text-gray-600 truncate">{order.customer}</p>
+                    <p className="font-medium text-gray-900 truncate">{post.title}</p>
+                    <p className="text-sm text-gray-600">{new Date(post.createdAt._seconds * 1000).toLocaleDateString()}</p>
                   </div>
                   <div className="text-right flex-shrink-0 ml-4">
-                    <p className="font-medium text-gray-900">{order.amount}</p>
+                    <p className="text-sm text-gray-600">{post.views || 0} views</p>
                     <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
-                      order.status === 'Completed' ? 'bg-green-100 text-green-800' :
-                      order.status === 'Processing' ? 'bg-yellow-100 text-yellow-800' :
+                      post.status === 'published' ? 'bg-green-100 text-green-800' :
+                      post.status === 'draft' ? 'bg-yellow-100 text-yellow-800' :
                       'bg-blue-100 text-blue-800'
                     }`}>
-                      {order.status}
+                      {post.status}
                     </span>
                   </div>
                 </div>
@@ -211,18 +179,27 @@ const AdminDashboard: React.FC = () => {
           >
             <h3 className="text-lg lg:text-xl font-semibold text-gray-900 mb-6">Top Products</h3>
             <div className="space-y-4">
-              {topProducts.length === 0 ? (
+              {products.length === 0 ? (
                 <div className="text-center py-8">
                   <p className="text-gray-500">No top products found</p>
                 </div>
               ) : (
-                topProducts.slice(0, 3).map((product) => (
+                products.slice(0, 3).map((product) => (
                 <div key={product.id} className="flex items-center justify-between py-3">
                   <div className="min-w-0 flex-1">
                     <p className="font-medium text-gray-900 truncate">{product.name}</p>
-                    <p className="text-sm text-gray-600">{product.sales} sales</p>
+                    <p className="text-sm text-gray-600">{product.category}</p>
                   </div>
-                  <p className="font-medium text-gray-900 flex-shrink-0 ml-4">{product.revenue}</p>
+                  <div className="text-right flex-shrink-0 ml-4">
+                    <p className="font-medium text-gray-900">{product.clickCount} clicks</p>
+                    <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
+                      product.status === 'published' ? 'bg-green-100 text-green-800' :
+                      product.status === 'draft' ? 'bg-yellow-100 text-yellow-800' :
+                      'bg-blue-100 text-blue-800'
+                    }`}>
+                      {product.status}
+                    </span>
+                  </div>
                 </div>
                 ))
               )}

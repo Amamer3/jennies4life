@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import {
   Plus,
@@ -9,86 +9,59 @@ import {
   Grid3X3,
   Package,
   TrendingUp,
-  MoreHorizontal
+  MoreHorizontal,
+  Loader2,
+  AlertCircle
 } from 'lucide-react';
-
-
-interface Category {
-  id: string;
-  name: string;
-  description: string;
-  image: string;
-  productCount: number;
-  status: 'active' | 'inactive';
-  featured: boolean;
-  createdAt: string;
-  color: string;
-}
+import { categoryAPI, type Category, type CreateCategoryRequest, type UpdateCategoryRequest } from '../../services/categoryApi';
 
 const CategoriesAdmin: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedStatus, setSelectedStatus] = useState('all');
   const [showAddModal, setShowAddModal] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+  
+  // Form refs for modal
+  const nameRef = useRef<HTMLInputElement>(null);
+  const descriptionRef = useRef<HTMLTextAreaElement>(null);
+  const imageRef = useRef<HTMLInputElement>(null);
+  const colorRef = useRef<HTMLInputElement>(null);
+  const statusRef = useRef<HTMLSelectElement>(null);
+  const featuredRef = useRef<HTMLInputElement>(null);
 
-  // Mock data
-  const categories: Category[] = [
-    {
-      id: '1',
-      name: 'Electronics',
-      description: 'Smart gadgets, phones, laptops, and electronic accessories',
-      image: 'https://images.pexels.com/photos/2536965/pexels-photo-2536965.jpeg',
-      productCount: 45,
-      status: 'active',
-      featured: true,
-      createdAt: '2024-01-15',
-      color: '#3B82F6'
-    },
-    {
-      id: '2',
-      name: 'Beauty',
-      description: 'Skincare, makeup, and beauty products for all skin types',
-      image: 'https://images.pexels.com/photos/5076516/pexels-photo-5076516.jpeg',
-      productCount: 32,
-      status: 'active',
-      featured: true,
-      createdAt: '2024-01-12',
-      color: '#EC4899'
-    },
-    {
-      id: '3',
-      name: 'Health & Wellness',
-      description: 'Fitness equipment, supplements, and wellness products',
-      image: 'https://images.pexels.com/photos/2988232/pexels-photo-2988232.jpeg',
-      productCount: 28,
-      status: 'active',
-      featured: false,
-      createdAt: '2024-01-10',
-      color: '#10B981'
-    },
-    {
-      id: '4',
-      name: 'Fashion',
-      description: 'Clothing, accessories, and fashion items for all occasions',
-      image: 'https://images.pexels.com/photos/3962285/pexels-photo-3962285.jpeg',
-      productCount: 51,
-      status: 'active',
-      featured: true,
-      createdAt: '2024-01-08',
-      color: '#8B5CF6'
-    },
-    {
-      id: '5',
-      name: 'Home & Garden',
-      description: 'Home decor, furniture, and gardening supplies',
-      image: 'https://images.pexels.com/photos/1571460/pexels-photo-1571460.jpeg',
-      productCount: 0,
-      status: 'inactive',
-      featured: false,
-      createdAt: '2024-01-05',
-      color: '#F59E0B'
+  // Fetch categories from API
+  const fetchCategories = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      console.log('🔄 Fetching categories from API...');
+      const response = await categoryAPI.getAllCategories();
+      
+      console.log('📦 API Response:', response);
+      
+      if (response.success && response.categories) {
+        console.log('✅ Categories fetched successfully:', response.categories.length, 'categories');
+        setCategories(response.categories);
+      } else {
+        const errorMessage = response.message || 'Failed to fetch categories';
+        console.error('❌ API returned error:', errorMessage);
+        setError(errorMessage);
+      }
+    } catch (error) {
+      console.error('🚨 Error fetching categories:', error);
+      setError('Failed to load categories. Please try again.');
+    } finally {
+      setLoading(false);
     }
-  ];
+  };
+
+  useEffect(() => {
+    fetchCategories();
+  }, []);
 
   const statuses = ['all', 'active', 'inactive'];
 
@@ -106,13 +79,165 @@ const CategoriesAdmin: React.FC = () => {
     }
   };
 
+  // Handle category creation
+  const handleCreateCategory = async () => {
+    if (!nameRef.current || !descriptionRef.current || !imageRef.current || 
+        !colorRef.current || !statusRef.current || !featuredRef.current) {
+      return;
+    }
+
+    const categoryData: CreateCategoryRequest = {
+      name: nameRef.current.value.trim(),
+      description: descriptionRef.current.value.trim(),
+      image: imageRef.current.value.trim(),
+      color: colorRef.current.value,
+      status: statusRef.current.value as 'active' | 'inactive',
+      featured: featuredRef.current.checked
+    };
+
+    if (!categoryData.name || !categoryData.description) {
+      setError('Name and description are required');
+      return;
+    }
+
+    try {
+      setSubmitting(true);
+      setError(null);
+      console.log('🔄 Creating category:', categoryData);
+      
+      const response = await categoryAPI.createCategory(categoryData);
+      
+      if (response.success) {
+        console.log('✅ Category created successfully');
+        await fetchCategories(); // Refresh the list
+        setShowAddModal(false);
+        // Reset form
+        if (nameRef.current) nameRef.current.value = '';
+        if (descriptionRef.current) descriptionRef.current.value = '';
+        if (imageRef.current) imageRef.current.value = '';
+        if (colorRef.current) colorRef.current.value = '#3B82F6';
+        if (statusRef.current) statusRef.current.value = 'active';
+        if (featuredRef.current) featuredRef.current.checked = false;
+      } else {
+        setError(response.message || 'Failed to create category');
+      }
+    } catch (error) {
+      console.error('🚨 Error creating category:', error);
+      setError('Failed to create category. Please try again.');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  // Handle category update
+  const handleUpdateCategory = async () => {
+    if (!selectedCategory || !nameRef.current || !descriptionRef.current || 
+        !imageRef.current || !colorRef.current || !statusRef.current || !featuredRef.current) {
+      return;
+    }
+
+    const categoryData: UpdateCategoryRequest = {
+      name: nameRef.current.value.trim(),
+      description: descriptionRef.current.value.trim(),
+      image: imageRef.current.value.trim(),
+      color: colorRef.current.value,
+      status: statusRef.current.value as 'active' | 'inactive',
+      featured: featuredRef.current.checked
+    };
+
+    if (!categoryData.name || !categoryData.description) {
+      setError('Name and description are required');
+      return;
+    }
+
+    try {
+      setSubmitting(true);
+      setError(null);
+      console.log('🔄 Updating category:', selectedCategory.id, categoryData);
+      
+      const response = await categoryAPI.updateCategory(selectedCategory.id, categoryData);
+      
+      if (response.success) {
+        console.log('✅ Category updated successfully');
+        await fetchCategories(); // Refresh the list
+        setSelectedCategory(null);
+      } else {
+        setError(response.message || 'Failed to update category');
+      }
+    } catch (error) {
+      console.error('🚨 Error updating category:', error);
+      setError('Failed to update category. Please try again.');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  // Handle category deletion
+  const handleDeleteCategory = async (categoryId: string, categoryName: string) => {
+    if (!confirm(`Are you sure you want to delete the category "${categoryName}"? This action cannot be undone.`)) {
+      return;
+    }
+
+    try {
+      setError(null);
+      console.log('🔄 Deleting category:', categoryId);
+      
+      const response = await categoryAPI.deleteCategory(categoryId);
+      
+      if (response.success) {
+        console.log('✅ Category deleted successfully');
+        await fetchCategories(); // Refresh the list
+      } else {
+        setError(response.message || 'Failed to delete category');
+      }
+    } catch (error) {
+      console.error('🚨 Error deleting category:', error);
+      setError('Failed to delete category. Please try again.');
+    }
+  };
+
+  // Calculate stats
+  const totalCategories = categories.length;
+  const activeCategories = categories.filter(cat => cat.status === 'active').length;
+  const featuredCategories = categories.filter(cat => cat.featured).length;
+  const totalProducts = categories.reduce((sum, cat) => sum + cat.productCount, 0);
+
   const CategoryModal = ({ category, onClose }: { category: Category | null; onClose: () => void }) => {
     if (!category && !showAddModal) return null;
+
+    // Set initial values when modal opens
+    React.useEffect(() => {
+      if (category) {
+        if (nameRef.current) nameRef.current.value = category.name;
+        if (descriptionRef.current) descriptionRef.current.value = category.description;
+        if (imageRef.current) imageRef.current.value = category.image || '';
+        if (colorRef.current) colorRef.current.value = category.color || '#3B82F6';
+        if (statusRef.current) statusRef.current.value = category.status;
+        if (featuredRef.current) featuredRef.current.checked = category.featured;
+      } else {
+        // Reset form for new category
+        if (nameRef.current) nameRef.current.value = '';
+        if (descriptionRef.current) descriptionRef.current.value = '';
+        if (imageRef.current) imageRef.current.value = '';
+        if (colorRef.current) colorRef.current.value = '#3B82F6';
+        if (statusRef.current) statusRef.current.value = 'active';
+        if (featuredRef.current) featuredRef.current.checked = false;
+      }
+    }, [category]);
+
+    const handleSubmit = async (e: React.FormEvent) => {
+      e.preventDefault();
+      if (category) {
+        await handleUpdateCategory();
+      } else {
+        await handleCreateCategory();
+      }
+    };
 
     return (
       <div className="fixed inset-0 z-50 overflow-y-auto">
         <div className="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
-          <div className="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75" onClick={onClose} />
+          <div className="fixed inset-0 transition-opacity" onClick={onClose} />
           
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
@@ -124,34 +249,46 @@ const CategoriesAdmin: React.FC = () => {
               {category ? 'Edit Category' : 'Add New Category'}
             </h3>
             
-            <div className="space-y-4">
+            {error && (
+              <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md flex items-center">
+                <AlertCircle className="h-4 w-4 text-red-500 mr-2" />
+                <span className="text-sm text-red-700">{error}</span>
+              </div>
+            )}
+            
+            <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Category Name</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Category Name *</label>
                 <input
+                  ref={nameRef}
                   type="text"
-                  defaultValue={category?.name || ''}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#e72a00]"
                   placeholder="Enter category name"
+                  required
+                  disabled={submitting}
                 />
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Description *</label>
                 <textarea
+                  ref={descriptionRef}
                   rows={3}
-                  defaultValue={category?.description || ''}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#e72a00]"
                   placeholder="Enter category description"
+                  required
+                  disabled={submitting}
                 />
               </div>
               
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Category Image URL</label>
                 <input
+                  ref={imageRef}
                   type="url"
-                  defaultValue={category?.image || ''}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#e72a00]"
                   placeholder="https://example.com/image.jpg"
+                  disabled={submitting}
                 />
               </div>
               
@@ -159,17 +296,19 @@ const CategoriesAdmin: React.FC = () => {
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Category Color</label>
                   <input
+                    ref={colorRef}
                     type="color"
-                    defaultValue={category?.color || '#3B82F6'}
                     className="w-full h-10 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#e72a00]"
+                    disabled={submitting}
                   />
                 </div>
                 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
                   <select
-                    defaultValue={category?.status || 'active'}
+                    ref={statusRef}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#e72a00]"
+                    disabled={submitting}
                   >
                     <option value="active">Active</option>
                     <option value="inactive">Inactive</option>
@@ -179,28 +318,36 @@ const CategoriesAdmin: React.FC = () => {
               
               <div className="flex items-center">
                 <input
+                  ref={featuredRef}
                   type="checkbox"
                   id="featured"
-                  defaultChecked={category?.featured || false}
                   className="h-4 w-4 text-[#e72a00] focus:ring-[#e72a00] border-gray-300 rounded"
+                  disabled={submitting}
                 />
                 <label htmlFor="featured" className="ml-2 block text-sm text-gray-700">
                   Featured Category (Show on homepage)
                 </label>
               </div>
-            </div>
-            
-            <div className="flex justify-end space-x-3 mt-6">
-              <button
-                onClick={onClose}
-                className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors"
-              >
-                Cancel
-              </button>
-              <button className="px-4 py-2 text-sm font-medium text-white bg-[#e72a00] rounded-md hover:bg-[#d12400] transition-colors">
-                {category ? 'Update Category' : 'Add Category'}
-              </button>
-            </div>
+              
+              <div className="flex justify-end space-x-3 mt-6">
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors disabled:opacity-50"
+                  disabled={submitting}
+                >
+                  Cancel
+                </button>
+                <button 
+                  type="submit"
+                  className="px-4 py-2 text-sm font-medium text-white bg-[#e72a00] rounded-md hover:bg-[#d12400] transition-colors disabled:opacity-50 flex items-center"
+                  disabled={submitting}
+                >
+                  {submitting && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                  {category ? 'Update Category' : 'Add Category'}
+                </button>
+              </div>
+            </form>
           </motion.div>
         </div>
       </div>
@@ -227,10 +374,10 @@ const CategoriesAdmin: React.FC = () => {
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         {[
-          { label: 'Total Categories', value: '12', icon: Grid3X3, color: 'bg-blue-500' },
-          { label: 'Active Categories', value: '10', icon: TrendingUp, color: 'bg-green-500' },
-          { label: 'Featured Categories', value: '4', icon: Grid3X3, color: 'bg-purple-500' },
-          { label: 'Total Products', value: '156', icon: Package, color: 'bg-orange-500' },
+          { label: 'Total Categories', value: totalCategories.toString(), icon: Grid3X3, color: 'bg-blue-500' },
+          { label: 'Active Categories', value: activeCategories.toString(), icon: TrendingUp, color: 'bg-green-500' },
+          { label: 'Featured Categories', value: featuredCategories.toString(), icon: Grid3X3, color: 'bg-purple-500' },
+          { label: 'Total Products', value: totalProducts.toString(), icon: Package, color: 'bg-orange-500' },
         ].map((stat, index) => (
           <motion.div
             key={stat.label}
@@ -250,7 +397,8 @@ const CategoriesAdmin: React.FC = () => {
             </div>
           </motion.div>
         ))}
-      </div>
+        </div>
+      
 
       {/* Filters */}
       <div className="bg-white rounded-lg shadow-sm p-4 border border-gray-200">
@@ -284,8 +432,25 @@ const CategoriesAdmin: React.FC = () => {
         </div>
       </div>
 
+      {/* Loading State */}
+      {loading && (
+        <div className="flex items-center justify-center py-12">
+          <Loader2 className="h-8 w-8 animate-spin text-[#e72a00]" />
+          <span className="ml-2 text-gray-600">Loading categories...</span>
+        </div>
+      )}
+
+      {/* Error State */}
+      {error && (
+        <div className="bg-red-50 border border-red-200 rounded-md p-4 flex items-center">
+          <AlertCircle className="h-5 w-5 text-red-500 mr-2" />
+          <span className="text-red-700">{error}</span>
+        </div>
+      )}
+
       {/* Categories Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {!loading && !error && filteredCategories.length > 0 && (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredCategories.map((category, index) => (
           <motion.div
             key={category.id}
@@ -336,13 +501,19 @@ const CategoriesAdmin: React.FC = () => {
                   <button className="text-gray-400 hover:text-gray-600 transition-colors">
                     <Eye className="h-4 w-4" />
                   </button>
-                  <button
-                    onClick={() => setSelectedCategory(category)}
-                    className="text-blue-600 hover:text-blue-800 transition-colors"
+                  <button 
+                     onClick={() => {
+                       setSelectedCategory(category);
+                       setShowAddModal(false);
+                     }}
+                     className="text-blue-600 hover:text-blue-800 transition-colors"
+                   >
+                     <Edit className="h-4 w-4" />
+                   </button>
+                  <button 
+                    onClick={() => handleDeleteCategory(category.id, category.name)}
+                    className="text-red-600 hover:text-red-800 transition-colors"
                   >
-                    <Edit className="h-4 w-4" />
-                  </button>
-                  <button className="text-red-600 hover:text-red-800 transition-colors">
                     <Trash2 className="h-4 w-4" />
                   </button>
                   <button className="text-gray-400 hover:text-gray-600 transition-colors">
@@ -354,20 +525,25 @@ const CategoriesAdmin: React.FC = () => {
           </motion.div>
         ))}
       </div>
+      )}
 
       {/* Empty State */}
-      {filteredCategories.length === 0 && (
+      {!loading && !error && filteredCategories.length === 0 && (
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           className="text-center py-12"
         >
           <Grid3X3 className="mx-auto h-12 w-12 text-gray-400" />
-          <h3 className="mt-2 text-sm font-medium text-gray-900">No categories found</h3>
+          <h3 className="mt-2 text-sm font-medium text-gray-900">
+            {categories.length === 0 ? 'No categories yet' : 'No categories match your filters'}
+          </h3>
           <p className="mt-1 text-sm text-gray-500">
-            {searchTerm ? 'Try adjusting your search terms.' : 'Get started by creating a new category.'}
+            {categories.length === 0 
+              ? 'Get started by creating your first category.' 
+              : 'Try adjusting your search or filter criteria.'}
           </p>
-          {!searchTerm && (
+          {categories.length === 0 && (
             <div className="mt-6">
               <button
                 onClick={() => setShowAddModal(true)}
@@ -440,13 +616,19 @@ const CategoriesAdmin: React.FC = () => {
                       <button className="text-gray-400 hover:text-gray-600">
                         <Eye className="h-4 w-4" />
                       </button>
-                      <button
-                        onClick={() => setSelectedCategory(category)}
-                        className="text-blue-600 hover:text-blue-900"
+                      <button 
+                         onClick={() => {
+                           setSelectedCategory(category);
+                           setShowAddModal(false);
+                         }}
+                         className="text-blue-600 hover:text-blue-900"
+                       >
+                         <Edit className="h-4 w-4" />
+                       </button>
+                      <button 
+                        onClick={() => handleDeleteCategory(category.id, category.name)}
+                        className="text-red-600 hover:text-red-900"
                       >
-                        <Edit className="h-4 w-4" />
-                      </button>
-                      <button className="text-red-600 hover:text-red-900">
                         <Trash2 className="h-4 w-4" />
                       </button>
                     </div>

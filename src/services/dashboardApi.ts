@@ -1,44 +1,69 @@
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
 
-interface DashboardStats {
-  totalRevenue: string;
-  activeProducts: string;
-  customerRating: string;
-  revenueChange: string;
-  productsChange: string;
-  ratingChange: string;
+export interface DashboardStats {
+  totalProducts: number;
+  publishedProducts: number;
+  draftProducts: number;
+  totalPosts: number;
+  publishedPosts: number;
+  draftPosts: number;
+  recentProducts: DashboardProduct[];
+  recentPosts: DashboardPost[];
 }
 
-interface DashboardStatsResponse {
-  success: boolean;
-  stats?: DashboardStats;
-  message?: string;
-}
 
-interface DashboardProduct {
+
+export interface DashboardProduct {
   id: string;
   name: string;
-  sales: number;
-  revenue: string;
+  affiliateLink: string;
+  description: string;
+  image: string;
+  slug: string;
+  category: string;
+  status: 'published' | 'draft';
+  createdAt: {
+    _seconds: number;
+    _nanoseconds: number;
+  };
+  clickCount: number;
+  lastClickedAt?: {
+    _seconds: number;
+    _nanoseconds: number;
+  };
+  updatedAt: {
+    _seconds: number;
+    _nanoseconds: number;
+  };
 }
 
 interface DashboardProductsResponse {
   success: boolean;
-  products?: DashboardProduct[];
+  data: DashboardProduct[];
   message?: string;
 }
 
-interface DashboardPost {
+export interface DashboardPost {
   id: string;
   title: string;
-  views: number;
-  likes: number;
-  createdAt: string;
+  content?: string;
+  excerpt?: string;
+  slug: string;
+  status: 'published' | 'draft';
+  createdAt: {
+    _seconds: number;
+    _nanoseconds: number;
+  };
+  updatedAt: {
+    _seconds: number;
+    _nanoseconds: number;
+  };
+  views?: number;
 }
 
 interface DashboardPostsResponse {
   success: boolean;
-  posts?: DashboardPost[];
+  data: DashboardPost[];
   message?: string;
 }
 
@@ -53,113 +78,57 @@ class DashboardAPI {
     };
   }
 
-  private isDemoMode(): boolean {
-    const authToken = localStorage.getItem('authToken');
-    return authToken === 'demo-admin-token';
+
+  async getStats(): Promise<DashboardStats> {
+    const response = await fetch(`${API_BASE_URL}/api/dashboard/stats`, {
+      headers: this.getAuthHeaders()
+    });
+    
+    if (!response.ok) {
+      throw new Error('Failed to fetch dashboard stats');
+    }
+    
+    const result = await response.json();
+    return result.data;
   }
 
-
-
-  async getStats(): Promise<DashboardStatsResponse> {
-    if (this.isDemoMode()) {
-      return {
-        success: true,
-        stats: {
-          totalRevenue: '$12,450.75',
-          activeProducts: '156',
-          customerRating: '4.8',
-          revenueChange: '+12.5%',
-          productsChange: '+5.1%',
-          ratingChange: '+0.3%'
-        }
-      };
+  async getAdminStats(): Promise<any> {
+    const response = await fetch(`${API_BASE_URL}/api/admin/stats`, {
+      headers: this.getAuthHeaders()
+    });
+    
+    if (!response.ok) {
+      throw new Error('Failed to fetch admin stats');
     }
-
-    try {
-      const response = await fetch(`${API_BASE_URL}/api/dashboard/stats`, {
-        method: 'GET',
-        headers: this.getAuthHeaders(),
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-      }
-
-      const data = await response.json();
-      return data;
-    } catch (error) {
-      console.error('Get dashboard stats API error:', error);
-      return {
-        success: false,
-        message: error instanceof Error ? error.message : 'Network error occurred while fetching dashboard stats'
-      };
-    }
+    
+    const result = await response.json();
+    return result;
   }
 
   async getProducts(): Promise<DashboardProductsResponse> {
-    if (this.isDemoMode()) {
-      return {
-        success: true,
-        products: [
-          {
-            id: '1',
-            name: 'Premium Hair Oil',
-            sales: 145,
-            revenue: '$4,350.00'
-          },
-          {
-            id: '2',
-            name: 'Moisturizing Cream',
-            sales: 98,
-            revenue: '$2,450.00'
-          },
-          {
-            id: '3',
-            name: 'Vitamin C Serum',
-            sales: 76,
-            revenue: '$3,040.00'
-          }
-        ]
-      };
+    const response = await fetch(`${API_BASE_URL}/api/dashboard/products`, {
+      headers: this.getAuthHeaders()
+    });
+    
+    if (!response.ok) {
+      throw new Error('Failed to fetch dashboard products');
     }
-
-    try {
-      const response = await fetch(`${API_BASE_URL}/api/dashboard/products`, {
-        method: 'GET',
-        headers: this.getAuthHeaders(),
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-      }
-
-      const data = await response.json();
-      return data;
-    } catch (error) {
-      console.error('Get dashboard products API error:', error);
-      return {
-        success: false,
-        message: error instanceof Error ? error.message : 'Network error occurred while fetching dashboard products'
-      };
-    }
+    
+    const result = await response.json();
+    return result;
   }
 
   async getPosts(): Promise<DashboardPostsResponse> {
-    try {
-      const response = await fetch(`${API_BASE_URL}/api/dashboard/posts`, {
-        method: 'GET',
-        headers: this.getAuthHeaders(),
-      });
-
-      const data = await response.json();
-      return data;
-    } catch (error) {
-      console.error('Get dashboard posts API error:', error);
-      return {
-        success: false,
-        message: 'Network error occurred while fetching dashboard posts'
-      };
+    const response = await fetch(`${API_BASE_URL}/api/dashboard/posts`, {
+      headers: this.getAuthHeaders()
+    });
+    
+    if (!response.ok) {
+      throw new Error('Failed to fetch dashboard posts');
     }
+    
+    const result = await response.json();
+    return result;
   }
 
 
@@ -167,10 +136,6 @@ class DashboardAPI {
 
 export const dashboardAPI = new DashboardAPI();
 export type {
-  DashboardStats,
-  DashboardStatsResponse,
-  DashboardProduct,
   DashboardProductsResponse,
-  DashboardPost,
   DashboardPostsResponse
 };

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import {
   Plus,
@@ -13,27 +13,10 @@ import {
   Heart,
   MoreHorizontal
 } from 'lucide-react';
+import { blogApi, type BlogPost } from '../../services/blogApi';
 
 
-interface BlogPost {
-  id: string;
-  title: string;
-  excerpt: string;
-  content: string;
-  author: string;
-  authorAvatar: string;
-  category: string;
-  tags: string[];
-  featuredImage: string;
-  status: 'published' | 'draft' | 'scheduled';
-  featured: boolean;
-  views: number;
-  likes: number;
-  comments: number;
-  publishDate: string;
-  createdAt: string;
-  updatedAt: string;
-}
+
 
 const BlogAdmin: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -43,85 +26,39 @@ const BlogAdmin: React.FC = () => {
   const [selectedPost, setSelectedPost] = useState<BlogPost | null>(null);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
-  // Mock data
-  const blogPosts: BlogPost[] = [
-    {
-      id: '1',
-      title: '10 Best Smart Gadgets for 2024',
-      excerpt: 'Discover the latest smart gadgets that will revolutionize your daily life in 2024.',
-      content: 'Full blog content here...',
-      author: 'John Smith',
-      authorAvatar: 'https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg',
-      category: 'Technology',
-      tags: ['gadgets', 'technology', 'smart devices', '2024'],
-      featuredImage: 'https://images.pexels.com/photos/2536965/pexels-photo-2536965.jpeg',
-      status: 'published',
-      featured: true,
-      views: 1234,
-      likes: 89,
-      comments: 23,
-      publishDate: '2024-01-15',
-      createdAt: '2024-01-14',
-      updatedAt: '2024-01-15'
-    },
-    {
-      id: '2',
-      title: 'The Ultimate Skincare Routine Guide',
-      excerpt: 'Learn how to create the perfect skincare routine for your skin type.',
-      content: 'Full blog content here...',
-      author: 'Sarah Johnson',
-      authorAvatar: 'https://images.pexels.com/photos/3763188/pexels-photo-3763188.jpeg',
-      category: 'Beauty',
-      tags: ['skincare', 'beauty', 'routine', 'tips'],
-      featuredImage: 'https://images.pexels.com/photos/5076516/pexels-photo-5076516.jpeg',
-      status: 'published',
-      featured: false,
-      views: 892,
-      likes: 67,
-      comments: 15,
-      publishDate: '2024-01-12',
-      createdAt: '2024-01-11',
-      updatedAt: '2024-01-12'
-    },
-    {
-      id: '3',
-      title: 'Fitness Trends to Watch This Year',
-      excerpt: 'Stay ahead of the curve with these emerging fitness trends.',
-      content: 'Full blog content here...',
-      author: 'Mike Wilson',
-      authorAvatar: 'https://images.pexels.com/photos/1222271/pexels-photo-1222271.jpeg',
-      category: 'Health',
-      tags: ['fitness', 'health', 'trends', 'workout'],
-      featuredImage: 'https://images.pexels.com/photos/2988232/pexels-photo-2988232.jpeg',
-      status: 'draft',
-      featured: false,
-      views: 0,
-      likes: 0,
-      comments: 0,
-      publishDate: '2024-01-20',
-      createdAt: '2024-01-10',
-      updatedAt: '2024-01-18'
-    },
-    {
-      id: '4',
-      title: 'Fashion Forward: Spring Collection Preview',
-      excerpt: 'Get a sneak peek at the hottest fashion trends for spring.',
-      content: 'Full blog content here...',
-      author: 'Emma Davis',
-      authorAvatar: 'https://images.pexels.com/photos/3763188/pexels-photo-3763188.jpeg',
-      category: 'Fashion',
-      tags: ['fashion', 'spring', 'trends', 'style'],
-      featuredImage: 'https://images.pexels.com/photos/3962285/pexels-photo-3962285.jpeg',
-      status: 'scheduled',
-      featured: true,
-      views: 0,
-      likes: 0,
-      comments: 0,
-      publishDate: '2024-01-25',
-      createdAt: '2024-01-08',
-      updatedAt: '2024-01-16'
+  const [blogPosts, setBlogPosts] = useState<BlogPost[]>([]);
+  const [, setLoading] = useState(true);
+
+  // Fetch blog posts from API
+  useEffect(() => {
+    fetchBlogPosts();
+  }, []);
+
+  const fetchBlogPosts = async () => {
+    try {
+      setLoading(true);
+      const posts = await blogApi.getAllPosts();
+      setBlogPosts(posts);
+    } catch (error) {
+      console.error('Failed to fetch blog posts:', error);
+    } finally {
+      setLoading(false);
     }
-  ];
+  };
+
+  const handleDeletePost = async (id: string) => {
+    if (window.confirm('Are you sure you want to delete this blog post?')) {
+      try {
+        await blogApi.deletePost(id);
+        setBlogPosts(blogPosts.filter(post => post.id !== id));
+      } catch (error) {
+        console.error('Failed to delete blog post:', error);
+        alert('Failed to delete blog post. Please try again.');
+      }
+    }
+  };
+
+
 
   const categories = ['all', 'Technology', 'Beauty', 'Health', 'Fashion', 'Lifestyle'];
   const statuses = ['all', 'published', 'draft', 'scheduled'];
@@ -150,7 +87,7 @@ const BlogAdmin: React.FC = () => {
     return (
       <div className="fixed inset-0 z-50 overflow-y-auto">
         <div className="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
-          <div className="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75" onClick={onClose} />
+          <div className="fixed inset-0 transition-opacity" onClick={onClose} />
           
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
@@ -255,7 +192,7 @@ const BlogAdmin: React.FC = () => {
                   <label className="block text-sm font-medium text-gray-700 mb-1">Publish Date</label>
                   <input
                     type="date"
-                    defaultValue={post?.publishDate || ''}
+                    defaultValue={post?.publishedAt || ''}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#e72a00]"
                   />
                 </div>
@@ -437,7 +374,7 @@ const BlogAdmin: React.FC = () => {
                 <div className="flex items-center space-x-2 mb-2">
                   <span className="text-xs text-[#e72a00] font-medium">{post.category}</span>
                   <span className="text-xs text-gray-500">•</span>
-                  <span className="text-xs text-gray-500">{new Date(post.publishDate).toLocaleDateString()}</span>
+                  <span className="text-xs text-gray-500">{post.publishedAt ? new Date(post.publishedAt).toLocaleDateString() : 'Not published'}</span>
                 </div>
                 
                 <h3 className="text-lg font-semibold text-gray-900 mb-2 line-clamp-2">{post.title}</h3>
@@ -488,10 +425,15 @@ const BlogAdmin: React.FC = () => {
                     <button
                       onClick={() => setSelectedPost(post)}
                       className="text-blue-600 hover:text-blue-800 transition-colors"
+                      title="Edit post"
                     >
                       <Edit className="h-4 w-4" />
                     </button>
-                    <button className="text-red-600 hover:text-red-800 transition-colors">
+                    <button 
+                      className="text-red-600 hover:text-red-800 transition-colors"
+                      onClick={() => handleDeletePost(post.id)}
+                      title="Delete post"
+                    >
                       <Trash2 className="h-4 w-4" />
                     </button>
                   </div>
@@ -576,7 +518,7 @@ const BlogAdmin: React.FC = () => {
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {new Date(post.publishDate).toLocaleDateString()}
+                      {post.publishedAt ? new Date(post.publishedAt).toLocaleDateString() : 'Not published'}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                       <div className="flex items-center space-x-2">
@@ -586,10 +528,15 @@ const BlogAdmin: React.FC = () => {
                         <button
                           onClick={() => setSelectedPost(post)}
                           className="text-blue-600 hover:text-blue-900"
+                          title="Edit post"
                         >
                           <Edit className="h-4 w-4" />
                         </button>
-                        <button className="text-red-600 hover:text-red-900">
+                        <button 
+                          className="text-red-600 hover:text-red-900"
+                          onClick={() => handleDeletePost(post.id)}
+                          title="Delete post"
+                        >
                           <Trash2 className="h-4 w-4" />
                         </button>
                         <button className="text-gray-400 hover:text-gray-600">

@@ -1,7 +1,6 @@
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
 
 import type { Product } from '../types';
-import { products, getProductBySlug } from '../data';
 
 // Response interfaces for public product endpoints
 interface PublicProductsResponse {
@@ -31,87 +30,12 @@ export interface ProductQueryParams {
 }
 
 class PublicProductAPI {
-  private isDemoMode(): boolean {
-    return !import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_DEMO_MODE === 'true';
-  }
-
   /**
    * GET /api/products - Retrieve all published products (public endpoint)
    * This endpoint returns only published products that are visible to the public
    */
   async getProducts(params: ProductQueryParams = {}): Promise<PublicProductsResponse> {
     console.log('PublicProductAPI: Starting getProducts request with params:', params);
-    
-    if (this.isDemoMode()) {
-      // Filter only published products from demo data
-      let filteredProducts = products.filter(_product => {
-        // Only return products that would be considered "published" in a real system
-        // For demo purposes, we'll return all products as they're all meant to be public
-        return true;
-      });
-
-      // Apply search filter
-      if (params.search) {
-        const searchTerm = params.search.toLowerCase();
-        filteredProducts = filteredProducts.filter(product =>
-          product.name.toLowerCase().includes(searchTerm) ||
-          product.description.toLowerCase().includes(searchTerm) ||
-          product.tags.some(tag => tag.toLowerCase().includes(searchTerm))
-        );
-      }
-
-      // Apply category filter
-      if (params.category) {
-        filteredProducts = filteredProducts.filter(product =>
-          product.category.toLowerCase().replace(/\s+/g, '-') === params.category?.toLowerCase()
-        );
-      }
-
-      // Apply featured filter
-      if (params.featured !== undefined) {
-        filteredProducts = filteredProducts.filter(product => product.isFeatured === params.featured);
-      }
-
-      // Apply sorting
-      if (params.sortBy) {
-        filteredProducts.sort((a, b) => {
-          let comparison = 0;
-          switch (params.sortBy) {
-            case 'name':
-              comparison = a.name.localeCompare(b.name);
-              break;
-            case 'price':
-              comparison = a.price - b.price;
-              break;
-            case 'rating':
-              comparison = a.rating - b.rating;
-              break;
-            case 'newest':
-              // For demo, we'll use the isNew flag
-              comparison = (b.isNew ? 1 : 0) - (a.isNew ? 1 : 0);
-              break;
-            default:
-              comparison = 0;
-          }
-          return params.sortOrder === 'desc' ? -comparison : comparison;
-        });
-      }
-
-      // Apply pagination
-      const page = params.page || 1;
-      const limit = params.limit || 20;
-      const startIndex = (page - 1) * limit;
-      const endIndex = startIndex + limit;
-      const paginatedProducts = filteredProducts.slice(startIndex, endIndex);
-
-      return {
-        success: true,
-        products: paginatedProducts,
-        total: filteredProducts.length,
-        page,
-        limit
-      };
-    }
     
     try {
       // Build query string
@@ -158,22 +82,6 @@ class PublicProductAPI {
    */
   async getProductBySlug(slug: string): Promise<PublicProductResponse> {
     console.log('PublicProductAPI: Starting getProductBySlug request for slug:', slug);
-    
-    if (this.isDemoMode()) {
-      const product = getProductBySlug(slug);
-      
-      if (!product) {
-        return {
-          success: false,
-          message: 'Product not found'
-        };
-      }
-
-      return {
-        success: true,
-        product
-      };
-    }
     
     try {
       console.log('🌐 Making API request to:', `${API_BASE_URL}/api/products/${slug}`);

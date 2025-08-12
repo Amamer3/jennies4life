@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import {
   Plus,
@@ -10,43 +10,10 @@ import {
   Users,
   UserCheck,
   UserX,
-  Mail,
-  Phone,
-  Calendar,
-  MoreHorizontal,
-  Ban,
-  CheckCircle,
-  AlertCircle
+  Shield
 } from 'lucide-react';
-
-
-interface User {
-  id: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  phone: string;
-  avatar: string;
-  role: 'admin' | 'customer' | 'moderator';
-  status: 'active' | 'inactive' | 'banned';
-  emailVerified: boolean;
-  lastLogin: string;
-  joinDate: string;
-
-  totalSpent: number;
-  address: {
-    street: string;
-    city: string;
-    state: string;
-    zipCode: string;
-    country: string;
-  };
-  preferences: {
-    newsletter: boolean;
-    smsNotifications: boolean;
-    emailNotifications: boolean;
-  };
-}
+import { userApi, type User } from '../../services/userApi';
+import { createAdminFromPayload, exampleAdminPayload } from '../../utils/createAdmin';
 
 const UsersAdmin: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -56,154 +23,63 @@ const UsersAdmin: React.FC = () => {
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('list');
 
-  // Mock data
-  const users: User[] = [
-    {
-      id: '1',
-      firstName: 'John',
-      lastName: 'Smith',
-      email: 'john.smith@email.com',
-      phone: '+1 (555) 123-4567',
-      avatar: 'https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg',
-      role: 'customer',
-      status: 'active',
-      emailVerified: true,
-      lastLogin: '2024-01-18T10:30:00Z',
-      joinDate: '2023-06-15T09:00:00Z',
+  const [users, setUsers] = useState<User[]>([]);
+  const [, setLoading] = useState(true);
+  const [creatingAdmin, setCreatingAdmin] = useState(false);
 
-      totalSpent: 1250.99,
-      address: {
-        street: '123 Main St',
-        city: 'New York',
-        state: 'NY',
-        zipCode: '10001',
-        country: 'USA'
-      },
-      preferences: {
-        newsletter: true,
-        smsNotifications: false,
-        emailNotifications: true
-      }
-    },
-    {
-      id: '2',
-      firstName: 'Sarah',
-      lastName: 'Johnson',
-      email: 'sarah.johnson@email.com',
-      phone: '+1 (555) 987-6543',
-      avatar: 'https://images.pexels.com/photos/3763188/pexels-photo-3763188.jpeg',
-      role: 'admin',
-      status: 'active',
-      emailVerified: true,
-      lastLogin: '2024-01-18T14:15:00Z',
-      joinDate: '2022-01-10T08:00:00Z',
+  // Fetch users from API
+  useEffect(() => {
+    fetchUsers();
+  }, []);
 
-      totalSpent: 0,
-      address: {
-        street: '456 Oak Ave',
-        city: 'Los Angeles',
-        state: 'CA',
-        zipCode: '90210',
-        country: 'USA'
-      },
-      preferences: {
-        newsletter: true,
-        smsNotifications: true,
-        emailNotifications: true
-      }
-    },
-    {
-      id: '3',
-      firstName: 'Mike',
-      lastName: 'Wilson',
-      email: 'mike.wilson@email.com',
-      phone: '+1 (555) 456-7890',
-      avatar: 'https://images.pexels.com/photos/1222271/pexels-photo-1222271.jpeg',
-      role: 'customer',
-      status: 'inactive',
-      emailVerified: false,
-      lastLogin: '2024-01-10T16:45:00Z',
-      joinDate: '2023-11-20T12:30:00Z',
+  const fetchUsers = async () => {
+    try {
+      setLoading(true);
+      const fetchedUsers = await userApi.getAllUsers();
+      setUsers(fetchedUsers);
+    } catch (error) {
+      console.error('Failed to fetch users:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-      totalSpent: 89.97,
-      address: {
-        street: '789 Pine Rd',
-        city: 'Chicago',
-        state: 'IL',
-        zipCode: '60601',
-        country: 'USA'
-      },
-      preferences: {
-        newsletter: false,
-        smsNotifications: false,
-        emailNotifications: true
-      }
-    },
-    {
-      id: '4',
-      firstName: 'Emma',
-      lastName: 'Davis',
-      email: 'emma.davis@email.com',
-      phone: '+1 (555) 321-0987',
-      avatar: 'https://images.pexels.com/photos/3763188/pexels-photo-3763188.jpeg',
-      role: 'moderator',
-      status: 'active',
-      emailVerified: true,
-      lastLogin: '2024-01-17T11:20:00Z',
-      joinDate: '2023-03-05T14:15:00Z',
-
-      totalSpent: 567.45,
-      address: {
-        street: '321 Elm St',
-        city: 'Miami',
-        state: 'FL',
-        zipCode: '33101',
-        country: 'USA'
-      },
-      preferences: {
-        newsletter: true,
-        smsNotifications: true,
-        emailNotifications: true
-      }
-    },
-    {
-      id: '5',
-      firstName: 'David',
-      lastName: 'Brown',
-      email: 'david.brown@email.com',
-      phone: '+1 (555) 654-3210',
-      avatar: 'https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg',
-      role: 'customer',
-      status: 'banned',
-      emailVerified: true,
-      lastLogin: '2024-01-05T09:30:00Z',
-      joinDate: '2023-08-12T10:45:00Z',
-
-      totalSpent: 25.99,
-      address: {
-        street: '654 Maple Dr',
-        city: 'Seattle',
-        state: 'WA',
-        zipCode: '98101',
-        country: 'USA'
-      },
-      preferences: {
-        newsletter: false,
-        smsNotifications: false,
-        emailNotifications: false
+  const handleDeleteUser = async (uid: string) => {
+    if (window.confirm('Are you sure you want to delete this user?')) {
+      try {
+        await userApi.deleteUser(uid);
+        setUsers(users.filter(user => user.uid !== uid));
+      } catch (error) {
+        console.error('Failed to delete user:', error);
+        alert('Failed to delete user. Please try again.');
       }
     }
-  ];
+  };
 
-  const roles = ['all', 'admin', 'customer', 'moderator'];
-  const statuses = ['all', 'active', 'inactive', 'banned'];
+
+  const handleCreateAdmin = async () => {
+    if (window.confirm('Create admin user with email: newadmin@jennies4life.com?')) {
+      try {
+        setCreatingAdmin(true);
+        const newAdmin = await createAdminFromPayload(exampleAdminPayload);
+        setUsers([...users, newAdmin]);
+        alert('Admin user created successfully!');
+      } catch (error) {
+        console.error('Failed to create admin user:', error);
+        alert('Failed to create admin user. Please try again.');
+      } finally {
+        setCreatingAdmin(false);
+      }
+    }
+  };
+
+  const roles = ['all', 'admin', 'user'];
+  const statuses = ['all', 'active', 'inactive'];
 
   const filteredUsers = users.filter(user => {
     const matchesSearch = 
-      user.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.phone.includes(searchTerm);
+      (user.name && user.name.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      (user.email && user.email.toLowerCase().includes(searchTerm.toLowerCase()));
     const matchesRole = selectedRole === 'all' || user.role === selectedRole;
     const matchesStatus = selectedStatus === 'all' || user.status === selectedStatus;
     return matchesSearch && matchesRole && matchesStatus;
@@ -213,7 +89,6 @@ const UsersAdmin: React.FC = () => {
     switch (status) {
       case 'active': return 'bg-green-100 text-green-800';
       case 'inactive': return 'bg-yellow-100 text-yellow-800';
-      case 'banned': return 'bg-red-100 text-red-800';
       default: return 'bg-gray-100 text-gray-800';
     }
   };
@@ -221,8 +96,7 @@ const UsersAdmin: React.FC = () => {
   const getRoleColor = (role: string) => {
     switch (role) {
       case 'admin': return 'bg-purple-100 text-purple-800';
-      case 'moderator': return 'bg-blue-100 text-blue-800';
-      case 'customer': return 'bg-gray-100 text-gray-800';
+      case 'user': return 'bg-gray-100 text-gray-800';
       default: return 'bg-gray-100 text-gray-800';
     }
   };
@@ -233,7 +107,7 @@ const UsersAdmin: React.FC = () => {
     return (
       <div className="fixed inset-0 z-50 overflow-y-auto">
         <div className="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
-          <div className="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75" onClick={onClose} />
+          <div className="fixed inset-0 transition-opacity" onClick={onClose} />
           
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
@@ -246,59 +120,34 @@ const UsersAdmin: React.FC = () => {
             </h3>
             
             <div className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">First Name</label>
-                  <input
-                    type="text"
-                    defaultValue={user?.firstName || ''}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#e72a00]"
-                    placeholder="Enter first name"
-                  />
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
-                  <input
-                    type="text"
-                    defaultValue={user?.lastName || ''}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#e72a00]"
-                    placeholder="Enter last name"
-                  />
-                </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
+                <input
+                  type="text"
+                  defaultValue={user?.name || ''}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#e72a00]"
+                  placeholder="Enter full name"
+                />
               </div>
               
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                  <input
-                    type="email"
-                    defaultValue={user?.email || ''}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#e72a00]"
-                    placeholder="Enter email address"
-                  />
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
-                  <input
-                    type="tel"
-                    defaultValue={user?.phone || ''}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#e72a00]"
-                    placeholder="Enter phone number"
-                  />
-                </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                <input
+                  type="email"
+                  defaultValue={user?.email || ''}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#e72a00]"
+                  placeholder="Enter email address"
+                />
               </div>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Role</label>
                   <select
-                    defaultValue={user?.role || 'customer'}
+                    defaultValue={user?.role || 'user'}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#e72a00]"
                   >
-                    <option value="customer">Customer</option>
-                    <option value="moderator">Moderator</option>
+                    <option value="user">User</option>
                     <option value="admin">Admin</option>
                   </select>
                 </div>
@@ -311,118 +160,7 @@ const UsersAdmin: React.FC = () => {
                   >
                     <option value="active">Active</option>
                     <option value="inactive">Inactive</option>
-                    <option value="banned">Banned</option>
                   </select>
-                </div>
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Avatar URL</label>
-                <input
-                  type="url"
-                  defaultValue={user?.avatar || ''}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#e72a00]"
-                  placeholder="https://example.com/avatar.jpg"
-                />
-              </div>
-              
-              <div className="border-t pt-4">
-                <h4 className="text-md font-medium text-gray-900 mb-3">Address Information</h4>
-                <div className="space-y-3">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Street Address</label>
-                    <input
-                      type="text"
-                      defaultValue={user?.address.street || ''}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#e72a00]"
-                      placeholder="Enter street address"
-                    />
-                  </div>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">City</label>
-                      <input
-                        type="text"
-                        defaultValue={user?.address.city || ''}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#e72a00]"
-                        placeholder="Enter city"
-                      />
-                    </div>
-                    
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">State</label>
-                      <input
-                        type="text"
-                        defaultValue={user?.address.state || ''}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#e72a00]"
-                        placeholder="Enter state"
-                      />
-                    </div>
-                  </div>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">ZIP Code</label>
-                      <input
-                        type="text"
-                        defaultValue={user?.address.zipCode || ''}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#e72a00]"
-                        placeholder="Enter ZIP code"
-                      />
-                    </div>
-                    
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Country</label>
-                      <input
-                        type="text"
-                        defaultValue={user?.address.country || ''}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#e72a00]"
-                        placeholder="Enter country"
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="border-t pt-4">
-                <h4 className="text-md font-medium text-gray-900 mb-3">Preferences</h4>
-                <div className="space-y-3">
-                  <div className="flex items-center">
-                    <input
-                      type="checkbox"
-                      id="newsletter"
-                      defaultChecked={user?.preferences.newsletter || false}
-                      className="h-4 w-4 text-[#e72a00] focus:ring-[#e72a00] border-gray-300 rounded"
-                    />
-                    <label htmlFor="newsletter" className="ml-2 block text-sm text-gray-700">
-                      Subscribe to newsletter
-                    </label>
-                  </div>
-                  
-                  <div className="flex items-center">
-                    <input
-                      type="checkbox"
-                      id="emailNotifications"
-                      defaultChecked={user?.preferences.emailNotifications || false}
-                      className="h-4 w-4 text-[#e72a00] focus:ring-[#e72a00] border-gray-300 rounded"
-                    />
-                    <label htmlFor="emailNotifications" className="ml-2 block text-sm text-gray-700">
-                      Email notifications
-                    </label>
-                  </div>
-                  
-                  <div className="flex items-center">
-                    <input
-                      type="checkbox"
-                      id="smsNotifications"
-                      defaultChecked={user?.preferences.smsNotifications || false}
-                      className="h-4 w-4 text-[#e72a00] focus:ring-[#e72a00] border-gray-300 rounded"
-                    />
-                    <label htmlFor="smsNotifications" className="ml-2 block text-sm text-gray-700">
-                      SMS notifications
-                    </label>
-                  </div>
                 </div>
               </div>
             </div>
@@ -471,23 +209,32 @@ const UsersAdmin: React.FC = () => {
               Grid
             </button>
           </div>
-          <button
-            onClick={() => setShowAddModal(true)}
-            className="inline-flex items-center px-4 py-2 bg-[#e72a00] text-white text-sm font-medium rounded-md hover:bg-[#d12400] transition-colors"
-          >
-            <Plus className="h-4 w-4 mr-2" />
-            Add User
-          </button>
+          <div className="flex space-x-2">
+            <button
+              onClick={handleCreateAdmin}
+              disabled={creatingAdmin}
+              className="inline-flex items-center px-4 py-2 bg-purple-600 text-white text-sm font-medium rounded-md hover:bg-purple-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <Shield className="h-4 w-4 mr-2" />
+              {creatingAdmin ? 'Creating...' : 'Create Admin'}
+            </button>
+            <button
+              onClick={() => setShowAddModal(true)}
+              className="inline-flex items-center px-4 py-2 bg-[#e72a00] text-white text-sm font-medium rounded-md hover:bg-[#d12400] transition-colors"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Add User
+            </button>
+          </div>
         </div>
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {[
-          { label: 'Total Users', value: '1,234', icon: Users, color: 'bg-blue-500' },
-          { label: 'Active Users', value: '1,089', icon: UserCheck, color: 'bg-green-500' },
-          { label: 'Inactive Users', value: '123', icon: UserX, color: 'bg-yellow-500' },
-          { label: 'Banned Users', value: '22', icon: Ban, color: 'bg-red-500' },
+          { label: 'Total Users', value: users.length.toString(), icon: Users, color: 'bg-blue-500' },
+          { label: 'Active Users', value: users.filter(u => u.status === 'active').length.toString(), icon: UserCheck, color: 'bg-green-500' },
+          { label: 'Inactive Users', value: users.filter(u => u.status === 'inactive').length.toString(), icon: UserX, color: 'bg-yellow-500' },
         ].map((stat, index) => (
           <motion.div
             key={stat.label}
@@ -565,16 +312,13 @@ const UsersAdmin: React.FC = () => {
                     User
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Contact
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Role
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Status
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Total Spent
+                    Created At
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Last Login
@@ -587,52 +331,41 @@ const UsersAdmin: React.FC = () => {
               <tbody className="bg-white divide-y divide-gray-200">
                 {filteredUsers.map((user) => (
                   <motion.tr
-                    key={user.id}
+                    key={user.uid}
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     className="hover:bg-gray-50 transition-colors"
                   >
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
-                        <img
-                          src={user.avatar}
-                          alt={`${user.firstName} ${user.lastName}`}
-                          className="h-10 w-10 rounded-full object-cover"
-                        />
+                        <div className="h-10 w-10 rounded-full bg-gray-300 flex items-center justify-center">
+                          <span className="text-sm font-medium text-gray-700">
+                            {user.name ? user.name.charAt(0).toUpperCase() : '?'}
+                          </span>
+                        </div>
                         <div className="ml-4">
                           <div className="text-sm font-medium text-gray-900">
-                            {user.firstName} {user.lastName}
+                            {user.name || 'N/A'}
                           </div>
-                          <div className="text-sm text-gray-500">{user.email}</div>
+                          <div className="text-sm text-gray-500">{user.email || 'N/A'}</div>
                         </div>
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">{user.phone}</div>
-                      <div className="flex items-center text-sm text-gray-500">
-                        {user.emailVerified ? (
-                          <CheckCircle className="h-4 w-4 text-green-500 mr-1" />
-                        ) : (
-                          <AlertCircle className="h-4 w-4 text-yellow-500 mr-1" />
-                        )}
-                        {user.emailVerified ? 'Verified' : 'Unverified'}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${getRoleColor(user.role)}`}>
-                        {user.role.charAt(0).toUpperCase() + user.role.slice(1)}
+                      <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${getRoleColor(user.role || 'user')}`}>
+                        {user.role ? user.role.charAt(0).toUpperCase() + user.role.slice(1) : 'User'}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(user.status)}`}>
-                        {user.status.charAt(0).toUpperCase() + user.status.slice(1)}
+                      <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(user.status || 'active')}`}>
+                        {user.status ? user.status.charAt(0).toUpperCase() + user.status.slice(1) : 'Active'}
                       </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      <div className="text-gray-500">${user.totalSpent.toFixed(2)}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {new Date(user.lastLogin).toLocaleDateString()}
+                      {new Date(user.createdAt).toLocaleDateString()}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {user.lastLogin ? new Date(user.lastLogin).toLocaleDateString() : 'Never'}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                       <div className="flex items-center space-x-2">
@@ -645,12 +378,14 @@ const UsersAdmin: React.FC = () => {
                         >
                           <Edit className="h-4 w-4" />
                         </button>
-                        <button className="text-red-600 hover:text-red-900">
+                        <button 
+                           onClick={() => handleDeleteUser(user.uid)}
+                           className="text-red-600 hover:text-red-900"
+                           title="Delete user"
+                         >
                           <Trash2 className="h-4 w-4" />
                         </button>
-                        <button className="text-gray-400 hover:text-gray-600">
-                          <MoreHorizontal className="h-4 w-4" />
-                        </button>
+
                       </div>
                     </td>
                   </motion.tr>
@@ -663,59 +398,56 @@ const UsersAdmin: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredUsers.map((user, index) => (
             <motion.div
-              key={user.id}
+              key={user.uid}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: index * 0.1 }}
               className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow"
             >
               <div className="flex items-center justify-between mb-4">
-                <img
-                  src={user.avatar}
-                  alt={`${user.firstName} ${user.lastName}`}
-                  className="h-12 w-12 rounded-full object-cover"
-                />
-                <div className="flex space-x-2">
-                  <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${getRoleColor(user.role)}`}>
-                    {user.role.charAt(0).toUpperCase() + user.role.slice(1)}
+                <div className="h-12 w-12 rounded-full bg-gray-300 flex items-center justify-center">
+                  <span className="text-lg font-medium text-gray-700">
+                    {user.name ? user.name.charAt(0).toUpperCase() : '?'}
                   </span>
-                  <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(user.status)}`}>
-                    {user.status.charAt(0).toUpperCase() + user.status.slice(1)}
+                </div>
+                <div className="flex space-x-2">
+                  <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${getRoleColor(user.role || 'user')}`}>
+                    {user.role ? user.role.charAt(0).toUpperCase() + user.role.slice(1) : 'User'}
+                  </span>
+                  <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(user.status || 'active')}`}>
+                    {user.status ? user.status.charAt(0).toUpperCase() + user.status.slice(1) : 'Active'}
                   </span>
                 </div>
               </div>
               
               <div className="mb-4">
                 <h3 className="text-lg font-semibold text-gray-900">
-                  {user.firstName} {user.lastName}
+                  {user.name || 'N/A'}
                 </h3>
                 <div className="flex items-center text-sm text-gray-500 mt-1">
-                  <Mail className="h-4 w-4 mr-1" />
-                  {user.email}
-                </div>
-                <div className="flex items-center text-sm text-gray-500 mt-1">
-                  <Phone className="h-4 w-4 mr-1" />
-                  {user.phone}
+                  <span className="mr-1">✉</span>
+                  {user.email || 'N/A'}
                 </div>
               </div>
               
               <div className="space-y-2 mb-4">
-
                 <div className="flex items-center justify-between text-sm">
-                  <span className="text-gray-600">Total Spent:</span>
-                  <span className="font-medium">${user.totalSpent.toFixed(2)}</span>
+                  <span className="text-gray-600">Status:</span>
+                  <span className={`font-medium ${(user.status || 'active') === 'active' ? 'text-green-600' : 'text-yellow-600'}`}>
+                    {user.status ? user.status.charAt(0).toUpperCase() + user.status.slice(1) : 'Active'}
+                  </span>
                 </div>
                 <div className="flex items-center justify-between text-sm">
-                  <span className="text-gray-600">Email Verified:</span>
-                  <span className={`font-medium ${user.emailVerified ? 'text-green-600' : 'text-yellow-600'}`}>
-                    {user.emailVerified ? 'Yes' : 'No'}
+                  <span className="text-gray-600">Role:</span>
+                  <span className="font-medium">
+                    {user.role ? user.role.charAt(0).toUpperCase() + user.role.slice(1) : 'User'}
                   </span>
                 </div>
               </div>
               
               <div className="flex items-center text-sm text-gray-500 mb-4">
-                <Calendar className="h-4 w-4 mr-1" />
-                Joined {new Date(user.joinDate).toLocaleDateString()}
+                <span className="mr-1">📅</span>
+                Joined {new Date(user.createdAt).toLocaleDateString()}
               </div>
               
               <div className="flex items-center justify-between pt-4 border-t border-gray-200">
@@ -729,12 +461,16 @@ const UsersAdmin: React.FC = () => {
                   >
                     <Edit className="h-4 w-4" />
                   </button>
-                  <button className="text-red-600 hover:text-red-800 transition-colors">
+                  <button 
+                     onClick={() => handleDeleteUser(user.uid)}
+                     className="text-red-600 hover:text-red-800 transition-colors"
+                     title="Delete user"
+                   >
                     <Trash2 className="h-4 w-4" />
                   </button>
                 </div>
                 <span className="text-xs text-gray-500">
-                  Last login: {new Date(user.lastLogin).toLocaleDateString()}
+                  Last login: {user.lastLogin ? new Date(user.lastLogin).toLocaleDateString() : 'Never'}
                 </span>
               </div>
             </motion.div>

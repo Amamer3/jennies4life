@@ -52,7 +52,7 @@ const AdminLogin: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#3e3e3e] via-[#fee8e4] to-[#fff] flex items-center justify-center p-4 relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-[#e4e4e4] via-[#e4e4e4] to-[#e4e4e4] flex items-center justify-center p-4 relative overflow-hidden">
       {/* Background Elements */}
       <motion.div
         animate={{ 

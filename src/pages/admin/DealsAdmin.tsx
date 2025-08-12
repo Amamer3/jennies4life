@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import {
   Plus,
@@ -15,27 +15,10 @@ import {
   DollarSign,
   MoreHorizontal
 } from 'lucide-react';
+import { dealsApi, type Deal } from '../../services/dealsApi';
 
 
-interface Deal {
-  id: string;
-  title: string;
-  description: string;
-  discountType: 'percentage' | 'fixed';
-  discountValue: number;
-  originalPrice?: number;
-  salePrice?: number;
-  productId: string;
-  productName: string;
-  productImage: string;
-  startDate: string;
-  endDate: string;
-  status: 'active' | 'inactive' | 'expired' | 'scheduled';
-  featured: boolean;
-  usageCount: number;
-  maxUsage?: number;
-  createdAt: string;
-}
+
 
 const DealsAdmin: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -44,85 +27,40 @@ const DealsAdmin: React.FC = () => {
   const [showAddModal, setShowAddModal] = useState(false);
   const [selectedDeal, setSelectedDeal] = useState<Deal | null>(null);
 
-  // Mock data
-  const deals: Deal[] = [
-    {
-      id: '1',
-      title: 'Smart Headphones Flash Sale',
-      description: 'Limited time offer on premium wireless headphones',
-      discountType: 'percentage',
-      discountValue: 40,
-      originalPrice: 129.99,
-      salePrice: 77.99,
-      productId: 'p1',
-      productName: 'Smart Wireless Headphones',
-      productImage: 'https://images.pexels.com/photos/3394650/pexels-photo-3394650.jpeg',
-      startDate: '2024-01-15',
-      endDate: '2024-01-25',
-      status: 'active',
-      featured: true,
-      usageCount: 156,
-      maxUsage: 500,
-      createdAt: '2024-01-14'
-    },
-    {
-      id: '2',
-      title: 'Beauty Bundle Discount',
-      description: 'Save on skincare essentials bundle',
-      discountType: 'fixed',
-      discountValue: 15,
-      originalPrice: 65.99,
-      salePrice: 50.99,
-      productId: 'p2',
-      productName: 'Organic Skincare Set',
-      productImage: 'https://images.pexels.com/photos/5076516/pexels-photo-5076516.jpeg',
-      startDate: '2024-01-10',
-      endDate: '2024-01-30',
-      status: 'active',
-      featured: false,
-      usageCount: 89,
-      maxUsage: 200,
-      createdAt: '2024-01-09'
-    },
-    {
-      id: '3',
-      title: 'Fitness Tracker Early Bird',
-      description: 'Pre-order discount for new fitness tracker',
-      discountType: 'percentage',
-      discountValue: 25,
-      originalPrice: 179.99,
-      salePrice: 134.99,
-      productId: 'p3',
-      productName: 'Fitness Tracker Pro',
-      productImage: 'https://images.pexels.com/photos/2988232/pexels-photo-2988232.jpeg',
-      startDate: '2024-01-20',
-      endDate: '2024-02-15',
-      status: 'scheduled',
-      featured: true,
-      usageCount: 0,
-      maxUsage: 100,
-      createdAt: '2024-01-08'
-    },
-    {
-      id: '4',
-      title: 'Holiday Fashion Sale',
-      description: 'End of season fashion clearance',
-      discountType: 'percentage',
-      discountValue: 50,
-      originalPrice: 199.99,
-      salePrice: 99.99,
-      productId: 'p4',
-      productName: 'Designer Handbag',
-      productImage: 'https://images.pexels.com/photos/3962285/pexels-photo-3962285.jpeg',
-      startDate: '2023-12-20',
-      endDate: '2024-01-05',
-      status: 'expired',
-      featured: false,
-      usageCount: 234,
-      maxUsage: 300,
-      createdAt: '2023-12-19'
+  const [deals, setDeals] = useState<Deal[]>([]);
+  const [, setLoading] = useState(true);
+
+  // Fetch deals from API
+  const fetchDeals = async () => {
+    try {
+      setLoading(true);
+      const fetchedDeals = await dealsApi.getAllDeals();
+      setDeals(fetchedDeals);
+    } catch (error) {
+      console.error('Failed to fetch deals:', error);
+      setDeals([]);
+    } finally {
+      setLoading(false);
     }
-  ];
+  };
+
+  const handleDeleteDeal = async (id: string) => {
+    if (window.confirm('Are you sure you want to delete this deal?')) {
+      try {
+        await dealsApi.deleteDeal(id);
+        setDeals(deals.filter(deal => deal.id !== id));
+      } catch (error) {
+        console.error('Failed to delete deal:', error);
+        alert('Failed to delete deal. Please try again.');
+      }
+    }
+  };
+
+
+
+  useEffect(() => {
+    fetchDeals();
+  }, []);
 
   const statuses = ['all', 'active', 'inactive', 'expired', 'scheduled'];
   const types = ['all', 'percentage', 'fixed'];
@@ -159,7 +97,7 @@ const DealsAdmin: React.FC = () => {
     return (
       <div className="fixed inset-0 z-50 overflow-y-auto">
         <div className="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
-          <div className="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75" onClick={onClose} />
+          <div className="fixed inset-0 transition-opacity" onClick={onClose} />
           
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
@@ -195,7 +133,7 @@ const DealsAdmin: React.FC = () => {
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Product</label>
                 <select
-                  defaultValue={deal?.productId || ''}
+                  defaultValue={deal?.id || ''}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#e72a00]"
                 >
                   <option value="">Select Product</option>
@@ -486,11 +424,11 @@ const DealsAdmin: React.FC = () => {
                   <p className="text-sm text-gray-900">
                     {deal.usageCount}{deal.maxUsage ? ` / ${deal.maxUsage}` : ''}
                   </p>
-                  {deal.maxUsage && (
+                  {deal.maxUsage && deal.maxUsage > 0 && (
                     <div className="w-full bg-gray-200 rounded-full h-2 mt-1">
                       <div 
                         className="bg-[#e72a00] h-2 rounded-full" 
-                        style={{ width: `${(deal.usageCount / deal.maxUsage) * 100}%` }}
+                        style={{ width: `${Math.min((deal.usageCount / deal.maxUsage) * 100, 100)}%` }}
                       />
                     </div>
                   )}
@@ -509,10 +447,15 @@ const DealsAdmin: React.FC = () => {
                   <button
                     onClick={() => setSelectedDeal(deal)}
                     className="text-blue-600 hover:text-blue-800 transition-colors"
+                    title="Edit deal"
                   >
                     <Edit className="h-4 w-4" />
                   </button>
-                  <button className="text-red-600 hover:text-red-800 transition-colors">
+                  <button 
+                    className="text-red-600 hover:text-red-800 transition-colors"
+                    onClick={() => handleDeleteDeal(deal.id)}
+                    title="Delete deal"
+                  >
                     <Trash2 className="h-4 w-4" />
                   </button>
                   <button className="text-gray-400 hover:text-gray-600 transition-colors">

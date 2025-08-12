@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import {
   TrendingUp,
@@ -17,6 +17,7 @@ import {
   Monitor,
   Tablet
 } from 'lucide-react';
+import { dashboardAPI } from '../../services/dashboardApi';
 
 
 interface MetricCard {
@@ -37,6 +38,29 @@ interface ChartData {
 const AnalyticsAdmin: React.FC = () => {
   const [selectedPeriod, setSelectedPeriod] = useState('7d');
   const [selectedMetric, setSelectedMetric] = useState('revenue');
+  const [dashboardStats, setDashboardStats] = useState<any>(null);
+  const [adminStats, setAdminStats] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchAnalyticsData();
+  }, [selectedPeriod]);
+
+  const fetchAnalyticsData = async () => {
+    try {
+      setLoading(true);
+      const [dashStats, admStats] = await Promise.all([
+        dashboardAPI.getStats(),
+        dashboardAPI.getAdminStats()
+      ]);
+      setDashboardStats(dashStats);
+      setAdminStats(admStats);
+    } catch (error) {
+      console.error('Failed to fetch analytics data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const periods = [
     { value: '24h', label: 'Last 24 Hours' },
@@ -46,42 +70,79 @@ const AnalyticsAdmin: React.FC = () => {
     { value: '1y', label: 'Last Year' }
   ];
 
-  const metrics: MetricCard[] = [
-    {
-      title: 'Total Revenue',
-      value: '$45,231.89',
-      change: '+20.1%',
-      changeType: 'increase',
-      icon: DollarSign,
-      color: 'bg-green-500'
-    },
+  const getMetrics = (): MetricCard[] => {
+    if (!dashboardStats || !adminStats) {
+      return [
+        {
+          title: 'Total Products',
+          value: '0',
+          change: '0%',
+          changeType: 'increase',
+          icon: DollarSign,
+          color: 'bg-green-500'
+        },
+        {
+          title: 'Total Users',
+          value: '0',
+          change: '0%',
+          changeType: 'increase',
+          icon: Users,
+          color: 'bg-purple-500'
+        },
+        {
+          title: 'Published Posts',
+          value: '0',
+          change: '0%',
+          changeType: 'increase',
+          icon: Eye,
+          color: 'bg-orange-500'
+        },
+        {
+          title: 'Active Users',
+          value: '0',
+          change: '0%',
+          changeType: 'increase',
+          icon: Target,
+          color: 'bg-pink-500'
+        }
+      ];
+    }
 
-    {
-      title: 'New Customers',
-      value: '456',
-      change: '+8.2%',
-      changeType: 'increase',
-      icon: Users,
-      color: 'bg-purple-500'
-    },
-    {
-      title: 'Page Views',
-      value: '12,345',
-      change: '-2.4%',
-      changeType: 'decrease',
-      icon: Eye,
-      color: 'bg-orange-500'
-    },
-    {
-      title: 'Conversion Rate',
-      value: '3.24%',
-      change: '+0.8%',
-      changeType: 'increase',
-      icon: Target,
-      color: 'bg-pink-500'
-    },
-
-  ];
+    return [
+      {
+        title: 'Total Products',
+        value: dashboardStats.totalProducts?.toString() || '0',
+        change: '+' + ((dashboardStats.publishedProducts / dashboardStats.totalProducts) * 100).toFixed(1) + '%',
+        changeType: 'increase',
+        icon: DollarSign,
+        color: 'bg-green-500'
+      },
+      {
+        title: 'Total Users',
+        value: adminStats.totalUsers?.toString() || '0',
+        change: '+' + ((adminStats.activeUsers / adminStats.totalUsers) * 100).toFixed(1) + '%',
+        changeType: 'increase',
+        icon: Users,
+        color: 'bg-purple-500'
+      },
+      {
+        title: 'Published Posts',
+        value: dashboardStats.publishedPosts?.toString() || '0',
+        change: '+' + ((dashboardStats.publishedPosts / dashboardStats.totalPosts) * 100).toFixed(1) + '%',
+        changeType: 'increase',
+        icon: Eye,
+        color: 'bg-orange-500'
+      },
+      {
+        title: 'Active Users',
+        value: adminStats.activeUsers?.toString() || '0',
+        change: '+' + ((adminStats.newUsersToday / adminStats.totalUsers) * 100).toFixed(1) + '%',
+        changeType: 'increase',
+        icon: Target,
+        color: 'bg-pink-500'
+      }
+    ];
+  };
 
   const revenueData: ChartData[] = [
     { name: 'Mon', value: 4000 },
@@ -269,9 +330,14 @@ const AnalyticsAdmin: React.FC = () => {
         </div>
       </div>
 
-      {/* Key Metrics */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {metrics.map((metric, index) => (
+      {/* Metrics Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        {loading ? (
+          <div className="col-span-4 text-center py-8">
+            <div className="text-gray-500">Loading analytics data...</div>
+          </div>
+        ) : (
+          getMetrics().map((metric, index) => (
           <motion.div
             key={metric.title}
             initial={{ opacity: 0, y: 20 }}
@@ -302,7 +368,8 @@ const AnalyticsAdmin: React.FC = () => {
               </div>
             </div>
           </motion.div>
-        ))}
+          ))
+        )}
       </div>
 
       {/* Charts Section */}

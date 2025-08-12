@@ -1,89 +1,90 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Zap, Heart, Smartphone, Home, Dumbbell, Sparkles } from 'lucide-react';
+import { ArrowRight, Zap, Heart, Smartphone, Home, Dumbbell, Sparkles, Loader2, AlertCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { publicCategoryAPI, type PublicCategory } from '../services/publicCategoryApi';
 
-interface Category {
-  id: string;
-  name: string;
-  description: string;
+interface CategoryDisplay extends PublicCategory {
   icon: React.ReactNode;
-  productCount: number;
-  color: string;
   gradient: string;
   path: string;
-  backgroundImage?: string;
 }
 
 const Categories: React.FC = () => {
-  const categories: Category[] = [
-    {
-      id: '1',
-      name: 'Health & Wellness',
-      description: 'Supplements, fitness gear, and wellness products for a healthier lifestyle',
-      icon: <Heart className="h-6 w-6 sm:h-8 sm:w-8" />,
-      productCount: 245,
-      color: 'text-[#FFDAB9]',
-      gradient: 'bg-gradient-to-br from-[#FFE4C4] to-[#FFA07A]',
-      path: '/category/health',
-      backgroundImage: 'https://images.pexels.com/photos/1640777/pexels-photo-1640777.jpeg',
-    },
-    {
-      id: '2',
-      name: 'Electronics',
-      description: 'Latest gadgets, smart devices, and tech accessories',
-      icon: <Smartphone className="h-6 w-6 sm:h-8 sm:w-8" />,
-      productCount: 189,
-      color: 'text-[#F0E68C]',
-      gradient: 'bg-gradient-to-br from-[#FFFACD] to-[#FFDAB9]',
-      path: '/category/electronics',
-      backgroundImage: 'https://images.pexels.com/photos/3861969/pexels-photo-3861969.jpeg',
-    },
-    {
-      id: '3',
-      name: 'Fashion & Style',
-      description: 'Trending clothing, accessories, and style essentials',
-      icon: <Sparkles className="h-6 w-6 sm:h-8 sm:w-8" />,
-      productCount: 312,
-      color: 'text-[#D1BF00]',
-      gradient: 'bg-gradient-to-br from-[#FFFF00] to-[#FFA500]',
-      path: '/category/fashion',
-      backgroundImage: 'https://images.pexels.com/photos/934070/pexels-photo-934070.jpeg',
-    },
-    {
-      id: '4',
-      name: 'Home & Garden',
-      description: 'Home decor, kitchen essentials, and garden tools',
-      icon: <Home className="h-6 w-6 sm:h-8 sm:w-8" />,
-      productCount: 156,
-      color: 'text-[#FFA07A]',
-      gradient: 'bg-gradient-to-br from-[#FFE4C4] to-[#FFFACD]',
-      path: '/category/home',
-      backgroundImage: 'https://images.pexels.com/photos/279746/pexels-photo-279746.jpeg',
-    },
-    {
-      id: '5',
-      name: 'Sports & Fitness',
-      description: 'Workout equipment, athletic wear, and fitness accessories',
-      icon: <Dumbbell className="h-6 w-6 sm:h-8 sm:w-8" />,
-      productCount: 198,
-      color: 'text-[#D1BF00]',
-      gradient: 'bg-gradient-to-br from-[#FFFFE0] to-[#FFDAB9]',
-      path: '/category/sports',
-      backgroundImage: 'https://images.pexels.com/photos/416717/pexels-photo-416717.jpeg',
-    },
-    {
-      id: '6',
-      name: 'Beauty & Care',
-      description: 'Skincare, makeup, and personal care products',
-      icon: <Zap className="h-6 w-6 sm:h-8 sm:w-8" />,
-      productCount: 167,
-      color: 'text-[#FFA07A]',
-      gradient: 'bg-gradient-to-br from-[#FFFFE0] to-[#FFFACD]',
-      path: '/category/beauty',
-      backgroundImage: 'https://images.pexels.com/photos/301703/pexels-photo-301703.jpeg',
-    },
-  ];
+  const [categories, setCategories] = useState<CategoryDisplay[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Icon mapping based on category name
+  const getIconForCategory = (name: string): React.ReactNode => {
+    const lowerName = name.toLowerCase();
+    if (lowerName.includes('health') || lowerName.includes('wellness')) {
+      return <Heart className="h-6 w-6 sm:h-8 sm:w-8" />;
+    } else if (lowerName.includes('electronic') || lowerName.includes('tech')) {
+      return <Smartphone className="h-6 w-6 sm:h-8 sm:w-8" />;
+    } else if (lowerName.includes('fashion') || lowerName.includes('style') || lowerName.includes('clothing')) {
+      return <Sparkles className="h-6 w-6 sm:h-8 sm:w-8" />;
+    } else if (lowerName.includes('home') || lowerName.includes('garden')) {
+      return <Home className="h-6 w-6 sm:h-8 sm:w-8" />;
+    } else if (lowerName.includes('sport') || lowerName.includes('fitness')) {
+      return <Dumbbell className="h-6 w-6 sm:h-8 sm:w-8" />;
+    } else if (lowerName.includes('beauty') || lowerName.includes('care')) {
+      return <Zap className="h-6 w-6 sm:h-8 sm:w-8" />;
+    }
+    return <Sparkles className="h-6 w-6 sm:h-8 sm:w-8" />; // Default icon
+  };
+
+  // Generate gradient based on color
+  const getGradientForColor = (color: string): string => {
+    // Convert hex to gradient
+    const colorMap: { [key: string]: string } = {
+      '#FFDAB9': 'bg-gradient-to-br from-[#FFE4C4] to-[#FFA07A]',
+      '#F0E68C': 'bg-gradient-to-br from-[#FFFACD] to-[#FFDAB9]',
+      '#D1BF00': 'bg-gradient-to-br from-[#FFFF00] to-[#FFA500]',
+      '#FFA07A': 'bg-gradient-to-br from-[#FFE4C4] to-[#FFFACD]',
+    };
+    return colorMap[color] || 'bg-gradient-to-br from-[#FFFFE0] to-[#FFDAB9]';
+  };
+
+  // Generate path based on category name
+  const getPathForCategory = (name: string): string => {
+    return `/category/${name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/-+$/, '')}`;
+  };
+
+  // Fetch categories from API
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        console.log('🔄 Fetching categories for homepage...');
+        
+        const response = await publicCategoryAPI.getActiveCategories();
+        
+        if (response.success) {
+          // Transform API categories to display format
+          const displayCategories: CategoryDisplay[] = response.data.map(category => ({
+            ...category,
+            icon: getIconForCategory(category.name),
+            gradient: getGradientForColor(category.color),
+            path: getPathForCategory(category.name),
+          }));
+          
+          setCategories(displayCategories);
+          console.log('✅ Categories loaded successfully:', displayCategories.length, 'categories');
+        } else {
+          setError(response.message || 'Failed to load categories');
+        }
+      } catch (error) {
+        console.error('🚨 Error fetching categories:', error);
+        setError('Failed to load categories. Please try again.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCategories();
+  }, []);
 
   return (
     <section className="py-8 sm:py-12 lg:py-16 bg-gradient-to-b from-[#fbb53b] to-[#fa6742]">
@@ -104,9 +105,26 @@ const Categories: React.FC = () => {
           </p>
         </motion.div>
 
+        {/* Loading State */}
+        {loading && (
+          <div className="flex items-center justify-center py-12">
+            <Loader2 className="h-8 w-8 animate-spin text-white" />
+            <span className="ml-2 text-white">Loading categories...</span>
+          </div>
+        )}
+
+        {/* Error State */}
+        {error && (
+          <div className="bg-red-50 border border-red-200 rounded-md p-4 flex items-center mb-8">
+            <AlertCircle className="h-5 w-5 text-red-500 mr-2" />
+            <span className="text-red-700">{error}</span>
+          </div>
+        )}
+
         {/* Categories Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
-          {categories.map((category, index) => (
+        {!loading && !error && categories.length > 0 && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
+            {categories.map((category, index) => (
             <motion.div
               key={category.id}
               initial={{ opacity: 0, y: 20 }}
@@ -126,16 +144,12 @@ const Categories: React.FC = () => {
                   <div className="absolute inset-0 opacity-10">
                     <div
                       className="absolute inset-0 bg-cover bg-center bg-no-repeat filter blur-sm"
-                      style={{ backgroundImage: `url(${category.backgroundImage})` }}
+                      style={{ backgroundImage: `url(${category.image})` }}
                     />
                   </div>
                   {/* Icon */}
-                  <div className={`relative ${category.color} transform group-hover:scale-105 transition-transform duration-300`}>
-                    {React.isValidElement(category.icon)
-                      ? React.cloneElement(category.icon as React.ReactElement<any>, {
-                          className: `h-6 w-6 sm:h-8 sm:w-8 ${category.color}`,
-                        })
-                      : category.icon}
+                  <div className={`relative text-white transform group-hover:scale-105 transition-transform duration-300`}>
+                    {category.icon}
                   </div>
                 </div>
 
@@ -162,8 +176,18 @@ const Categories: React.FC = () => {
                 </div>
               </Link>
             </motion.div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
+
+        {/* Empty State */}
+        {!loading && !error && categories.length === 0 && (
+          <div className="text-center py-12">
+            <Sparkles className="h-12 w-12 text-white mx-auto mb-4 opacity-50" />
+            <h3 className="text-lg font-medium text-white mb-2">No categories available</h3>
+            <p className="text-white opacity-75">Categories will appear here once they are added.</p>
+          </div>
+        )}
 
         {/* Featured Category Banner */}
         <motion.div

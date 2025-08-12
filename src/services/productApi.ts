@@ -50,13 +50,6 @@ class ProductAPI {
     };
   }
 
-  private isDemoMode(): boolean {
-    const authToken = localStorage.getItem('authToken');
-    return authToken === 'demo-admin-token';
-  }
-
-
-
   async createProduct(productData: CreateProductRequest): Promise<ProductResponse> {
     try {
       const response = await fetch(`${API_BASE_URL}/api/products`, {
@@ -94,54 +87,6 @@ class ProductAPI {
 
   async getProducts(): Promise<ProductsListResponse> {
     console.log('ProductAPI: Starting getProducts request');
-    
-    if (this.isDemoMode()) {
-      return {
-        success: true,
-        products: [
-          {
-            id: '1',
-            name: 'Premium Hair Oil',
-            description: 'Nourishing hair oil for all hair types',
-            affiliateLink: 'https://example.com/hair-oil',
-            category: 'Hair Care',
-            image: '/api/placeholder/300/300',
-            status: 'published',
-            createdAt: new Date().toISOString().split('T')[0]
-          },
-          {
-            id: '2',
-            name: 'Moisturizing Cream',
-            description: 'Deep moisturizing cream for dry skin',
-            affiliateLink: 'https://example.com/moisturizer',
-            category: 'Skin Care',
-            image: '/api/placeholder/300/300',
-            status: 'published',
-            createdAt: new Date().toISOString().split('T')[0]
-          },
-          {
-            id: '3',
-            name: 'Vitamin C Serum',
-            description: 'Brightening vitamin C serum',
-            affiliateLink: 'https://example.com/vitamin-c',
-            category: 'Skin Care',
-            image: '/api/placeholder/300/300',
-            status: 'published',
-            createdAt: new Date().toISOString().split('T')[0]
-          },
-          {
-            id: '4',
-            name: 'Natural Shampoo',
-            description: 'Organic shampoo for healthy hair',
-            affiliateLink: 'https://example.com/shampoo',
-            category: 'Hair Care',
-            image: '/api/placeholder/300/300',
-            status: 'published',
-            createdAt: new Date().toISOString().split('T')[0]
-          }
-        ]
-      };
-    }
     
     try {
       console.log('🌐 Making API request to:', `${API_BASE_URL}/api/products`);
