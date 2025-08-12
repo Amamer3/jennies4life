@@ -14,6 +14,8 @@ const AdminLogin: React.FC = () => {
   const { login, isAuthenticated, isLoading } = useAuth();
   const location = useLocation();
   
+  // Note: Removed automatic logout on mount to prevent clearing tokens after successful login
+  
   // Redirect if already authenticated
   if (isAuthenticated) {
     const from = (location.state as any)?.from?.pathname || '/admin';
@@ -39,11 +41,11 @@ const AdminLogin: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-black via-black to-black flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-[#3e3e3e] via-[#fee8e4] to-[#fff] flex items-center justify-center">
         <motion.div
           animate={{ rotate: 360 }}
           transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-          className="w-8 h-8 border-2 border-black border-t-transparent rounded-full"
+          className="w-8 h-8 border-2 border-gray-300 border-t-transparent rounded-full"
         />
       </div>
     );
@@ -237,17 +239,7 @@ const AdminLogin: React.FC = () => {
             </motion.button>
           </motion.form>
 
-          {/* Demo Credentials Info */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.5, delay: 0.4 }}
-            className="mt-4 p-3 bg-blue-500/20 border border-blue-400/30 rounded-lg relative z-10"
-          >
-            <p className="text-xs text-black font-medium mb-1">Demo Credentials:</p>
-            <p className="text-xs text-black">Username: <span className="font-mono">admin</span> | Password: <span className="font-mono">admin123</span></p>
-            <p className="text-xs text-black">Username: <span className="font-mono">demo</span> | Password: <span className="font-mono">demo123</span></p>
-          </motion.div>
+          
 
           {/* Footer */}
           <motion.div

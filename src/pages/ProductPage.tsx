@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import {
   Star,
@@ -12,34 +12,13 @@ import {
   ExternalLink,
   ChevronLeft,
   ChevronRight,
-  Plus,
-  Minus,
 } from 'lucide-react';
 import { motion } from 'framer-motion';
+import type { Product } from '../types';
+import { publicProductAPI } from '../services/publicProductApi';
+import { getProductById, getProductBySlug } from '../data';
 
 // Mock data (replace with actual implementation)
-interface Product {
-  id: string;
-  name: string;
-  description: string;
-  price: number;
-  originalPrice?: number;
-  discount?: number;
-  rating: number;
-  reviewCount: number;
-  image: string;
-  images?: string[];
-  category: string;
-  brand: string;
-  inStock: boolean;
-  features: string[];
-  affiliateLink: string;
-  tags: string[];
-  isNew?: boolean;
-  isBestseller?: boolean;
-  isFeatured?: boolean;
-  slug: string;
-}
 
 const mockProducts: Product[] = [
   {
@@ -91,32 +70,103 @@ const mockProducts: Product[] = [
   },
 ];
 
-const getProductById = (id: string): Product | null =>
-  mockProducts.find((product) => product.id === id) || null;
-
 const products = mockProducts;
 
 const ProductPage: React.FC = () => {
-  const { id } = useParams<{ id: string }>();
-  const product = id ? getProductById(id) : null;
+  const { id, slug } = useParams<{ id?: string; slug?: string }>();
+  const [product, setProduct] = useState<Product | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [selectedImage, setSelectedImage] = useState(0);
-  const [quantity, setQuantity] = useState(1);
   const [isWishlisted, setIsWishlisted] = useState(false);
 
-  const images = useMemo(() => product?.images || (product?.image ? [product.image] : []), [product]);
-  const relatedProducts = useMemo(
-    () =>
-      products
-        .filter((p) => p.category === product?.category && p.id !== product?.id)
-        .slice(0, 4),
-    [product]
-  );
+  useEffect(() => {
+    const fetchProduct = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        
+        let fetchedProduct: Product | null = null;
+        
+        if (slug) {
+          // Try API first, fallback to local data
+          try {
+            const response = await publicProductAPI.getProductBySlug(slug);
+            fetchedProduct = response.product || null;
+          } catch (apiError) {
+            console.warn('API failed, using local data:', apiError);
+            fetchedProduct = getProductBySlug(slug) || null;
+          }
+        } else if (id) {
+          // For ID-based routing, use local data (legacy support)
+          fetchedProduct = getProductById(id) || null;
+        }
+        
+        setProduct(fetchedProduct);
+      } catch (err) {
+        setError('Failed to load product');
+        console.error('Error fetching product:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  if (!product) {
+    if (id || slug) {
+      fetchProduct();
+    }
+  }, [id, slug]);
+
+  const images = useMemo(() => product?.images || (product?.image ? [product.image] : []), [product]);
+  const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
+
+  useEffect(() => {
+    const fetchRelatedProducts = async () => {
+      if (!product) return;
+      
+      try {
+        // Try to get related products from API
+        const allProducts = await publicProductAPI.getProducts({
+          category: product.category,
+          limit: 5 // Get 5 to exclude current product
+        });
+        
+        // Filter out current product and limit to 4
+        const filtered = (allProducts.products || [])
+          .filter(p => p.id !== product.id)
+          .slice(0, 4);
+        
+        setRelatedProducts(filtered);
+      } catch (error) {
+        console.warn('Failed to fetch related products from API, using local data:', error);
+        // Fallback to local data
+        const localRelated = products
+          .filter((p) => p.category === product?.category && p.id !== product?.id)
+          .slice(0, 4);
+        setRelatedProducts(localRelated);
+      }
+    };
+
+    fetchRelatedProducts();
+  }, [product]);
+
+  if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
-          <h1 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4">Product Not Found</h1>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading product...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !product) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4">
+            {error || 'Product Not Found'}
+          </h1>
           <Link
             to="/"
             className="text-blue-500 hover:text-blue-600 text-sm sm:text-base transition-colors"
@@ -338,32 +388,8 @@ const ProductPage: React.FC = () => {
               </ul>
             </div>
 
-            {/* Quantity & Add to Cart */}
+            {/* Buy Now Section */}
             <div className="space-y-3 sm:space-y-4">
-              <div className="flex items-center gap-3 sm:gap-4">
-                <span className="text-xs sm:text-sm font-medium text-gray-900">Quantity:</span>
-                <div className="flex items-center border border-gray-300 rounded-lg">
-                  <button
-                    onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                    className="p-2 sm:p-3 hover:bg-gray-50 transition-colors"
-                    aria-label="Decrease quantity"
-                    disabled={quantity <= 1}
-                  >
-                    <Minus className="h-4 w-4 text-gray-600" />
-                  </button>
-                  <span className="px-3 sm:px-4 py-1.5 sm:py-2 border-x border-gray-300 min-w-[50px] sm:min-w-[60px] text-center text-xs sm:text-sm">
-                    {quantity}
-                  </span>
-                  <button
-                    onClick={() => setQuantity(quantity + 1)}
-                    className="p-2 sm:p-3 hover:bg-gray-50 transition-colors"
-                    aria-label="Increase quantity"
-                    disabled={!product.inStock}
-                  >
-                    <Plus className="h-4 w-4 text-gray-600" />
-                  </button>
-                </div>
-              </div>
 
               <div className="flex gap-2 sm:gap-3">
                 <a

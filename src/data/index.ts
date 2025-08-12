@@ -548,6 +548,10 @@ export const getProductById = (id: string): Product | undefined => {
   return products.find(product => product.id === id);
 };
 
+export const getProductBySlug = (slug: string): Product | undefined => {
+  return products.find(product => product.slug.toLowerCase() === slug.toLowerCase());
+};
+
 export const getCategoryBySlug = (slug: string): Category | undefined => {
   return categories.find(category => category.slug.toLowerCase() === slug.toLowerCase());
 };

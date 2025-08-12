@@ -1,10 +1,9 @@
 import React, { useState } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
-  LayoutDashboard,
+  Home,
   Package,
-  Grid3X3,
   Tag,
   FileText,
   Users,
@@ -13,17 +12,11 @@ import {
   LogOut,
   Menu,
   X,
-  User
+  User,
+  Percent
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 
-interface SidebarItem {
-  id: string;
-  label: string;
-  icon: React.ComponentType<any>;
-  path: string;
-  count?: number;
-}
 
 interface AdminLayoutProps {
   children: React.ReactNode;
@@ -34,8 +27,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
   const [isMobile, setIsMobile] = useState(false);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   
-  const { user, logout } = useAuth();
-  const navigate = useNavigate();
+  const { user } = useAuth();
 
   React.useEffect(() => {
     const checkMobile = () => {
@@ -49,13 +41,13 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
   }, []);
   const location = useLocation();
 
-  const sidebarItems: SidebarItem[] = [
-    { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, path: '/admin' },
-    { id: 'products', label: 'Products', icon: Package, path: '/admin/products', count: 156 },
-    { id: 'categories', label: 'Categories', icon: Grid3X3, path: '/admin/categories', count: 12 },
-    { id: 'deals', label: 'Deals', icon: Tag, path: '/admin/deals', count: 23 },
-    { id: 'blog', label: 'Blog Posts', icon: FileText, path: '/admin/blog', count: 45 },
-    { id: 'users', label: 'Users', icon: Users, path: '/admin/users', count: 1247 },
+  const sidebarItems = [
+    { id: 'dashboard', label: 'Dashboard', icon: Home, path: '/admin' },
+    { id: 'products', label: 'Products', icon: Package, path: '/admin/products' },
+    { id: 'categories', label: 'Categories', icon: Tag, path: '/admin/categories' },
+    { id: 'deals', label: 'Deals', icon: Percent, path: '/admin/deals' },
+    { id: 'blog', label: 'Blog Posts', icon: FileText, path: '/admin/blog' },
+    { id: 'users', label: 'Users', icon: Users, path: '/admin/users' },
     { id: 'analytics', label: 'Analytics', icon: BarChart3, path: '/admin/analytics' },
     { id: 'settings', label: 'Settings', icon: Settings, path: '/admin/settings' },
   ];
@@ -110,13 +102,6 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
                     isActive ? 'text-white' : 'text-gray-400 group-hover:text-gray-500'
                   }`} />
                   <span className="truncate">{item.label}</span>
-                  {item.count && (
-                    <span className={`ml-auto inline-block py-0.5 px-2 text-xs rounded-full flex-shrink-0 ${
-                      isActive ? 'bg-white text-[#e72a00]' : 'bg-gray-200 text-gray-600'
-                    }`}>
-                      {item.count}
-                    </span>
-                  )}
                 </Link>
               );
             })}
@@ -227,9 +212,10 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  onClick={async () => {
-                    await logout();
-                    navigate('/admin/login');
+                  onClick={() => {
+                    setShowLogoutConfirm(false);
+                    // Navigate immediately to prevent any loading state
+                    window.location.href = '/admin/login';
                   }}
                   className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:ml-3 sm:w-auto sm:text-sm transition-colors duration-200"
                 >

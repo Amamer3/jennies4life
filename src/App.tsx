@@ -10,6 +10,7 @@ import BlogSection from './components/BlogSection';
 import Newsletter from './components/Newsletter';
 import Footer from './components/Footer';
 import ProductPage from './pages/ProductPage';
+import ProductsListPage from './pages/ProductsListPage';
 import BlogPage from './pages/BlogPage';
 import CategoryPage from './pages/CategoryPage';
 import AboutPage from './pages/AboutPage';
@@ -52,7 +53,21 @@ function App() {
           } />
           
           {/* Public Routes with Header and Footer */}
+          <Route path="/products" element={
+            <div className="min-h-screen bg-gray-50">
+              <Header />
+              <ProductsListPage />
+              <Footer />
+            </div>
+          } />
           <Route path="/products/:id" element={
+            <div className="min-h-screen bg-gray-50">
+              <Header />
+              <ProductPage />
+              <Footer />
+            </div>
+          } />
+          <Route path="/product/:slug" element={
             <div className="min-h-screen bg-gray-50">
               <Header />
               <ProductPage />

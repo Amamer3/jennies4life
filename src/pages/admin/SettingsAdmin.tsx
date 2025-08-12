@@ -295,7 +295,7 @@ const SettingsAdmin: React.FC = () => {
         <h3 className="text-lg font-medium text-gray-900 mb-4">Email Notifications</h3>
         <div className="space-y-4">
           {[
-            { label: 'New Orders', description: 'Get notified when new orders are placed' },
+        
             { label: 'Low Stock Alerts', description: 'Receive alerts when products are running low' },
             { label: 'Customer Reviews', description: 'Notifications for new customer reviews' },
             { label: 'System Updates', description: 'Important system and security updates' },

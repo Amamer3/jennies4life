@@ -4,7 +4,6 @@ import {
   TrendingUp,
   TrendingDown,
   DollarSign,
-  ShoppingCart,
   Users,
   Eye,
   Calendar,
@@ -56,14 +55,7 @@ const AnalyticsAdmin: React.FC = () => {
       icon: DollarSign,
       color: 'bg-green-500'
     },
-    {
-      title: 'Total Orders',
-      value: '1,234',
-      change: '+15.3%',
-      changeType: 'increase',
-      icon: ShoppingCart,
-      color: 'bg-blue-500'
-    },
+
     {
       title: 'New Customers',
       value: '456',
@@ -88,14 +80,7 @@ const AnalyticsAdmin: React.FC = () => {
       icon: Target,
       color: 'bg-pink-500'
     },
-    {
-      title: 'Avg. Order Value',
-      value: '$89.50',
-      change: '+12.5%',
-      changeType: 'increase',
-      icon: TrendingUp,
-      color: 'bg-indigo-500'
-    }
+
   ];
 
   const revenueData: ChartData[] = [
@@ -161,14 +146,7 @@ const AnalyticsAdmin: React.FC = () => {
   ];
 
   const recentActivity = [
-    {
-      id: '1',
-      type: 'order',
-      message: 'New order #1234 placed',
-      time: '2 minutes ago',
-      icon: ShoppingCart,
-      color: 'text-blue-600'
-    },
+
     {
       id: '2',
       type: 'user',

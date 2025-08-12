@@ -1,49 +1,132 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import {
   TrendingUp,
   ShoppingCart,
   Star,
   DollarSign,
-  Package
+  Package,
+  Loader2
 } from 'lucide-react';
-
-const stats = [
-  {
-    title: 'Total Revenue',
-    value: '$45,231',
-    change: '+12.5%',
-    icon: DollarSign,
-    color: 'bg-green-500',
-    trend: 'up'
-  },
-  {
-    title: 'Total Orders',
-    value: '1,234',
-    change: '+8.2%',
-    icon: ShoppingCart,
-    color: 'bg-blue-500',
-    trend: 'up'
-  },
-  {
-    title: 'Active Products',
-    value: '156',
-    change: '+3.1%',
-    icon: Package,
-    color: 'bg-purple-500',
-    trend: 'up'
-  },
-  {
-    title: 'Customer Rating',
-    value: '4.8',
-    change: '+0.3',
-    icon: Star,
-    color: 'bg-yellow-500',
-    trend: 'up'
-  },
-];
+import { dashboardAPI } from '../../services/dashboardApi';
+import type {
+  DashboardStats,
+  DashboardProduct,
+  RecentOrder
+} from '../../services/dashboardApi';
 
 const AdminDashboard: React.FC = () => {
+  const [stats, setStats] = useState<DashboardStats | null>(null);
+  const [topProducts, setTopProducts] = useState<DashboardProduct[]>([]);
+  const [recentOrders, setRecentOrders] = useState<RecentOrder[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Fetch dashboard data
+  const fetchDashboardData = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      const [statsResponse, productsResponse, ordersResponse] = await Promise.all([
+        dashboardAPI.getStats(),
+        dashboardAPI.getProducts(),
+        dashboardAPI.getRecentOrders()
+      ]);
+
+      if (statsResponse.success && statsResponse.stats) {
+        setStats(statsResponse.stats);
+      } else {
+        console.error('Failed to fetch stats:', statsResponse.message);
+      }
+
+      if (productsResponse.success && productsResponse.products) {
+        setTopProducts(productsResponse.products);
+      } else {
+        console.error('Failed to fetch products:', productsResponse.message);
+      }
+
+      if (ordersResponse.success && ordersResponse.orders) {
+        setRecentOrders(ordersResponse.orders);
+      } else {
+        console.error('Failed to fetch orders:', ordersResponse.message);
+      }
+    } catch (err) {
+      setError('Network error occurred while fetching dashboard data');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchDashboardData();
+  }, []);
+
+  const statsConfig = [
+    {
+      title: 'Total Revenue',
+      value: stats?.totalRevenue || '$0',
+      change: stats?.revenueChange || '+0%',
+      icon: DollarSign,
+      color: 'bg-green-500',
+      trend: 'up'
+    },
+    {
+      title: 'Total Orders',
+      value: stats?.totalOrders || '0',
+      change: stats?.ordersChange || '+0%',
+      icon: ShoppingCart,
+      color: 'bg-blue-500',
+      trend: 'up'
+    },
+    {
+      title: 'Active Products',
+      value: stats?.activeProducts || '0',
+      change: stats?.productsChange || '+0%',
+      icon: Package,
+      color: 'bg-purple-500',
+      trend: 'up'
+    },
+    {
+      title: 'Customer Rating',
+      value: stats?.customerRating || '0.0',
+      change: stats?.ratingChange || '+0',
+      icon: Star,
+      color: 'bg-yellow-500',
+      trend: 'up'
+    },
+  ];
+
+  // Loading state
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-96">
+        <div className="text-center">
+          <Loader2 className="h-8 w-8 animate-spin mx-auto text-[#e72a00]" />
+          <p className="mt-2 text-gray-600">Loading dashboard...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <div className="flex items-center justify-center min-h-96">
+        <div className="text-center">
+          <div className="bg-red-50 border border-red-200 rounded-lg p-6">
+            <p className="text-red-800 mb-4">{error}</p>
+            <button
+              onClick={fetchDashboardData}
+              className="px-4 py-2 bg-[#e72a00] text-white rounded-md hover:bg-[#d12400] transition-colors"
+            >
+              Try Again
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
   return (
     <div className="space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -57,7 +140,7 @@ const AdminDashboard: React.FC = () => {
 
         {/* Stats Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {stats.map((stat, index) => (
+          {statsConfig.map((stat, index) => (
             <motion.div
               key={stat.title}
               initial={{ opacity: 0, y: 20 }}
@@ -93,11 +176,12 @@ const AdminDashboard: React.FC = () => {
           >
             <h3 className="text-lg lg:text-xl font-semibold text-gray-900 mb-6">Recent Orders</h3>
             <div className="space-y-4">
-              {[
-                { id: '#1234', customer: 'John Doe', amount: '$89.99', status: 'Completed' },
-                { id: '#1235', customer: 'Jane Smith', amount: '$156.50', status: 'Processing' },
-                { id: '#1236', customer: 'Mike Johnson', amount: '$45.00', status: 'Shipped' },
-              ].map((order) => (
+              {recentOrders.length === 0 ? (
+                <div className="text-center py-8">
+                  <p className="text-gray-500">No recent orders found</p>
+                </div>
+              ) : (
+                recentOrders.slice(0, 3).map((order) => (
                 <div key={order.id} className="flex items-center justify-between py-3">
                   <div className="min-w-0 flex-1">
                     <p className="font-medium text-gray-900">{order.id}</p>
@@ -114,7 +198,8 @@ const AdminDashboard: React.FC = () => {
                     </span>
                   </div>
                 </div>
-              ))}
+                ))
+              )}
             </div>
           </motion.div>
 
@@ -126,19 +211,21 @@ const AdminDashboard: React.FC = () => {
           >
             <h3 className="text-lg lg:text-xl font-semibold text-gray-900 mb-6">Top Products</h3>
             <div className="space-y-4">
-              {[
-                { name: 'Smart Gadgets', sales: 234, revenue: '$12,450' },
-                { name: 'Skincare Set', sales: 189, revenue: '$8,920' },
-                { name: 'Wellness Kit', sales: 156, revenue: '$7,800' },
-              ].map((product) => (
-                <div key={product.name} className="flex items-center justify-between py-3">
+              {topProducts.length === 0 ? (
+                <div className="text-center py-8">
+                  <p className="text-gray-500">No top products found</p>
+                </div>
+              ) : (
+                topProducts.slice(0, 3).map((product) => (
+                <div key={product.id} className="flex items-center justify-between py-3">
                   <div className="min-w-0 flex-1">
                     <p className="font-medium text-gray-900 truncate">{product.name}</p>
                     <p className="text-sm text-gray-600">{product.sales} sales</p>
                   </div>
                   <p className="font-medium text-gray-900 flex-shrink-0 ml-4">{product.revenue}</p>
                 </div>
-              ))}
+                ))
+              )}
             </div>
           </motion.div>
         </div>

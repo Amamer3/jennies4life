@@ -32,7 +32,7 @@ interface User {
   emailVerified: boolean;
   lastLogin: string;
   joinDate: string;
-  totalOrders: number;
+
   totalSpent: number;
   address: {
     street: string;
@@ -70,7 +70,7 @@ const UsersAdmin: React.FC = () => {
       emailVerified: true,
       lastLogin: '2024-01-18T10:30:00Z',
       joinDate: '2023-06-15T09:00:00Z',
-      totalOrders: 12,
+
       totalSpent: 1250.99,
       address: {
         street: '123 Main St',
@@ -97,7 +97,7 @@ const UsersAdmin: React.FC = () => {
       emailVerified: true,
       lastLogin: '2024-01-18T14:15:00Z',
       joinDate: '2022-01-10T08:00:00Z',
-      totalOrders: 0,
+
       totalSpent: 0,
       address: {
         street: '456 Oak Ave',
@@ -124,7 +124,7 @@ const UsersAdmin: React.FC = () => {
       emailVerified: false,
       lastLogin: '2024-01-10T16:45:00Z',
       joinDate: '2023-11-20T12:30:00Z',
-      totalOrders: 3,
+
       totalSpent: 89.97,
       address: {
         street: '789 Pine Rd',
@@ -151,7 +151,7 @@ const UsersAdmin: React.FC = () => {
       emailVerified: true,
       lastLogin: '2024-01-17T11:20:00Z',
       joinDate: '2023-03-05T14:15:00Z',
-      totalOrders: 8,
+
       totalSpent: 567.45,
       address: {
         street: '321 Elm St',
@@ -178,7 +178,7 @@ const UsersAdmin: React.FC = () => {
       emailVerified: true,
       lastLogin: '2024-01-05T09:30:00Z',
       joinDate: '2023-08-12T10:45:00Z',
-      totalOrders: 1,
+
       totalSpent: 25.99,
       address: {
         street: '654 Maple Dr',
@@ -574,7 +574,7 @@ const UsersAdmin: React.FC = () => {
                     Status
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Orders
+                    Total Spent
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Last Login
@@ -629,7 +629,6 @@ const UsersAdmin: React.FC = () => {
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      <div>{user.totalOrders} orders</div>
                       <div className="text-gray-500">${user.totalSpent.toFixed(2)}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
@@ -701,10 +700,7 @@ const UsersAdmin: React.FC = () => {
               </div>
               
               <div className="space-y-2 mb-4">
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-gray-600">Total Orders:</span>
-                  <span className="font-medium">{user.totalOrders}</span>
-                </div>
+
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-gray-600">Total Spent:</span>
                   <span className="font-medium">${user.totalSpent.toFixed(2)}</span>

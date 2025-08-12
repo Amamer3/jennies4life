@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import {
   Plus,
@@ -7,27 +7,23 @@ import {
   Edit,
   Trash2,
   Eye,
-  Star,
   Package,
-  DollarSign,
   TrendingUp,
-  MoreHorizontal
+  MoreHorizontal,
+  Loader2
 } from 'lucide-react';
+import { productAPI } from '../../services/productApi';
+import type { CreateProductRequest } from '../../services/productApi';
 
 
 interface Product {
   id: string;
   name: string;
-  category: string;
-  price: number;
-  originalPrice?: number;
-  discount?: number;
-  stock: number;
-  rating: number;
-  reviews: number;
   image: string;
-  status: 'active' | 'inactive' | 'out_of_stock';
-  featured: boolean;
+  description: string;
+  affiliateLink: string;
+  category: string;
+  status: 'published' | 'draft' | 'archived';
   createdAt: string;
 }
 
@@ -37,69 +33,44 @@ const ProductsAdmin: React.FC = () => {
   const [selectedStatus, setSelectedStatus] = useState('all');
   const [showAddModal, setShowAddModal] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const formRef = useRef<HTMLFormElement>(null);
 
-  // Mock data
-  const products: Product[] = [
-    {
-      id: '1',
-      name: 'Smart Wireless Headphones',
-      category: 'Electronics',
-      price: 89.99,
-      originalPrice: 129.99,
-      discount: 31,
-      stock: 45,
-      rating: 4.8,
-      reviews: 234,
-      image: 'https://images.pexels.com/photos/3394650/pexels-photo-3394650.jpeg',
-      status: 'active',
-      featured: true,
-      createdAt: '2024-01-15'
-    },
-    {
-      id: '2',
-      name: 'Organic Skincare Set',
-      category: 'Beauty',
-      price: 45.99,
-      stock: 23,
-      rating: 4.6,
-      reviews: 189,
-      image: 'https://images.pexels.com/photos/5076516/pexels-photo-5076516.jpeg',
-      status: 'active',
-      featured: false,
-      createdAt: '2024-01-12'
-    },
-    {
-      id: '3',
-      name: 'Fitness Tracker Pro',
-      category: 'Health',
-      price: 129.99,
-      originalPrice: 179.99,
-      discount: 28,
-      stock: 0,
-      rating: 4.7,
-      reviews: 156,
-      image: 'https://images.pexels.com/photos/2988232/pexels-photo-2988232.jpeg',
-      status: 'out_of_stock',
-      featured: true,
-      createdAt: '2024-01-10'
-    },
-    {
-      id: '4',
-      name: 'Designer Handbag',
-      category: 'Fashion',
-      price: 199.99,
-      stock: 12,
-      rating: 4.9,
-      reviews: 89,
-      image: 'https://images.pexels.com/photos/3962285/pexels-photo-3962285.jpeg',
-      status: 'active',
-      featured: false,
-      createdAt: '2024-01-08'
+  // Fetch products from API
+  const fetchProducts = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      console.log('🔄 Fetching products from API...');
+      const response = await productAPI.getProducts();
+      
+      console.log('📦 API Response:', response);
+      
+      if (response.success && response.products) {
+        console.log('✅ Products fetched successfully:', response.products.length, 'products');
+        setProducts(response.products);
+      } else {
+        const errorMessage = response.message || 'Failed to fetch products';
+        console.error('❌ API returned error:', errorMessage);
+        setError(errorMessage);
+      }
+    } catch (err) {
+      console.error('🚨 Network error while fetching products:', err);
+      setError('Network error occurred while fetching products');
+    } finally {
+      setLoading(false);
     }
-  ];
+  };
+
+  useEffect(() => {
+    fetchProducts();
+  }, []);
 
   const categories = ['all', 'Electronics', 'Beauty', 'Health', 'Fashion'];
-  const statuses = ['all', 'active', 'inactive', 'out_of_stock'];
+  const statuses = ['all', 'published', 'draft', 'archived'];
 
   const filteredProducts = products.filter(product => {
     const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase());
@@ -110,11 +81,49 @@ const ProductsAdmin: React.FC = () => {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'active': return 'bg-green-100 text-green-800';
-      case 'inactive': return 'bg-gray-100 text-gray-800';
-      case 'out_of_stock': return 'bg-red-100 text-red-800';
+      case 'published': return 'bg-green-100 text-green-800';
+      case 'draft': return 'bg-yellow-100 text-yellow-800';
+      case 'archived': return 'bg-gray-100 text-gray-800';
       default: return 'bg-gray-100 text-gray-800';
     }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!formRef.current) return;
+
+    setIsSubmitting(true);
+    const formData = new FormData(formRef.current);
+    
+    const productData: CreateProductRequest = {
+      name: formData.get('name') as string,
+      image: formData.get('image') as string,
+      description: formData.get('description') as string,
+      affiliateLink: formData.get('affiliateLink') as string,
+      category: formData.get('category') as string,
+      status: formData.get('status') as 'published' | 'draft' | 'archived'
+    };
+
+    try {
+      const result = await productAPI.createProduct(productData);
+      if (result.success) {
+        alert('Product created successfully!');
+        onClose();
+        // Refresh the products list
+        await fetchProducts();
+      } else {
+        alert(`Error: ${result.message}`);
+      }
+    } catch (error) {
+      alert('Failed to create product. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const onClose = () => {
+    setSelectedProduct(null);
+    setShowAddModal(false);
   };
 
   const ProductModal = ({ product, onClose }: { product: Product | null; onClose: () => void }) => {
@@ -135,21 +144,27 @@ const ProductsAdmin: React.FC = () => {
               {product ? 'Edit Product' : 'Add New Product'}
             </h3>
             
+            <form ref={formRef} onSubmit={handleSubmit}>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Product Name</label>
                 <input
                   type="text"
+                  name="name"
                   defaultValue={product?.name || ''}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#e72a00]"
+                  placeholder="Amazing Product"
+                  required
                 />
               </div>
               
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
                 <select
+                  name="category"
                   defaultValue={product?.category || ''}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#e72a00]"
+                  required
                 >
                   <option value="">Select Category</option>
                   {categories.slice(1).map(cat => (
@@ -158,75 +173,110 @@ const ProductsAdmin: React.FC = () => {
                 </select>
               </div>
               
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Price</label>
-                <input
-                  type="number"
-                  step="0.01"
-                  defaultValue={product?.price || ''}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#e72a00]"
-                />
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Stock</label>
-                <input
-                  type="number"
-                  defaultValue={product?.stock || ''}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#e72a00]"
-                />
-              </div>
-              
               <div className="md:col-span-2">
                 <label className="block text-sm font-medium text-gray-700 mb-1">Image URL</label>
                 <input
                   type="url"
+                  name="image"
                   defaultValue={product?.image || ''}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#e72a00]"
+                  placeholder="https://example.com/image.jpg"
+                  required
+                />
+              </div>
+              
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                <textarea
+                  rows={3}
+                  name="description"
+                  defaultValue={product?.description || ''}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#e72a00]"
+                  placeholder="This is an amazing product that you'll love!"
+                  required
+                />
+              </div>
+              
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium text-gray-700 mb-1">Affiliate Link</label>
+                <input
+                  type="url"
+                  name="affiliateLink"
+                  defaultValue={product?.affiliateLink || ''}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#e72a00]"
+                  placeholder="https://affiliate.com/product/123"
+                  required
                 />
               </div>
               
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
                 <select
-                  defaultValue={product?.status || 'active'}
+                  name="status"
+                  defaultValue={product?.status || 'published'}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#e72a00]"
                 >
-                  <option value="active">Active</option>
-                  <option value="inactive">Inactive</option>
-                  <option value="out_of_stock">Out of Stock</option>
+                  <option value="published">Published</option>
+                  <option value="draft">Draft</option>
+                  <option value="archived">Archived</option>
                 </select>
-              </div>
-              
-              <div className="flex items-center">
-                <input
-                  type="checkbox"
-                  id="featured"
-                  defaultChecked={product?.featured || false}
-                  className="h-4 w-4 text-[#e72a00] focus:ring-[#e72a00] border-gray-300 rounded"
-                />
-                <label htmlFor="featured" className="ml-2 block text-sm text-gray-700">
-                  Featured Product
-                </label>
               </div>
             </div>
             
             <div className="flex justify-end space-x-3 mt-6">
               <button
+                type="button"
                 onClick={onClose}
                 className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors"
+                disabled={isSubmitting}
               >
                 Cancel
               </button>
-              <button className="px-4 py-2 text-sm font-medium text-white bg-[#e72a00] rounded-md hover:bg-[#d12400] transition-colors">
-                {product ? 'Update Product' : 'Add Product'}
+              <button 
+                type="submit"
+                className="px-4 py-2 text-sm font-medium text-white bg-[#e72a00] rounded-md hover:bg-[#d12400] transition-colors disabled:opacity-50"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? 'Creating...' : (product ? 'Update Product' : 'Add Product')}
               </button>
             </div>
+            </form>
           </motion.div>
         </div>
       </div>
     );
   };
+
+  // Loading state
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-96">
+        <div className="text-center">
+          <Loader2 className="h-8 w-8 animate-spin mx-auto text-[#e72a00]" />
+          <p className="mt-2 text-gray-600">Loading products...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <div className="flex items-center justify-center min-h-96">
+        <div className="text-center">
+          <div className="bg-red-50 border border-red-200 rounded-lg p-6">
+            <p className="text-red-800 mb-4">{error}</p>
+            <button
+              onClick={fetchProducts}
+              className="px-4 py-2 bg-[#e72a00] text-white rounded-md hover:bg-[#d12400] transition-colors"
+            >
+              Try Again
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -248,10 +298,10 @@ const ProductsAdmin: React.FC = () => {
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         {[
-          { label: 'Total Products', value: '156', icon: Package, color: 'bg-blue-500' },
-          { label: 'Active Products', value: '142', icon: TrendingUp, color: 'bg-green-500' },
-          { label: 'Out of Stock', value: '8', icon: Package, color: 'bg-red-500' },
-          { label: 'Total Value', value: '$45,231', icon: DollarSign, color: 'bg-purple-500' },
+          { label: 'Total Products', value: products.length.toString(), icon: Package, color: 'bg-blue-500' },
+          { label: 'Published', value: products.filter(p => p.status === 'published').length.toString(), icon: TrendingUp, color: 'bg-green-500' },
+          { label: 'Draft', value: products.filter(p => p.status === 'draft').length.toString(), icon: Package, color: 'bg-yellow-500' },
+          { label: 'Archived', value: products.filter(p => p.status === 'archived').length.toString(), icon: Package, color: 'bg-gray-500' },
         ].map((stat, index) => (
           <motion.div
             key={stat.label}
@@ -331,13 +381,10 @@ const ProductsAdmin: React.FC = () => {
                   Category
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Price
+                  Description
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Stock
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Rating
+                  Affiliate Link
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Status
@@ -348,7 +395,31 @@ const ProductsAdmin: React.FC = () => {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {filteredProducts.map((product) => (
+              {filteredProducts.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="px-6 py-12 text-center">
+                    <div className="text-gray-500">
+                      <Package className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+                      <p className="text-lg font-medium mb-2">No products found</p>
+                      <p className="text-sm">
+                        {products.length === 0 
+                          ? "Get started by adding your first product." 
+                          : "Try adjusting your search or filter criteria."}
+                      </p>
+                      {products.length === 0 && (
+                        <button
+                          onClick={() => setShowAddModal(true)}
+                          className="mt-4 inline-flex items-center px-4 py-2 bg-[#e72a00] text-white text-sm font-medium rounded-md hover:bg-[#d12400] transition-colors"
+                        >
+                          <Plus className="h-4 w-4 mr-2" />
+                          Add Your First Product
+                        </button>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              ) : (
+                filteredProducts.map((product) => (
                 <motion.tr
                   key={product.id}
                   initial={{ opacity: 0 }}
@@ -364,40 +435,27 @@ const ProductsAdmin: React.FC = () => {
                       />
                       <div className="ml-4">
                         <div className="text-sm font-medium text-gray-900">{product.name}</div>
-                        {product.featured && (
-                          <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800">
-                            <Star className="h-3 w-3 mr-1" />
-                            Featured
-                          </span>
-                        )}
+                        <div className="text-xs text-gray-500">ID: {product.id}</div>
                       </div>
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                     {product.category}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">
-                      ${product.price}
-                      {product.originalPrice && (
-                        <span className="text-xs text-gray-500 line-through ml-1">
-                          ${product.originalPrice}
-                        </span>
-                      )}
+                  <td className="px-6 py-4">
+                    <div className="text-sm text-gray-900 max-w-xs truncate">
+                      {product.description}
                     </div>
-                    {product.discount && (
-                      <div className="text-xs text-green-600">{product.discount}% off</div>
-                    )}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {product.stock}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center">
-                      <Star className="h-4 w-4 text-yellow-400 fill-current" />
-                      <span className="ml-1 text-sm text-gray-900">{product.rating}</span>
-                      <span className="ml-1 text-xs text-gray-500">({product.reviews})</span>
-                    </div>
+                    <a
+                      href={product.affiliateLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-600 hover:text-blue-900 text-sm truncate max-w-xs block"
+                    >
+                      {product.affiliateLink}
+                    </a>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(product.status)}`}>
@@ -424,42 +482,42 @@ const ProductsAdmin: React.FC = () => {
                     </div>
                   </td>
                 </motion.tr>
-              ))}
+                ))
+              )}
             </tbody>
           </table>
         </div>
       </div>
 
       {/* Pagination */}
-      <div className="flex items-center justify-between">
-        <div className="text-sm text-gray-700">
-          Showing <span className="font-medium">1</span> to <span className="font-medium">{filteredProducts.length}</span> of{' '}
-          <span className="font-medium">{products.length}</span> results
+      {filteredProducts.length > 0 && (
+        <div className="flex items-center justify-between">
+          <div className="text-sm text-gray-700">
+            Showing <span className="font-medium">1</span> to <span className="font-medium">{filteredProducts.length}</span> of{' '}
+            <span className="font-medium">{products.length}</span> results
+          </div>
+          <div className="flex items-center space-x-2">
+            <button className="px-3 py-1 text-sm border border-gray-300 rounded-md hover:bg-gray-50 transition-colors">
+              Previous
+            </button>
+            <button className="px-3 py-1 text-sm bg-[#e72a00] text-white rounded-md">
+              1
+            </button>
+            <button className="px-3 py-1 text-sm border border-gray-300 rounded-md hover:bg-gray-50 transition-colors">
+              2
+            </button>
+            <button className="px-3 py-1 text-sm border border-gray-300 rounded-md hover:bg-gray-50 transition-colors">
+              Next
+            </button>
+          </div>
         </div>
-        <div className="flex items-center space-x-2">
-          <button className="px-3 py-1 text-sm border border-gray-300 rounded-md hover:bg-gray-50 transition-colors">
-            Previous
-          </button>
-          <button className="px-3 py-1 text-sm bg-[#e72a00] text-white rounded-md">
-            1
-          </button>
-          <button className="px-3 py-1 text-sm border border-gray-300 rounded-md hover:bg-gray-50 transition-colors">
-            2
-          </button>
-          <button className="px-3 py-1 text-sm border border-gray-300 rounded-md hover:bg-gray-50 transition-colors">
-            Next
-          </button>
-        </div>
-      </div>
+      )}
 
       {/* Modals */}
       {(selectedProduct || showAddModal) && (
         <ProductModal
           product={selectedProduct}
-          onClose={() => {
-            setSelectedProduct(null);
-            setShowAddModal(false);
-          }}
+          onClose={onClose}
         />
       )}
     </div>
