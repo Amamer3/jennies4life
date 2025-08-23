@@ -70,13 +70,8 @@ const Header: React.FC = () => {
         <div className="flex items-center justify-between h-16 sm:h-18 lg:h-20">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2 sm:gap-3 flex-shrink-0 min-w-0">
-            <img src="/Jennie4lifelogo.png" alt="Jennies4Life Logo" className="w-16 h-12 sm:w-20 sm:h-16 md:w-24 md:h-18 rounded object-contain" />
-            {/* <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-r from-[#FFFACD] to-[#FFDAB9] rounded-xl flex items-center justify-center">
-              <Heart className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
-            </div>
-            <span className="text-lg sm:text-xl md:text-2xl font-heading font-bold text-gray-900">
-              Jennies4Life
-            </span> */}
+            <img src="/tracking.png" alt="Jennies4Life Logo" className="w-16 h-12 sm:w-20 sm:h-16 md:w-24 md:h-18 rounded object-contain" />
+           
           </Link>
 
           {/* Desktop Navigation */}
@@ -236,28 +231,28 @@ const Header: React.FC = () => {
              <div className="space-y-1">
                <Link
                  to="/"
-                 className="block px-4 py-3 text-base font-medium text-gray-700 hover:text-primary-600 hover:bg-gray-50 rounded-lg transition-all duration-200 min-h-[48px] flex items-center"
+                 className="block px-4 py-3 text-base font-medium text-gray-700 hover:text-primary-600 hover:bg-gray-50 rounded-lg transition-all duration-200 min-h-[48px] items-center"
                  onClick={() => setIsMenuOpen(false)}
                >
                  Home
                </Link>
                <Link
                  to="/blog"
-                 className="block px-4 py-3 text-base font-medium text-gray-700 hover:text-primary-600 hover:bg-gray-50 rounded-lg transition-all duration-200 min-h-[48px] flex items-center"
+                 className="block px-4 py-3 text-base font-medium text-gray-700 hover:text-primary-600 hover:bg-gray-50 rounded-lg transition-all duration-200 min-h-[48px] items-center"
                  onClick={() => setIsMenuOpen(false)}
                >
                  Blog
                </Link>
                <Link
                  to="/deals"
-                 className="block px-4 py-3 text-base font-medium text-gray-700 hover:text-primary-600 hover:bg-gray-50 rounded-lg transition-all duration-200 min-h-[48px] flex items-center"
+                 className="block px-4 py-3 text-base font-medium text-gray-700 hover:text-primary-600 hover:bg-gray-50 rounded-lg transition-all duration-200 min-h-[48px] items-center"
                  onClick={() => setIsMenuOpen(false)}
                >
                  Deals
                </Link>
                <Link
                  to="/about"
-                 className="block px-4 py-3 text-base font-medium text-gray-700 hover:text-primary-600 hover:bg-gray-50 rounded-lg transition-all duration-200 min-h-[48px] flex items-center"
+                 className="block px-4 py-3 text-base font-medium text-gray-700 hover:text-primary-600 hover:bg-gray-50 rounded-lg transition-all duration-200 min-h-[48px] items-center"
                  onClick={() => setIsMenuOpen(false)}
                >
                  About
@@ -274,7 +269,7 @@ const Header: React.FC = () => {
                    <Link
                      key={category.id}
                      to={`/category/${category.slug || category.id}`}
-                     className="block px-4 py-3 text-base text-gray-600 hover:text-primary-600 hover:bg-gray-50 rounded-lg transition-all duration-200 min-h-[48px] flex items-center"
+                     className="block px-4 py-3 text-base text-gray-600 hover:text-primary-600 hover:bg-gray-50 rounded-lg transition-all duration-200 min-h-[48px] items-center"
                      onClick={() => setIsMenuOpen(false)}
                    >
                      {category.name}

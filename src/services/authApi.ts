@@ -1,7 +1,10 @@
 import { signInWithCustomToken } from 'firebase/auth';
 import { auth } from '../config/firebase';
 
-export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
+// Use relative URL in development to leverage Vite proxy, full URL in production
+export const API_BASE_URL = import.meta.env.DEV 
+  ? '' // Use relative URL in development to go through Vite proxy
+  : (import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000');
 
 interface LoginRequest {
   username: string;
@@ -130,6 +133,24 @@ class AuthAPI {
       };
     } catch (error) {
       console.error('🔐 AuthAPI - login error:', error);
+      
+      // Handle CORS errors specifically
+      if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
+        console.error('🚫 CORS Error detected - likely backend CORS configuration issue');
+        return {
+          success: false,
+          message: 'Unable to connect to authentication server. This may be due to CORS configuration. Please contact support if the issue persists.'
+        };
+      }
+      
+      // Handle network errors
+      if (error instanceof Error && (error.message.includes('NetworkError') || error.message.includes('CORS'))) {
+        return {
+          success: false,
+          message: 'Network connection error. Please check your internet connection and try again.'
+        };
+      }
+      
       return {
         success: false,
         message: error instanceof Error ? error.message : 'Authentication failed'
