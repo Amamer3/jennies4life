@@ -1,26 +1,53 @@
-import React, { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
+/**
+ * Authentication Context Provider
+ * 
+ * This module provides the main authentication context for the Jennies4Life application.
+ * It manages user authentication state, handles login/logout operations, and provides
+ * authentication-related utilities throughout the application.
+ * 
+ * Features:
+ * - Automatic token validation and refresh on app startup
+ * - Persistent authentication state management
+ * - Firebase integration for secure token handling
+ * - Comprehensive error handling and logging
+ * - Profile management and user data synchronization
+ * 
+ * @module AuthContext
+ * @author Jennies4Life Development Team
+ * @since 1.0.0
+ * 
+ * @example
+ * ```typescript
+ * // Wrap your app with AuthProvider
+ * import { AuthProvider } from './contexts/AuthContext';
+ * 
+ * function App() {
+ *   return (
+ *     <AuthProvider>
+ *       <YourAppComponents />
+ *     </AuthProvider>
+ *   );
+ * }
+ * 
+ * // Use authentication in components
+ * import { useAuth } from './contexts/AuthContext';
+ * 
+ * function LoginComponent() {
+ *   const { login, isAuthenticated, user } = useAuth();
+ *   // ... component logic
+ * }
+ * ```
+ */
+
+import React, { useState, useEffect, createContext, useContext } from 'react';
 import { authAPI } from '../services/authApi';
+import type { User, AuthProviderProps, AuthContextType } from '../types/auth';
 
-interface User {
-  id: string;
-  username: string;
-  email: string;
-  role: 'admin' | 'user';
-}
-
-interface AuthContextType {
-  user: User | null;
-  isAuthenticated: boolean;
-  isLoading: boolean;
-  login: (username: string, password: string) => Promise<boolean>;
-  logout: () => Promise<void>;
-  getProfile: () => Promise<User | null>;
-  refreshToken: () => Promise<boolean>;
-}
-
+// Create the AuthContext
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export const useAuth = () => {
+// Custom hook to use the AuthContext
+export const useAuth = (): AuthContextType => {
   const context = useContext(AuthContext);
   if (context === undefined) {
     throw new Error('useAuth must be used within an AuthProvider');
@@ -28,10 +55,22 @@ export const useAuth = () => {
   return context;
 };
 
-interface AuthProviderProps {
-  children: ReactNode;
-}
-
+/**
+ * AuthProvider Component
+ * 
+ * The main authentication provider component that wraps the application
+ * and provides authentication context to all child components.
+ * 
+ * State Management:
+ * - user: Current authenticated user data or null
+ * - isAuthenticated: Boolean indicating if user is currently authenticated
+ * - isLoading: Boolean indicating if authentication check is in progress
+ * 
+ * @component
+ * @param {AuthProviderProps} props - Component props
+ * @param {React.ReactNode} props.children - Child components to wrap with auth context
+ * @returns {JSX.Element} AuthContext.Provider with authentication state and methods
+ */
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -40,62 +79,69 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   // Check for existing session on mount
   useEffect(() => {
     const checkAuthStatus = async () => {
+      console.log('🔍 AuthContext - checking auth status on mount');
+      
       try {
-        console.log('🔍 AuthContext - checking auth status on mount');
-        
         const token = localStorage.getItem('authToken');
         console.log('🔍 AuthContext - stored token exists:', !!token);
         
-        if (token) {
-          console.log('🔍 AuthContext - token found, checking authentication');
+        if (!token) {
+          console.log('No auth token found - user must login');
+          setIsAuthenticated(false);
+          return;
+        }
+
+        console.log('🔍 AuthContext - token found, checking authentication');
+        
+        // First try to get user profile with existing token
+        const profileResponse = await authAPI.getProfile();
+        
+        if (profileResponse.success && profileResponse.user) {
+          console.log('✅ AuthContext - profile verification successful with existing token');
+          setUser(profileResponse.user);
+          setIsAuthenticated(true);
+          return;
+        }
+        
+        console.log('⚠️ AuthContext - profile verification failed, attempting token refresh');
+        
+        // If profile fails, try to refresh the token
+        const refreshResponse = await authAPI.refresh();
+        
+        if (refreshResponse.success && refreshResponse.token) {
+          console.log('✅ AuthContext - token refresh successful, retrying profile');
+          const retryProfileResponse = await authAPI.getProfile();
           
-          // First try to get user profile with existing token
-          const profileResponse = await authAPI.getProfile();
-          
-          if (profileResponse.success && profileResponse.user) {
-             console.log('✅ AuthContext - profile verification successful with existing token');
-             setUser(profileResponse.user);
-             setIsAuthenticated(true);
-             setIsLoading(false);
-             return;
-           }
-          
-          console.log('⚠️ AuthContext - profile verification failed, attempting token refresh');
-          
-          // If profile fails, try to refresh the token
-          const refreshSuccess = await refreshToken();
-          
-          if (refreshSuccess) {
-            console.log('✅ AuthContext - token refresh successful, retrying profile');
-            const retryProfileResponse = await authAPI.getProfile();
-            
-            if (retryProfileResponse.success && retryProfileResponse.user) {
-               console.log('✅ AuthContext - profile verification successful after refresh');
-               setUser(retryProfileResponse.user);
-               setIsAuthenticated(true);
-               setIsLoading(false);
-               return;
-             }
+          if (retryProfileResponse.success && retryProfileResponse.user) {
+            console.log('✅ AuthContext - profile verification successful after refresh');
+            setUser(retryProfileResponse.user);
+            setIsAuthenticated(true);
+            return;
+          } else {
+            console.log('❌ AuthContext - profile verification failed after successful token refresh');
+            setUser(null);
+            setIsAuthenticated(false);
+            localStorage.removeItem('authToken');
+            localStorage.removeItem('refreshToken');
+            return;
           }
-          
-          console.log('❌ AuthContext - authentication failed, clearing tokens');
-           localStorage.removeItem('authToken');
-           localStorage.removeItem('refreshToken');
-           setIsAuthenticated(false);
-         } else {
-           // No token found - user must authenticate
-           console.log('No auth token found - user must login');
-           setIsAuthenticated(false);
-         }
-       } catch (error) {
-         console.error('Error checking auth status:', error);
-         console.log('❌ AuthContext - error occurred, clearing tokens');
-         localStorage.removeItem('authToken');
-         localStorage.removeItem('refreshToken');
-         setIsAuthenticated(false);
-       } finally {
-         setIsLoading(false);
-       }
+        }
+        
+        console.log('❌ AuthContext - token refresh failed');
+        setUser(null);
+        setIsAuthenticated(false);
+        localStorage.removeItem('authToken');
+        localStorage.removeItem('refreshToken');
+      } catch (error) {
+        console.error('❌ AuthContext - authentication error:', error);
+        // Clean up on any auth failure
+        localStorage.removeItem('authToken');
+        localStorage.removeItem('refreshToken');
+        setUser(null);
+        setIsAuthenticated(false);
+      } finally {
+        setIsLoading(false);
+      }
     };
 
     checkAuthStatus();

@@ -239,7 +239,7 @@ const BlogPage: React.FC = () => {
               className="max-w-xl mx-auto relative mb-6"
             >
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 sm:h-5 sm:w-5 text-gray-400" />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 sm:h-5 sm:w-5 text-gray-400" aria-hidden="true" />
                 <input
                   type="text"
                   placeholder="Search articles, reviews, and guides..."
@@ -261,10 +261,12 @@ const BlogPage: React.FC = () => {
               <motion.button
                 whileHover={{ scale: 1.05, y: -2 }}
                 whileTap={{ scale: 0.95 }}
-                className="group relative px-6 py-3 bg-white text-green-600 font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden"
+                className="group relative px-6 py-3 bg-white text-green-600 font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 min-h-[44px]"
+                aria-label="Explore trending blog articles"
+                type="button"
               >
                 <span className="relative flex items-center">
-                  <TrendingUp className="h-5 w-5 mr-2" />
+                  <TrendingUp className="h-5 w-5 mr-2" aria-hidden="true" />
                   Explore Trending
                 </span>
               </motion.button>
@@ -272,10 +274,12 @@ const BlogPage: React.FC = () => {
               <motion.button
                 whileHover={{ scale: 1.05, y: -2 }}
                 whileTap={{ scale: 0.95 }}
-                className="group px-6 py-3 bg-transparent border-2 border-white text-white font-semibold rounded-xl hover:bg-white hover:text-green-600 transition-all duration-300 shadow-sm hover:shadow-lg"
+                className="group px-6 py-3 bg-transparent border-2 border-white text-white font-semibold rounded-xl hover:bg-white hover:text-green-600 transition-all duration-300 shadow-sm hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 min-h-[44px]"
+                aria-label="Browse blog articles by category"
+                type="button"
               >
                 <span className="flex items-center">
-                  <Filter className="h-5 w-5 mr-2" />
+                  <Filter className="h-5 w-5 mr-2" aria-hidden="true" />
                   Browse Categories
                 </span>
               </motion.button>
@@ -341,7 +345,11 @@ const BlogPage: React.FC = () => {
                   transition={{ duration: 0.6, delay: 0.3 }}
                   className="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-bold text-gray-900 mb-3 sm:mb-4 leading-tight hover:text-blue-600 transition-colors duration-300"
                 >
-                  <Link to={`/blog/${featuredPost.slug}`} aria-label={`Read ${featuredPost.title}`}>
+                  <Link 
+                    to={`/blog/${featuredPost.slug}`} 
+                    aria-label={`Read featured article: ${featuredPost.title}`}
+                    className="focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded"
+                  >
                     {featuredPost.title}
                   </Link>
                 </motion.h2>
@@ -363,7 +371,7 @@ const BlogPage: React.FC = () => {
                 >
                   <div className="flex items-center">
                     <User className="h-3 w-3 sm:h-4 sm:w-4 mr-1 text-blue-500" />
-                    {typeof featuredPost.author === 'string' ? featuredPost.author : (featuredPost.author as any)?.name || 'Unknown Author'}
+                    {featuredPost.author || 'Unknown Author'}
                   </div>
                   <div className="flex items-center">
                     <Calendar className="h-3 w-3 sm:h-4 sm:w-4 mr-1 text-blue-500" />
@@ -504,7 +512,7 @@ const BlogPage: React.FC = () => {
                     transition={{ duration: 2, repeat: Infinity }}
                     className="mr-2"
                   >
-                    <Filter className="h-5 w-5 text-blue-600" />
+                    <Filter className="h-5 w-5 text-blue-600" aria-hidden="true" />
                   </motion.div>
                   <span className="text-sm font-semibold text-gray-700">Filter by Category</span>
                 </motion.div>
@@ -519,7 +527,9 @@ const BlogPage: React.FC = () => {
                       whileTap={{ scale: 0.95 }}
                       onClick={() => setSelectedCategory(category || 'All')}
                       aria-label={`Filter by ${category} category`}
-                      className={`relative px-3 sm:px-4 py-2 rounded-full text-xs sm:text-sm font-medium transition-all duration-300 overflow-hidden ${
+                      aria-pressed={selectedCategory === category}
+                      type="button"
+                      className={`relative px-3 sm:px-4 py-2 rounded-full text-xs sm:text-sm font-medium transition-all duration-300 overflow-hidden focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 min-h-[36px] ${
                         selectedCategory === category
                           ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg'
                           : 'bg-gray-50 text-gray-600 hover:bg-gray-100 border border-gray-200 hover:border-blue-300'
@@ -569,7 +579,9 @@ const BlogPage: React.FC = () => {
                     whileTap={{ scale: 0.95 }}
                     onClick={() => setViewMode('grid')}
                     aria-label="Switch to grid view"
-                    className={`relative p-2 transition-all duration-200 ${
+                    aria-pressed={viewMode === 'grid'}
+                    type="button"
+                    className={`relative p-2 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 min-h-[36px] min-w-[36px] ${
                       viewMode === 'grid' 
                         ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white' 
                         : 'text-gray-600 hover:bg-gray-50'
@@ -582,14 +594,16 @@ const BlogPage: React.FC = () => {
                         transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
                       />
                     )}
-                    <Grid className="h-4 w-4 sm:h-5 sm:w-5 relative z-10" />
+                    <Grid className="h-4 w-4 sm:h-5 sm:w-5 relative z-10" aria-hidden="true" />
                   </motion.button>
                   <motion.button
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={() => setViewMode('list')}
                     aria-label="Switch to list view"
-                    className={`relative p-2 transition-all duration-200 ${
+                    aria-pressed={viewMode === 'list'}
+                    type="button"
+                    className={`relative p-2 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 min-h-[36px] min-w-[36px] ${
                       viewMode === 'list' 
                         ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white' 
                         : 'text-gray-600 hover:bg-gray-50'
@@ -602,7 +616,7 @@ const BlogPage: React.FC = () => {
                         transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
                       />
                     )}
-                    <List className="h-4 w-4 sm:h-5 sm:w-5 relative z-10" />
+                    <List className="h-4 w-4 sm:h-5 sm:w-5 relative z-10" aria-hidden="true" />
                   </motion.button>
                 </motion.div>
               </div>
@@ -726,7 +740,7 @@ const BlogPage: React.FC = () => {
                             transition={{ duration: 2, repeat: Infinity }}
                             className="bg-gradient-to-r from-orange-500 to-red-500 text-white p-1.5 rounded-full shadow-lg"
                           >
-                            <Flame className="h-3 w-3" />
+                            <Flame className="h-3 w-3" aria-hidden="true" />
                           </motion.div>
                         </motion.div>
                       )}
@@ -744,8 +758,8 @@ const BlogPage: React.FC = () => {
                       >
                         <Link 
                           to={`/blog/${post.slug}`} 
-                          aria-label={`Read ${post.title}`}
-                          className="hover:underline decoration-2 underline-offset-2"
+                          aria-label={`Read article: ${post.title}`}
+                          className="hover:underline decoration-2 underline-offset-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded"
                         >
                           {post.title}
                         </Link>
@@ -778,7 +792,7 @@ const BlogPage: React.FC = () => {
                             whileHover={{ scale: 1.05, y: -1 }}
                             className="inline-flex items-center text-xs text-gray-500 bg-gradient-to-r from-gray-100 to-gray-50 px-2 py-1 rounded-full hover:from-blue-50 hover:to-purple-50 hover:text-blue-600 transition-all duration-200 cursor-pointer"
                           >
-                            <Tag className="h-3 w-3 mr-1" />
+                            <Tag className="h-3 w-3 mr-1" aria-hidden="true" />
                             {tag}
                           </motion.span>
                         ))}
@@ -802,7 +816,7 @@ const BlogPage: React.FC = () => {
                             className="flex items-center hover:text-blue-600 transition-colors duration-200"
                           >
                             <User className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
-                            {typeof post.author === 'string' ? post.author : (post.author as any)?.name || 'Unknown Author'}
+                            {post.author || 'Unknown Author'}
                           </motion.div>
                           <motion.div
                             whileHover={{ scale: 1.05 }}
@@ -832,25 +846,31 @@ const BlogPage: React.FC = () => {
                           <motion.button
                             whileHover={{ scale: 1.1 }}
                             whileTap={{ scale: 0.95 }}
-                            className="flex items-center text-gray-500 hover:text-red-500 transition-colors duration-200"
+                            className="flex items-center text-gray-500 hover:text-red-500 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 rounded min-h-[36px]"
+                            aria-label={`Like this article (${Math.floor(Math.random() * 100) + 10} likes)`}
+                            type="button"
                           >
-                            <Heart className="h-4 w-4 mr-1" />
+                            <Heart className="h-4 w-4 mr-1" aria-hidden="true" />
                             <span className="text-xs">{Math.floor(Math.random() * 100) + 10}</span>
                           </motion.button>
                           <motion.button
                             whileHover={{ scale: 1.1 }}
                             whileTap={{ scale: 0.95 }}
-                            className="flex items-center text-gray-500 hover:text-blue-500 transition-colors duration-200"
+                            className="flex items-center text-gray-500 hover:text-blue-500 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded min-h-[36px]"
+                            aria-label={`View count: ${Math.floor(Math.random() * 1000) + 100} views`}
+                            type="button"
                           >
-                            <Eye className="h-4 w-4 mr-1" />
+                            <Eye className="h-4 w-4 mr-1" aria-hidden="true" />
                             <span className="text-xs">{Math.floor(Math.random() * 1000) + 100}</span>
                           </motion.button>
                           <motion.button
                             whileHover={{ scale: 1.1, rotate: 15 }}
                             whileTap={{ scale: 0.95 }}
-                            className="text-gray-500 hover:text-green-500 transition-colors duration-200"
+                            className="text-gray-500 hover:text-green-500 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 rounded p-2 min-h-[36px] min-w-[36px]"
+                            aria-label="Share this article"
+                            type="button"
                           >
-                            <Share2 className="h-4 w-4" />
+                            <Share2 className="h-4 w-4" aria-hidden="true" />
                           </motion.button>
                         </motion.div>
                         
@@ -862,10 +882,10 @@ const BlogPage: React.FC = () => {
                           <Link
                             to={`/blog/${post.slug}`}
                             aria-label={`Read more about ${post.title}`}
-                            className="inline-flex items-center text-blue-600 hover:text-blue-700 text-sm font-medium group-hover:translate-x-1 transition-all duration-200"
+                            className="inline-flex items-center text-blue-600 hover:text-blue-700 text-sm font-medium group-hover:translate-x-1 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded min-h-[36px]"
                           >
                             Read More
-                            <ArrowRight className="ml-1 h-3 w-3 sm:h-4 sm:w-4" />
+                            <ArrowRight className="ml-1 h-3 w-3 sm:h-4 sm:w-4" aria-hidden="true" />
                           </Link>
                         </motion.div>
                       </div>
@@ -903,8 +923,9 @@ const BlogPage: React.FC = () => {
                 boxShadow: "0 20px 40px rgba(59, 130, 246, 0.3)"
               }}
               whileTap={{ scale: 0.95 }}
-              className="relative inline-flex items-center px-8 sm:px-10 py-4 sm:py-5 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden group"
+              className="relative inline-flex items-center px-8 sm:px-10 py-4 sm:py-5 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden group focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 min-h-[44px]"
               aria-label="Load more articles"
+              type="button"
             >
               {/* Button Background Animation */}
               <motion.div
@@ -943,7 +964,7 @@ const BlogPage: React.FC = () => {
                 transition={{ duration: 1.5, repeat: Infinity }}
                 className="relative z-10"
               >
-                <ArrowRight className="h-5 w-5" />
+                <ArrowRight className="h-5 w-5" aria-hidden="true" />
               </motion.div>
             </motion.button>
             

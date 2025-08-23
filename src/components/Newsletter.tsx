@@ -25,7 +25,7 @@ const Newsletter: React.FC = () => {
       } else {
         setError(response.message || 'Failed to subscribe. Please try again.');
       }
-    } catch (error) {
+    } catch {
       setError('Network error. Please check your connection and try again.');
     } finally {
       setIsLoading(false);

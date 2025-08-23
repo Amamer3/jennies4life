@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { 
@@ -52,7 +52,7 @@ const ProductsListPage: React.FC = () => {
   };
 
   // Fetch products from API
-  const fetchProducts = async () => {
+  const fetchProducts = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -86,7 +86,7 @@ const ProductsListPage: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [currentPage, productsPerPage, sortBy, sortOrder, searchTerm, selectedCategory]);
 
   // Effect to fetch categories and products when component mounts
   useEffect(() => {
@@ -96,7 +96,7 @@ const ProductsListPage: React.FC = () => {
   // Effect to fetch products when filters change
   useEffect(() => {
     fetchProducts();
-  }, [currentPage, sortBy, sortOrder, selectedCategory]);
+  }, [currentPage, sortBy, sortOrder, selectedCategory, fetchProducts]);
 
   // Effect to handle search with debounce
   useEffect(() => {
@@ -106,7 +106,7 @@ const ProductsListPage: React.FC = () => {
     }, 500);
 
     return () => clearTimeout(timeoutId);
-  }, [searchTerm]);
+  }, [searchTerm, fetchProducts]);
 
   const toggleWishlist = (productId: string) => {
     setWishlist(prev => {
@@ -126,65 +126,66 @@ const ProductsListPage: React.FC = () => {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden group"
+      className="bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden group focus-within:ring-2 focus-within:ring-primary-500 focus-within:ring-offset-2"
     >
       <div className="relative overflow-hidden">
         <img
           src={product.image}
           alt={product.name}
-          className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
+          className="w-full h-40 sm:h-48 object-cover group-hover:scale-105 transition-transform duration-300"
         />
         {product.discount && (
-          <div className="absolute top-3 left-3 bg-red-500 text-white px-2 py-1 rounded-full text-xs font-semibold">
+          <div className="absolute top-2 sm:top-3 left-2 sm:left-3 bg-red-500 text-white px-2 py-1 rounded-full text-xs font-semibold">
             -{product.discount}%
           </div>
         )}
         {product.isNew && (
-          <div className="absolute top-3 right-3 bg-green-500 text-white px-2 py-1 rounded-full text-xs font-semibold">
+          <div className="absolute top-2 sm:top-3 right-12 sm:right-14 bg-green-500 text-white px-2 py-1 rounded-full text-xs font-semibold">
             New
           </div>
         )}
         <button
           onClick={() => toggleWishlist(product.id)}
-          className={`absolute top-3 right-3 p-2 rounded-full transition-colors ${
+          className={`absolute top-2 sm:top-3 right-2 sm:right-3 p-2 rounded-full transition-colors min-w-[40px] min-h-[40px] flex items-center justify-center ${
             wishlist.has(product.id)
               ? 'bg-red-500 text-white'
-              : 'bg-white/80 text-gray-600 hover:bg-red-500 hover:text-white'
+              : 'bg-white/90 text-gray-600 hover:bg-red-500 hover:text-white'
           }`}
+          aria-label={wishlist.has(product.id) ? 'Remove from wishlist' : 'Add to wishlist'}
         >
-          <Heart className="h-4 w-4" fill={wishlist.has(product.id) ? 'currentColor' : 'none'} />
+          <Heart className="h-4 w-4" fill={wishlist.has(product.id) ? 'currentColor' : 'none'} aria-hidden="true" />
         </button>
       </div>
       
-      <div className="p-4">
+      <div className="p-3 sm:p-4">
         <div className="flex items-center justify-between mb-2">
-          <span className="text-sm text-gray-500">{product.category}</span>
-          <div className="flex items-center">
-            <Star className="h-4 w-4 text-yellow-400 fill-current" />
-            <span className="text-sm text-gray-600 ml-1">{product.rating}</span>
-            <span className="text-xs text-gray-400 ml-1">({product.reviewCount})</span>
+          <span className="text-xs sm:text-sm text-gray-500 truncate">{product.category}</span>
+          <div className="flex items-center flex-shrink-0 ml-2">
+            <Star className="h-3 w-3 sm:h-4 sm:w-4 text-yellow-400 fill-current" aria-hidden="true" />
+            <span className="text-xs sm:text-sm text-gray-600 ml-1">{product.rating}</span>
+            <span className="text-xs text-gray-400 ml-1 hidden sm:inline">({product.reviewCount})</span>
           </div>
         </div>
         
-        <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2">{product.name}</h3>
-        <p className="text-sm text-gray-600 mb-3 line-clamp-2">{product.description}</p>
+        <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2 text-sm sm:text-base leading-tight">{product.name}</h3>
+        <p className="text-xs sm:text-sm text-gray-600 mb-3 line-clamp-2 leading-relaxed">{product.description}</p>
         
         <div className="flex items-center justify-between mb-3">
-          <div className="flex items-center space-x-2">
-            <span className="text-lg font-bold text-gray-900">${product.price}</span>
+          <div className="flex items-center space-x-1 sm:space-x-2">
+            <span className="text-base sm:text-lg font-bold text-gray-900">${product.price}</span>
             {product.originalPrice && (
-              <span className="text-sm text-gray-500 line-through">${product.originalPrice}</span>
+              <span className="text-xs sm:text-sm text-gray-500 line-through">${product.originalPrice}</span>
             )}
           </div>
           {!product.inStock && (
-            <span className="text-sm text-red-500 font-medium">Out of Stock</span>
+            <span className="text-xs sm:text-sm text-red-500 font-medium">Out of Stock</span>
           )}
         </div>
         
         <div className="flex space-x-2">
           <Link
             to={`/product/${product.slug}`}
-            className="flex-1 bg-primary-500 text-white py-2 px-4 rounded-lg hover:bg-primary-600 transition-colors text-center text-sm font-medium"
+            className="flex-1 bg-primary-500 text-white py-2 px-3 sm:px-4 rounded-lg hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition-colors text-center text-xs sm:text-sm font-medium min-h-[40px] flex items-center justify-center"
           >
             View Details
           </Link>
@@ -192,9 +193,10 @@ const ProductsListPage: React.FC = () => {
             href={product.affiliateLink}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center justify-center bg-gray-100 text-gray-700 py-2 px-3 rounded-lg hover:bg-gray-200 transition-colors"
+            className="flex items-center justify-center bg-gray-100 text-gray-700 py-2 px-3 rounded-lg hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors min-w-[40px] min-h-[40px]"
+            aria-label="Open affiliate link"
           >
-            <ExternalLink className="h-4 w-4" />
+            <ExternalLink className="h-4 w-4" aria-hidden="true" />
           </a>
         </div>
       </div>
@@ -205,10 +207,10 @@ const ProductsListPage: React.FC = () => {
     <motion.div
       initial={{ opacity: 0, x: -20 }}
       animate={{ opacity: 1, x: 0 }}
-      className="bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden"
+      className="bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden focus-within:ring-2 focus-within:ring-primary-500 focus-within:ring-offset-2"
     >
-      <div className="flex">
-        <div className="relative w-48 h-32">
+      <div className="flex flex-col sm:flex-row">
+        <div className="relative w-full sm:w-48 h-48 sm:h-32 flex-shrink-0">
           <img
             src={product.image}
             alt={product.name}
@@ -221,48 +223,49 @@ const ProductsListPage: React.FC = () => {
           )}
         </div>
         
-        <div className="flex-1 p-4">
-          <div className="flex items-start justify-between">
+        <div className="flex-1 p-3 sm:p-4">
+          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between">
             <div className="flex-1">
-              <div className="flex items-center space-x-2 mb-1">
-                <span className="text-sm text-gray-500">{product.category}</span>
+              <div className="flex items-center justify-between sm:justify-start sm:space-x-2 mb-1">
+                <span className="text-xs sm:text-sm text-gray-500">{product.category}</span>
                 <div className="flex items-center">
-                  <Star className="h-4 w-4 text-yellow-400 fill-current" />
-                  <span className="text-sm text-gray-600 ml-1">{product.rating}</span>
+                  <Star className="h-3 w-3 sm:h-4 sm:w-4 text-yellow-400 fill-current" aria-hidden="true" />
+                  <span className="text-xs sm:text-sm text-gray-600 ml-1">{product.rating}</span>
                 </div>
               </div>
               
-              <h3 className="font-semibold text-gray-900 mb-2">{product.name}</h3>
-              <p className="text-sm text-gray-600 mb-3 line-clamp-2">{product.description}</p>
+              <h3 className="font-semibold text-gray-900 mb-2 text-sm sm:text-base leading-tight">{product.name}</h3>
+              <p className="text-xs sm:text-sm text-gray-600 mb-3 line-clamp-2 leading-relaxed">{product.description}</p>
               
-              <div className="flex items-center space-x-4">
-                <div className="flex items-center space-x-2">
-                  <span className="text-lg font-bold text-gray-900">${product.price}</span>
+              <div className="flex items-center justify-between sm:justify-start sm:space-x-4">
+                <div className="flex items-center space-x-1 sm:space-x-2">
+                  <span className="text-base sm:text-lg font-bold text-gray-900">${product.price}</span>
                   {product.originalPrice && (
-                    <span className="text-sm text-gray-500 line-through">${product.originalPrice}</span>
+                    <span className="text-xs sm:text-sm text-gray-500 line-through">${product.originalPrice}</span>
                   )}
                 </div>
                 {!product.inStock && (
-                  <span className="text-sm text-red-500 font-medium">Out of Stock</span>
+                  <span className="text-xs sm:text-sm text-red-500 font-medium">Out of Stock</span>
                 )}
               </div>
             </div>
             
-            <div className="flex flex-col space-y-2 ml-4">
+            <div className="flex flex-row sm:flex-col justify-between sm:justify-start space-x-2 sm:space-x-0 sm:space-y-2 mt-3 sm:mt-0 sm:ml-4">
               <button
                 onClick={() => toggleWishlist(product.id)}
-                className={`p-2 rounded-full transition-colors ${
+                className={`p-2 rounded-full transition-colors min-w-[40px] min-h-[40px] flex items-center justify-center ${
                   wishlist.has(product.id)
                     ? 'bg-red-500 text-white'
                     : 'bg-gray-100 text-gray-600 hover:bg-red-500 hover:text-white'
                 }`}
+                aria-label={wishlist.has(product.id) ? 'Remove from wishlist' : 'Add to wishlist'}
               >
-                <Heart className="h-4 w-4" fill={wishlist.has(product.id) ? 'currentColor' : 'none'} />
+                <Heart className="h-4 w-4" fill={wishlist.has(product.id) ? 'currentColor' : 'none'} aria-hidden="true" />
               </button>
               
               <Link
                 to={`/product/${product.slug}`}
-                className="bg-primary-500 text-white py-2 px-4 rounded-lg hover:bg-primary-600 transition-colors text-center text-sm font-medium"
+                className="bg-primary-500 text-white py-2 px-3 sm:px-4 rounded-lg hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition-colors text-center text-xs sm:text-sm font-medium min-h-[40px] flex items-center justify-center flex-1 sm:flex-none"
               >
                 View Details
               </Link>
@@ -271,9 +274,10 @@ const ProductsListPage: React.FC = () => {
                 href={product.affiliateLink}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center justify-center bg-gray-100 text-gray-700 py-2 px-3 rounded-lg hover:bg-gray-200 transition-colors"
+                className="flex items-center justify-center bg-gray-100 text-gray-700 py-2 px-3 rounded-lg hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors min-w-[40px] min-h-[40px]"
+                aria-label="Open affiliate link"
               >
-                <ExternalLink className="h-4 w-4" />
+                <ExternalLink className="h-4 w-4" aria-hidden="true" />
               </a>
             </div>
           </div>
@@ -363,7 +367,7 @@ const ProductsListPage: React.FC = () => {
                   <label className="block text-sm font-medium text-gray-700 mb-2">Sort By</label>
                   <select
                     value={sortBy}
-                    onChange={(e) => setSortBy(e.target.value as any)}
+                    onChange={(e) => setSortBy(e.target.value as 'name' | 'price' | 'rating' | 'newest')}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                   >
                     <option value="name">Name</option>
@@ -378,7 +382,7 @@ const ProductsListPage: React.FC = () => {
                   <label className="block text-sm font-medium text-gray-700 mb-2">Order</label>
                   <select
                     value={sortOrder}
-                    onChange={(e) => setSortOrder(e.target.value as any)}
+                    onChange={(e) => setSortOrder(e.target.value as 'asc' | 'desc')}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                   >
                     <option value="asc">Ascending</option>

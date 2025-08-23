@@ -108,11 +108,14 @@ const FeaturedProducts: React.FC = () => {
 
         {/* Products Grid */}
         {featuredProducts.length === 0 ? (
-          <div className="text-center py-12">
-            <p className="text-gray-600">No featured products available at the moment.</p>
+          <div className="text-center py-16 px-4">
+            <div className="max-w-md mx-auto">
+              <p className="text-gray-600 text-base">No featured products available at the moment.</p>
+              <p className="text-gray-500 text-sm mt-2">Check back soon for our latest featured items!</p>
+            </div>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 sm:gap-8">
             {featuredProducts.map((product, index) => (
               <motion.div
                 key={product.id}
@@ -120,7 +123,7 @@ const FeaturedProducts: React.FC = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: index * 0.1 }}
                 viewport={{ once: true }}
-                className="group bg-white rounded-lg shadow-md hover:shadow-lg transition-all duration-300 overflow-hidden border border-gray-100"
+                className="group bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden border border-gray-100 hover:-translate-y-1 focus-within:ring-2 focus-within:ring-primary-500 focus-within:ring-offset-2"
               >
                 {/* Product Image */}
                 <div className="relative overflow-hidden">
@@ -144,65 +147,66 @@ const FeaturedProducts: React.FC = () => {
                   )}
                   {/* Wishlist Button */}
                   <button
-                    className="absolute top-2 right-10 w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:bg-red-50"
+                    className="absolute top-2 right-10 p-2 min-w-[40px] min-h-[40px] bg-white rounded-full shadow-md opacity-0 group-hover:opacity-100 sm:opacity-100 transition-all duration-200 hover:bg-pink-50 focus:opacity-100 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:ring-offset-2"
                     aria-label={`Add ${product.name} to wishlist`}
                   >
-                    <Heart className="h-4 w-4 text-gray-600 hover:text-red-500" />
+                    <Heart className="h-4 w-4 text-gray-600 hover:text-pink-600" aria-hidden="true" />
                   </button>
                 </div>
 
                 {/* Product Info */}
-                <div className="p-4 sm:p-5">
+                <div className="p-4 sm:p-5 lg:p-6">
                   {/* Category */}
                   <p className="text-xs sm:text-sm text-primary-600 font-medium mb-1 sm:mb-2">{product.category}</p>
                   {/* Product Name */}
-                  <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-1 sm:mb-2 line-clamp-2 group-hover:text-red-600 transition-colors">
+                  <h3 className="text-base sm:text-lg lg:text-xl font-semibold text-gray-900 mb-1 sm:mb-2 line-clamp-2 group-hover:text-red-600 transition-colors leading-tight">
                     <Link to={`/products/${product.slug || product.id}`} aria-label={`View details for ${product.name}`}>
                       {product.name}
                     </Link>
                   </h3>
                   {/* Description */}
-                  <p className="text-xs sm:text-sm text-gray-600 mb-2 sm:mb-3 line-clamp-2">{product.description}</p>
+                  <p className="text-xs sm:text-sm text-gray-600 mb-2 sm:mb-3 line-clamp-2 leading-relaxed">{product.description}</p>
                   {/* Rating */}
-                  <div className="flex items-center mb-2 sm:mb-3">
-                    <div className="flex text-yellow-400 mr-2">
+                  <div className="flex items-center gap-2 mb-4">
+                    <div className="flex items-center gap-0.5 text-yellow-400">
                       {[...Array(5)].map((_, i) => {
                         const ratingValue = i + 1;
                         const rating = product.rating || 0;
                         return (
                           <Star
                             key={i}
-                            className={`h-3 w-3 sm:h-4 sm:w-4 ${
+                            className={`h-4 w-4 ${
                               ratingValue <= Math.floor(rating)
                                 ? 'fill-current'
                                 : ratingValue <= rating
                                 ? 'fill-current text-opacity-50'
                                 : 'stroke-current fill-transparent'
                             }`}
+                            aria-hidden="true"
                           />
                         );
                       })}
                     </div>
-                    <span className="text-xs sm:text-sm text-gray-600">
+                    <span className="text-sm text-gray-600 font-medium">
                       {(product.rating || 0).toFixed(1)} ({product.reviews || 0} reviews)
                     </span>
                   </div>
                   {/* Price */}
-                  <div className="flex items-center justify-between mb-2 sm:mb-3">
-                    <div className="flex items-center gap-1 sm:gap-2">
-                      <span className="text-base sm:text-lg font-bold text-gray-900">${(product.price || 0).toFixed(2)}</span>
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
+                      <span className="text-lg sm:text-xl font-bold text-gray-900">${(product.price || 0).toFixed(2)}</span>
                       {product.originalPrice && (
-                        <span className="text-xs sm:text-sm text-gray-500 line-through">
+                        <span className="text-sm text-gray-500 line-through">
                           ${product.originalPrice.toFixed(2)}
                         </span>
                       )}
                     </div>
                   </div>
                   {/* Action Buttons */}
-                  <div className="flex gap-2 sm:gap-3">
+                  <div className="flex gap-3">
                     <Link
                       to={`/products/${product.slug || product.id}`}
-                      className="flex-1 bg-[#e72a00] text-white font-medium py-2 px-3 sm:px-4 rounded-lg text-xs sm:text-sm transition-all duration-200 text-center"
+                      className="flex-1 bg-[#e72a00] text-white font-medium py-3 px-4 rounded-lg text-sm transition-all duration-200 text-center hover:bg-[#d12400] focus:outline-none focus:ring-2 focus:ring-[#e72a00] focus:ring-offset-2"
                       aria-label={`View details for ${product.name}`}
                     >
                       View Details
@@ -211,11 +215,11 @@ const FeaturedProducts: React.FC = () => {
                       href={product.affiliateLink}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex items-center justify-center w-8 sm:w-10 h-8 sm:h-10 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-lg transition-colors duration-200"
+                      className="flex items-center justify-center min-w-[48px] min-h-[48px] bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 hover:scale-105"
                       aria-label={`Buy ${product.name} now`}
                       title="Buy Now"
                     >
-                      <ExternalLink className="h-3 w-3 sm:h-4 sm:w-4" />
+                      <ExternalLink className="h-4 w-4" aria-hidden="true" />
                     </a>
                   </div>
                 </div>

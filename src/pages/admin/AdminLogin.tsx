@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Eye, EyeOff, Lock, User, Shield, AlertCircle } from 'lucide-react';
-import { useAuth } from '../../contexts/AuthContext';
+import { useAuth } from '../../hooks/useAuth';
 
 const AdminLogin: React.FC = () => {
   const [username, setUsername] = useState('');
@@ -18,7 +18,7 @@ const AdminLogin: React.FC = () => {
   
   // Redirect if already authenticated
   if (isAuthenticated) {
-    const from = (location.state as any)?.from?.pathname || '/admin';
+    const from = (location.state as { from?: { pathname: string } })?.from?.pathname || '/admin';
     return <Navigate to={from} replace />;
   }
 
@@ -32,7 +32,7 @@ const AdminLogin: React.FC = () => {
       if (!success) {
         setError('Invalid username or password');
       }
-    } catch (err) {
+    } catch {
       setError('An error occurred during login');
     } finally {
       setIsSubmitting(false);
@@ -151,9 +151,11 @@ const AdminLogin: React.FC = () => {
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               className="bg-red-500/20 border border-red-400/30 rounded-lg p-3 mb-4 relative z-10"
+              role="alert"
+              id="login-error"
             >
               <div className="flex items-center space-x-2">
-                <AlertCircle className="h-4 w-4 text-black" />
+                <AlertCircle className="h-4 w-4 text-black" aria-hidden="true" />
                 <span className="text-sm text-black">{error}</span>
               </div>
             </motion.div>
@@ -174,17 +176,20 @@ const AdminLogin: React.FC = () => {
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <User className="h-5 w-5 text-black" />
+                  <User className="h-5 w-5 text-black" aria-hidden="true" />
                 </div>
                 <motion.input
                   whileFocus={{ scale: 1.02 }}
                   type="text"
                   id="username"
+                  name="username"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   className="block w-full pl-10 pr-3 py-3 bg-black/10 border border-white/20 rounded-lg text-black placeholder-black focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 backdrop-blur-sm"
                   placeholder="Enter your username"
                   required
+                  aria-describedby={error ? 'login-error' : undefined}
+                  aria-invalid={error ? 'true' : 'false'}
                 />
               </div>
             </div>
@@ -196,24 +201,28 @@ const AdminLogin: React.FC = () => {
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Lock className="h-5 w-5 text-black" />
+                  <Lock className="h-5 w-5 text-black" aria-hidden="true" />
                 </div>
                 <motion.input
                   whileFocus={{ scale: 1.02 }}
                   type={showPassword ? 'text' : 'password'}
                   id="password"
+                  name="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="block w-full pl-10 pr-12 py-3 bg-black/10 border border-white/20 rounded-lg text-black placeholder-black focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 backdrop-blur-sm"
                   placeholder="Enter your password"
                   required
+                  aria-describedby={error ? 'login-error' : undefined}
+                  aria-invalid={error ? 'true' : 'false'}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-black hover:text-white transition-colors duration-200"
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-black hover:text-white transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded"
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
                 >
-                  {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                  {showPassword ? <EyeOff className="h-5 w-5" aria-hidden="true" /> : <Eye className="h-5 w-5" aria-hidden="true" />}
                 </button>
               </div>
             </div>
@@ -225,15 +234,17 @@ const AdminLogin: React.FC = () => {
               type="submit"
               disabled={isSubmitting}
               className="w-full bg-gradient-to-r from-[#fc7100] to-[#ff9966] text-black font-semibold py-3 px-4 rounded-lg hover:from-[#fc7100] hover:to-[#ff9966] focus:outline-none focus:ring-2 focus:ring-[#fc7100] focus:ring-offset-2 focus:ring-offset-transparent transition-all duration-200 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed relative overflow-hidden"
+              aria-describedby={isSubmitting ? 'loading-status' : undefined}
             >
               {isSubmitting && (
                 <motion.div
                   animate={{ rotate: 360 }}
                   transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
                   className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 border-2 border-white border-t-transparent rounded-full"
+                  aria-hidden="true"
                 />
               )}
-              <span className={isSubmitting ? 'ml-8' : ''}>
+              <span className={isSubmitting ? 'ml-8' : ''} id={isSubmitting ? 'loading-status' : undefined}>
                 {isSubmitting ? 'Signing In...' : 'Sign In'}
               </span>
             </motion.button>

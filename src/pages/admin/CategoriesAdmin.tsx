@@ -203,8 +203,6 @@ const CategoriesAdmin: React.FC = () => {
   const totalProducts = categories.reduce((sum, cat) => sum + cat.productCount, 0);
 
   const CategoryModal = ({ category, onClose }: { category: Category | null; onClose: () => void }) => {
-    if (!category && !showAddModal) return null;
-
     // Set initial values when modal opens
     React.useEffect(() => {
       if (category) {
@@ -224,6 +222,8 @@ const CategoriesAdmin: React.FC = () => {
         if (featuredRef.current) featuredRef.current.checked = false;
       }
     }, [category]);
+
+    if (!category && !showAddModal) return null;
 
     const handleSubmit = async (e: React.FormEvent) => {
       e.preventDefault();
@@ -404,21 +404,29 @@ const CategoriesAdmin: React.FC = () => {
       <div className="bg-white rounded-lg shadow-sm p-4 border border-gray-200">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" aria-hidden="true" />
+            <label htmlFor="category-search" className="sr-only">Search categories</label>
             <input
               type="text"
+              id="category-search"
               placeholder="Search categories..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#e72a00]"
+              className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#e72a00] focus:border-transparent"
+              aria-describedby="search-help"
             />
+            <div id="search-help" className="sr-only">Search categories by name</div>
           </div>
           
+          <label htmlFor="status-filter" className="sr-only">Filter by status</label>
           <select
+            id="status-filter"
             value={selectedStatus}
             onChange={(e) => setSelectedStatus(e.target.value)}
-            className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#e72a00]"
+            className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#e72a00] focus:border-transparent"
+            aria-describedby="status-help"
           >
+            <div id="status-help" className="sr-only">Filter categories by their status</div>
             {statuses.map(status => (
               <option key={status} value={status}>
                 {status === 'all' ? 'All Status' : status.charAt(0).toUpperCase() + status.slice(1)}
@@ -498,26 +506,38 @@ const CategoriesAdmin: React.FC = () => {
                 </div>
                 
                 <div className="flex items-center space-x-2">
-                  <button className="text-gray-400 hover:text-gray-600 transition-colors">
-                    <Eye className="h-4 w-4" />
+                  <button 
+                    className="text-gray-400 hover:text-gray-600 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 rounded p-1 min-h-[36px] min-w-[36px]"
+                    aria-label={`View ${category.name} category details`}
+                    type="button"
+                  >
+                    <Eye className="h-4 w-4" aria-hidden="true" />
                   </button>
                   <button 
                      onClick={() => {
                        setSelectedCategory(category);
                        setShowAddModal(false);
                      }}
-                     className="text-blue-600 hover:text-blue-800 transition-colors"
+                     className="text-blue-600 hover:text-blue-800 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded p-1 min-h-[36px] min-w-[36px]"
+                     aria-label={`Edit ${category.name} category`}
+                     type="button"
                    >
-                     <Edit className="h-4 w-4" />
+                     <Edit className="h-4 w-4" aria-hidden="true" />
                    </button>
                   <button 
                     onClick={() => handleDeleteCategory(category.id, category.name)}
-                    className="text-red-600 hover:text-red-800 transition-colors"
+                    className="text-red-600 hover:text-red-800 transition-colors focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 rounded p-1 min-h-[36px] min-w-[36px]"
+                    aria-label={`Delete ${category.name} category`}
+                    type="button"
                   >
-                    <Trash2 className="h-4 w-4" />
+                    <Trash2 className="h-4 w-4" aria-hidden="true" />
                   </button>
-                  <button className="text-gray-400 hover:text-gray-600 transition-colors">
-                    <MoreHorizontal className="h-4 w-4" />
+                  <button 
+                    className="text-gray-400 hover:text-gray-600 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 rounded p-1 min-h-[36px] min-w-[36px]"
+                    aria-label={`More options for ${category.name} category`}
+                    type="button"
+                  >
+                    <MoreHorizontal className="h-4 w-4" aria-hidden="true" />
                   </button>
                 </div>
               </div>
@@ -547,9 +567,11 @@ const CategoriesAdmin: React.FC = () => {
             <div className="mt-6">
               <button
                 onClick={() => setShowAddModal(true)}
-                className="inline-flex items-center px-4 py-2 bg-[#e72a00] text-white text-sm font-medium rounded-md hover:bg-[#d12400] transition-colors"
+                className="inline-flex items-center px-4 py-2 bg-[#e72a00] text-white text-sm font-medium rounded-md hover:bg-[#d12400] transition-colors focus:outline-none focus:ring-2 focus:ring-[#e72a00] focus:ring-offset-2 min-h-[44px]"
+                type="button"
+                aria-label="Add new category"
               >
-                <Plus className="h-4 w-4 mr-2" />
+                <Plus className="h-4 w-4 mr-2" aria-hidden="true" />
                 Add Category
               </button>
             </div>
@@ -563,22 +585,22 @@ const CategoriesAdmin: React.FC = () => {
           <h3 className="text-lg font-medium text-gray-900">Categories Overview</h3>
         </div>
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
+          <table className="min-w-full divide-y divide-gray-200" role="table" aria-label="Categories overview table">
             <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <tr role="row">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" scope="col">
                   Category
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" scope="col">
                   Products
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" scope="col">
                   Status
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" scope="col">
                   Created
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" scope="col">
                   Actions
                 </th>
               </tr>
@@ -613,23 +635,31 @@ const CategoriesAdmin: React.FC = () => {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                     <div className="flex items-center space-x-2">
-                      <button className="text-gray-400 hover:text-gray-600">
-                        <Eye className="h-4 w-4" />
+                      <button 
+                        className="text-gray-400 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 rounded p-1 min-h-[36px] min-w-[36px]"
+                        aria-label={`View ${category.name} category details`}
+                        type="button"
+                      >
+                        <Eye className="h-4 w-4" aria-hidden="true" />
                       </button>
                       <button 
                          onClick={() => {
                            setSelectedCategory(category);
                            setShowAddModal(false);
                          }}
-                         className="text-blue-600 hover:text-blue-900"
+                         className="text-blue-600 hover:text-blue-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded p-1 min-h-[36px] min-w-[36px]"
+                         aria-label={`Edit ${category.name} category`}
+                         type="button"
                        >
-                         <Edit className="h-4 w-4" />
+                         <Edit className="h-4 w-4" aria-hidden="true" />
                        </button>
                       <button 
                         onClick={() => handleDeleteCategory(category.id, category.name)}
-                        className="text-red-600 hover:text-red-900"
+                        className="text-red-600 hover:text-red-900 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 rounded p-1 min-h-[36px] min-w-[36px]"
+                        aria-label={`Delete ${category.name} category`}
+                        type="button"
                       >
-                        <Trash2 className="h-4 w-4" />
+                        <Trash2 className="h-4 w-4" aria-hidden="true" />
                       </button>
                     </div>
                   </td>

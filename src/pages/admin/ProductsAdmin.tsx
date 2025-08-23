@@ -12,6 +12,15 @@ import {
   MoreHorizontal,
   Loader2
 } from 'lucide-react';
+
+const isValidImageUrl = (url: string): boolean => {
+  try {
+    const validUrl = new URL(url);
+    return validUrl.protocol === 'http:' || validUrl.protocol === 'https:';
+  } catch {
+    return false;
+  }
+};
 import { productAPI } from '../../services/productApi';
 import type { CreateProductRequest } from '../../services/productApi';
 import { publicCategoryAPI } from '../../services/publicCategoryApi';
@@ -62,21 +71,43 @@ const ProductsAdmin: React.FC = () => {
       setLoading(true);
       setError(null);
       console.log('🔄 Fetching products from API...');
+
+      // Check authentication status
+      const token = localStorage.getItem('authToken');
+      if (!token) {
+        console.error('❌ No authentication token found');
+        setError('Please login to view products');
+        return;
+      }
+
       const response = await productAPI.getProducts();
-      
       console.log('📦 API Response:', response);
       
-      if (response.success && response.products) {
+      if (response.success && Array.isArray(response.products)) {
         console.log('✅ Products fetched successfully:', response.products.length, 'products');
         setProducts(response.products);
+        setError(null);
       } else {
         const errorMessage = response.message || 'Failed to fetch products';
         console.error('❌ API returned error:', errorMessage);
-        setError(errorMessage);
+        
+        // Handle specific error cases
+        if (errorMessage.toLowerCase().includes('unauthorized') || 
+            errorMessage.toLowerCase().includes('token')) {
+          setError('Session expired. Please login again.');
+        } else if (errorMessage.includes('404')) {
+          setError('Products endpoint not found. Please check API configuration.');
+        } else {
+          setError(errorMessage);
+        }
+        
+        // Clear products on error
+        setProducts([]);
       }
     } catch (err) {
       console.error('🚨 Network error while fetching products:', err);
-      setError('Network error occurred while fetching products');
+      setError(err instanceof Error ? err.message : 'Network error occurred while fetching products');
+      setProducts([]);
     } finally {
       setLoading(false);
     }
@@ -112,9 +143,16 @@ const ProductsAdmin: React.FC = () => {
     setIsSubmitting(true);
     const formData = new FormData(formRef.current);
     
+    // Validate and process image URL
+    let imageUrl = formData.get('image') as string;
+    if (!imageUrl || !isValidImageUrl(imageUrl)) {
+      // Use a default image URL if none provided or invalid
+      imageUrl = 'https://via.placeholder.com/300x200?text=Product+Image';
+    }
+    
     const productData: CreateProductRequest = {
       name: formData.get('name') as string,
-      image: formData.get('image') as string,
+      image: imageUrl,
       description: formData.get('description') as string,
       affiliateLink: formData.get('affiliateLink') as string,
       category: formData.get('category') as string,
@@ -131,7 +169,7 @@ const ProductsAdmin: React.FC = () => {
       } else {
         alert(`Error: ${result.message}`);
       }
-    } catch (error) {
+    } catch {
       alert('Failed to create product. Please try again.');
     } finally {
       setIsSubmitting(false);
@@ -163,10 +201,13 @@ const ProductsAdmin: React.FC = () => {
                 {product ? 'Edit Product' : 'Add New Product'}
               </h3>
               <button
+                type="button"
                 onClick={onClose}
-                className="text-gray-400 hover:text-gray-600 sm:hidden"
+                className="text-gray-400 hover:text-gray-600 sm:hidden focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 rounded p-1 min-h-[44px] min-w-[44px]"
+                aria-label="Close modal"
+                title="Close modal"
               >
-                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
@@ -175,25 +216,31 @@ const ProductsAdmin: React.FC = () => {
             <form ref={formRef} onSubmit={handleSubmit}>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Product Name</label>
+                <label htmlFor="product-name" className="block text-sm font-medium text-gray-700 mb-1">Product Name</label>
                 <input
                   type="text"
+                  id="product-name"
                   name="name"
                   defaultValue={product?.name || ''}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#e72a00]"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#e72a00] focus:border-transparent"
                   placeholder="Amazing Product"
                   required
+                  aria-describedby="product-name-help"
                 />
+                <div id="product-name-help" className="sr-only">Enter a descriptive name for the product</div>
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
+                <label htmlFor="product-category" className="block text-sm font-medium text-gray-700 mb-1">Category</label>
                 <select
+                  id="product-category"
                   name="category"
                   defaultValue={product?.category || ''}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#e72a00]"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#e72a00] focus:border-transparent"
                   required
+                  aria-describedby="category-help"
                 >
+                  <div id="category-help" className="sr-only">Select a category for the product</div>
                   <option value="">Select Category</option>
                   {categories.slice(1).map(cat => (
                     <option key={cat} value={cat}>{cat}</option>
@@ -202,48 +249,60 @@ const ProductsAdmin: React.FC = () => {
               </div>
               
               <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-1">Image URL</label>
+                <label htmlFor="product-image" className="block text-sm font-medium text-gray-700 mb-1">Image URL</label>
                 <input
                   type="url"
+                  id="product-image"
                   name="image"
                   defaultValue={product?.image || ''}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#e72a00]"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#e72a00] focus:border-transparent"
                   placeholder="https://example.com/image.jpg"
                   required
+                  aria-describedby="image-help"
                 />
+                <div id="image-help" className="sr-only">Enter a valid URL for the product image</div>
               </div>
               
               <div className="sm:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                <label htmlFor="product-description" className="block text-sm font-medium text-gray-700 mb-1">Description</label>
                 <textarea
                   rows={3}
+                  id="product-description"
                   name="description"
                   defaultValue={product?.description || ''}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#e72a00] focus:border-transparent"
                   placeholder="This is an amazing product that you'll love!"
                   required
+                  aria-describedby="description-help"
                 />
+                <div id="description-help" className="sr-only">Provide a detailed description of the product</div>
               </div>
               
               <div className="sm:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-1">Affiliate Link</label>
+                <label htmlFor="product-affiliate" className="block text-sm font-medium text-gray-700 mb-1">Affiliate Link</label>
                 <input
                   type="url"
+                  id="product-affiliate"
                   name="affiliateLink"
                   defaultValue={product?.affiliateLink || ''}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#e72a00] focus:border-transparent"
                   placeholder="https://affiliate.com/product/123"
                   required
+                  aria-describedby="affiliate-help"
                 />
+                <div id="affiliate-help" className="sr-only">Enter the affiliate link where customers can purchase this product</div>
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                <label htmlFor="product-status" className="block text-sm font-medium text-gray-700 mb-1">Status</label>
                 <select
+                  id="product-status"
                   name="status"
                   defaultValue={product?.status || 'published'}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#e72a00] focus:border-transparent"
+                  aria-describedby="status-help"
                 >
+                  <div id="status-help" className="sr-only">Select the publication status of the product</div>
                   <option value="published">Published</option>
                   <option value="draft">Draft</option>
                   <option value="archived">Archived</option>
@@ -255,15 +314,17 @@ const ProductsAdmin: React.FC = () => {
               <button
                 type="button"
                 onClick={onClose}
-                className="w-full sm:w-auto px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors"
+                className="w-full sm:w-auto px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 min-h-[44px]"
                 disabled={isSubmitting}
+                aria-label="Cancel and close form"
               >
                 Cancel
               </button>
               <button 
                 type="submit"
-                className="w-full sm:w-auto px-4 py-2 text-sm font-medium text-white bg-[#e72a00] rounded-md hover:bg-[#d12400] transition-colors disabled:opacity-50"
+                className="w-full sm:w-auto px-4 py-2 text-sm font-medium text-white bg-[#e72a00] rounded-md hover:bg-[#d12400] transition-colors disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-[#e72a00] focus:ring-offset-2 min-h-[44px]"
                 disabled={isSubmitting}
+                aria-label={isSubmitting ? 'Submitting form' : (product ? 'Update product' : 'Add new product')}
               >
                 {isSubmitting ? 'Creating...' : (product ? 'Update Product' : 'Add Product')}
               </button>
@@ -369,6 +430,8 @@ const ProductsAdmin: React.FC = () => {
             value={selectedCategory}
             onChange={(e) => setSelectedCategory(e.target.value)}
             className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#e72a00]"
+            aria-label="Filter by category"
+            title="Filter by category"
           >
             {categories.map(cat => (
               <option key={cat} value={cat}>
@@ -381,6 +444,8 @@ const ProductsAdmin: React.FC = () => {
             value={selectedStatus}
             onChange={(e) => setSelectedStatus(e.target.value)}
             className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#e72a00]"
+            aria-label="Filter by status"
+            title="Filter by status"
           >
             {statuses.map(status => (
               <option key={status} value={status}>
@@ -389,7 +454,11 @@ const ProductsAdmin: React.FC = () => {
             ))}
           </select>
           
-          <button className="inline-flex items-center justify-center px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors">
+          <button 
+            type="button"
+            className="inline-flex items-center justify-center px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors"
+            aria-label="Show more filters"
+          >
             <Filter className="h-4 w-4 mr-2" />
             <span className="hidden sm:inline">More Filters</span>
             <span className="sm:hidden">Filters</span>
@@ -494,19 +563,37 @@ const ProductsAdmin: React.FC = () => {
                   </td>
                   <td className="px-4 py-4 whitespace-nowrap text-sm font-medium w-1/12">
                     <div className="flex items-center space-x-1">
-                      <button className="text-gray-400 hover:text-gray-600 p-1">
+                      <button 
+                        type="button"
+                        className="text-gray-400 hover:text-gray-600 p-1"
+                        aria-label="View product details"
+                        title="View product details"
+                      >
                         <Eye className="h-4 w-4" />
                       </button>
                       <button
+                        type="button"
                         onClick={() => setSelectedProduct(product)}
                         className="text-blue-600 hover:text-blue-900 p-1"
+                        aria-label="Edit product"
+                        title="Edit product"
                       >
                         <Edit className="h-4 w-4" />
                       </button>
-                      <button className="text-red-600 hover:text-red-900 p-1">
+                      <button 
+                        type="button"
+                        className="text-red-600 hover:text-red-900 p-1"
+                        aria-label="Delete product"
+                        title="Delete product"
+                      >
                         <Trash2 className="h-4 w-4" />
                       </button>
-                      <button className="text-gray-400 hover:text-gray-600 p-1">
+                      <button 
+                        type="button"
+                        className="text-gray-400 hover:text-gray-600 p-1"
+                        aria-label="More options"
+                        title="More options"
+                      >
                         <MoreHorizontal className="h-4 w-4" />
                       </button>
                     </div>
@@ -587,20 +674,38 @@ const ProductsAdmin: React.FC = () => {
                   
                   <div className="flex items-center justify-between mt-4">
                     <div className="flex items-center space-x-3">
-                      <button className="text-gray-400 hover:text-gray-600 p-1">
+                      <button 
+                        type="button"
+                        className="text-gray-400 hover:text-gray-600 p-1"
+                        aria-label="View product details"
+                        title="View product details"
+                      >
                         <Eye className="h-4 w-4" />
                       </button>
                       <button
+                        type="button"
                         onClick={() => setSelectedProduct(product)}
                         className="text-blue-600 hover:text-blue-900 p-1"
+                        aria-label="Edit product"
+                        title="Edit product"
                       >
                         <Edit className="h-4 w-4" />
                       </button>
-                      <button className="text-red-600 hover:text-red-900 p-1">
+                      <button 
+                        type="button"
+                        className="text-red-600 hover:text-red-900 p-1"
+                        aria-label="Delete product"
+                        title="Delete product"
+                      >
                         <Trash2 className="h-4 w-4" />
                       </button>
                     </div>
-                    <button className="text-gray-400 hover:text-gray-600 p-1">
+                    <button 
+                      type="button"
+                      className="text-gray-400 hover:text-gray-600 p-1"
+                      aria-label="More options"
+                      title="More options"
+                    >
                       <MoreHorizontal className="h-4 w-4" />
                     </button>
                   </div>
@@ -619,17 +724,36 @@ const ProductsAdmin: React.FC = () => {
             <span className="font-medium">{products.length}</span> results
           </div>
           <div className="flex items-center justify-center space-x-1 sm:space-x-2">
-            <button className="px-2 sm:px-3 py-1 text-sm border border-gray-300 rounded-md hover:bg-gray-50 transition-colors">
+            <button 
+              type="button"
+              className="px-2 sm:px-3 py-1 text-sm border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+              aria-label="Go to previous page"
+              title="Go to previous page"
+            >
               <span className="hidden sm:inline">Previous</span>
               <span className="sm:hidden">Prev</span>
             </button>
-            <button className="px-2 sm:px-3 py-1 text-sm bg-[#e72a00] text-white rounded-md">
+            <button 
+              type="button"
+              className="px-2 sm:px-3 py-1 text-sm bg-[#e72a00] text-white rounded-md"
+              aria-label="Current page, page 1"
+              aria-current="page"
+            >
               1
             </button>
-            <button className="px-2 sm:px-3 py-1 text-sm border border-gray-300 rounded-md hover:bg-gray-50 transition-colors">
+            <button 
+              type="button"
+              className="px-2 sm:px-3 py-1 text-sm border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+              aria-label="Go to page 2"
+            >
               2
             </button>
-            <button className="px-2 sm:px-3 py-1 text-sm border border-gray-300 rounded-md hover:bg-gray-50 transition-colors">
+            <button 
+              type="button"
+              className="px-2 sm:px-3 py-1 text-sm border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+              aria-label="Go to next page"
+              title="Go to next page"
+            >
               <span className="hidden sm:inline">Next</span>
               <span className="sm:hidden">Next</span>
             </button>

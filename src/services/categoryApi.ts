@@ -9,7 +9,14 @@ interface CreateCategoryRequest {
   featured?: boolean;
 }
 
-interface UpdateCategoryRequest extends Partial<CreateCategoryRequest> {}
+interface UpdateCategoryRequest {
+  name?: string;
+  description?: string;
+  image?: string;
+  color?: string;
+  status?: 'active' | 'inactive';
+  featured?: boolean;
+}
 
 interface Category {
   id: string;

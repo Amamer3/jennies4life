@@ -1,4 +1,16 @@
+import { authAPI } from './authApi';
+
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
+
+// Helper function to validate image URLs
+function isValidImageUrl(url: string): boolean {
+  try {
+    const parsedUrl = new URL(url);
+    return parsedUrl.protocol === 'http:' || parsedUrl.protocol === 'https:';
+  } catch {
+    return false;
+  }
+}
 
 interface CreateProductRequest {
   name: string;
@@ -42,40 +54,99 @@ interface ProductsListResponse {
 class ProductAPI {
   private getAuthHeaders(): HeadersInit {
     const token = localStorage.getItem('authToken');
-    console.log('🔍 ProductAPI getAuthHeaders - token from localStorage:', token ? `${token.substring(0, 20)}...` : 'null');
-    console.log('🔍 ProductAPI getAuthHeaders - localStorage keys:', Object.keys(localStorage));
-    return {
-      'Content-Type': 'application/json',
-      ...(token && { 'Authorization': `Bearer ${token}` })
+    console.log('🔍 ProductAPI getAuthHeaders - token status:', token ? 'present' : 'missing');
+    
+    const headers: HeadersInit = {
+      'Content-Type': 'application/json'
     };
+
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+
+    return headers;
+  }
+
+  private async refreshTokenIfNeeded(): Promise<boolean> {
+    if (!localStorage.getItem('authToken')) {
+      console.log('🔄 No token found, attempting to refresh...');
+      try {
+        const response = await authAPI.refresh();
+        return response.success;
+      } catch (error) {
+        console.error('Failed to refresh token:', error);
+        return false;
+      }
+    }
+    return true;
+  }
+
+  private async makeAuthenticatedRequest<T>(url: string, options: RequestInit): Promise<T> {
+    await this.refreshTokenIfNeeded();
+    
+    const headers = this.getAuthHeaders();
+    const response = await fetch(url, { ...options, headers });
+
+    console.log('📡 Response status:', response.status, response.statusText);
+    
+    const rawText = await response.text();
+    console.log('📦 Raw response:', rawText);
+
+    let data;
+    try {
+      data = JSON.parse(rawText);
+    } catch (e) {
+      console.error('❌ Failed to parse response as JSON:', e);
+      throw new Error('Invalid response format from server');
+    }
+
+    if (response.status === 401) {
+      // Token might be expired, try to refresh and retry
+      console.log('🔄 Token expired, attempting refresh...');
+      const refreshed = await authAPI.refresh();
+      if (refreshed.success) {
+        console.log('✅ Token refreshed, retrying request...');
+        const newHeaders = this.getAuthHeaders();
+        return this.makeAuthenticatedRequest<T>(url, { ...options, headers: newHeaders });
+      }
+      throw new Error('Authentication failed');
+    }
+
+    if (!response.ok) {
+      throw new Error(data.message || `Request failed with status ${response.status}`);
+    }
+
+    return data;
   }
 
   async createProduct(productData: CreateProductRequest): Promise<ProductResponse> {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/products`, {
-        method: 'POST',
-        headers: this.getAuthHeaders(),
-        body: JSON.stringify(productData),
-      });
+      // Validate image URL before sending
+      if (!productData.image || !isValidImageUrl(productData.image)) {
+        productData.image = 'https://via.placeholder.com/300x200?text=Product+Image';
+      }
 
-      const data = await response.json();
-      
-      if (response.ok) {
+      const response = await this.makeAuthenticatedRequest<ProductResponse>(
+        `${API_BASE_URL}/api/products`,
+        {
+          method: 'POST',
+          body: JSON.stringify(productData)
+        }
+      );
+
+      if (response.success) {
         return {
           success: true,
-          product: data.product || {
+          product: response.product || {
             id: Date.now().toString(),
             ...productData,
             createdAt: new Date().toISOString().split('T')[0]
           },
-          message: data.message || 'Product created successfully'
+          message: response.message || 'Product created successfully'
         };
       }
 
-      return {
-        success: false,
-        message: data.message || 'Failed to create product'
-      };
+      return response;
     } catch (error) {
       console.error('Create product API error:', error);
       return {
@@ -89,38 +160,22 @@ class ProductAPI {
     console.log('ProductAPI: Starting getProducts request');
     
     try {
-      console.log('🌐 Making API request to:', `${API_BASE_URL}/api/products`);
-      console.log('🔑 Auth headers:', this.getAuthHeaders());
-      
-      const response = await fetch(`${API_BASE_URL}/api/products`, {
-        method: 'GET',
-        headers: this.getAuthHeaders(),
+      const response = await this.makeAuthenticatedRequest<ProductsListResponse>(`${API_BASE_URL}/api/products`, {
+        method: 'GET'
       });
 
-      console.log('📡 Response status:', response.status, response.statusText);
-      console.log('📡 Response headers:', Object.fromEntries(response.headers.entries()));
-      
-      if (!response.ok) {
-        console.error('❌ HTTP Error:', response.status, response.statusText);
+      if (response.success && Array.isArray(response.products)) {
         return {
-          success: false,
-          message: `HTTP ${response.status}: ${response.statusText}`
-        };
-      }
-
-      const data = await response.json();
-      console.log('📄 Response data:', data);
-      
-      // Normalize server response to match expected interface
-      if (data.success && data.data) {
-        return {
-          success: data.success,
-          products: data.data,
-          message: data.message
+          success: true,
+          products: response.products,
+          message: 'Products fetched successfully'
         };
       }
       
-      return data;
+      return {
+        success: false,
+        message: response.message || 'Failed to fetch products'
+      };
     } catch (error) {
       console.error('🚨 Network error in getProducts:', error);
       return {
@@ -132,14 +187,18 @@ class ProductAPI {
 
   async updateProduct(id: string, productData: Partial<CreateProductRequest>): Promise<ProductResponse> {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/products/${id}`, {
-        method: 'PUT',
-        headers: this.getAuthHeaders(),
-        body: JSON.stringify(productData),
-      });
+      // Validate image URL if it's being updated
+      if (productData.image && !isValidImageUrl(productData.image)) {
+        productData.image = 'https://via.placeholder.com/300x200?text=Product+Image';
+      }
 
-      const data = await response.json();
-      return data;
+      return await this.makeAuthenticatedRequest<ProductResponse>(
+        `${API_BASE_URL}/api/products/${id}`,
+        {
+          method: 'PUT',
+          body: JSON.stringify(productData)
+        }
+      );
     } catch (error) {
       console.error('Update product API error:', error);
       return {
@@ -151,13 +210,10 @@ class ProductAPI {
 
   async deleteProduct(id: string): Promise<{ success: boolean; message?: string }> {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/products/${id}`, {
-        method: 'DELETE',
-        headers: this.getAuthHeaders(),
-      });
-
-      const data = await response.json();
-      return data;
+      return await this.makeAuthenticatedRequest(
+        `${API_BASE_URL}/api/products/${id}`,
+        { method: 'DELETE' }
+      );
     } catch (error) {
       console.error('Delete product API error:', error);
       return {

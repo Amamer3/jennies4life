@@ -94,55 +94,55 @@ const SettingsAdmin: React.FC = () => {
     <div className="space-y-6">
       <div>
         <h3 className="text-lg font-medium text-gray-900 mb-4">Site Information</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Site Name</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Site Name</label>
             <input
               type="text"
               defaultValue="Jennies4Life"
               onChange={handleInputChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#e72a00]"
+              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#e72a00] focus:border-transparent transition-colors"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Site Tagline</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Site Tagline</label>
             <input
               type="text"
               defaultValue="Your one-stop shop for everything"
               onChange={handleInputChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#e72a00]"
+              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#e72a00] focus:border-transparent transition-colors"
             />
           </div>
         </div>
       </div>
       
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Site Description</label>
+        <label className="block text-sm font-medium text-gray-700 mb-2">Site Description</label>
         <textarea
           rows={3}
           defaultValue="Discover amazing products and deals at Jennies4Life. We offer a wide range of quality items for all your needs."
           onChange={handleInputChange}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#e72a00]"
+          className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#e72a00] focus:border-transparent transition-colors resize-vertical"
         />
       </div>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Contact Email</label>
+          <label className="block text-sm font-medium text-gray-700 mb-2">Contact Email</label>
           <input
             type="email"
             defaultValue="contact@jennies4life.com"
             onChange={handleInputChange}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#e72a00]"
+            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#e72a00] focus:border-transparent transition-colors"
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Support Phone</label>
+          <label className="block text-sm font-medium text-gray-700 mb-2">Support Phone</label>
           <input
             type="tel"
             defaultValue="+1 (555) 123-4567"
             onChange={handleInputChange}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#e72a00]"
+            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#e72a00] focus:border-transparent transition-colors"
           />
         </div>
       </div>
@@ -153,29 +153,31 @@ const SettingsAdmin: React.FC = () => {
           {[
             'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'
           ].map(day => (
-            <div key={day} className="flex items-center space-x-4">
-              <div className="w-20">
+            <div key={day} className="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-4 p-2 rounded hover:bg-gray-50">
+              <div className="w-full sm:w-20">
                 <span className="text-sm font-medium text-gray-700">{day}</span>
               </div>
               <div className="flex items-center space-x-2">
                 <input
                   type="checkbox"
                   defaultChecked={day !== 'Sunday'}
-                  className="h-4 w-4 text-[#e72a00] focus:ring-[#e72a00] border-gray-300 rounded"
+                  className="h-4 w-4 text-[#e72a00] focus:ring-[#e72a00] focus:ring-offset-0 border-gray-300 rounded"
                 />
                 <span className="text-sm text-gray-600">Open</span>
               </div>
-              <input
-                type="time"
-                defaultValue="09:00"
-                className="px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-[#e72a00]"
-              />
-              <span className="text-sm text-gray-600">to</span>
-              <input
-                type="time"
-                defaultValue="18:00"
-                className="px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-[#e72a00]"
-              />
+              <div className="flex items-center space-x-2 flex-1">
+                <input
+                  type="time"
+                  defaultValue="09:00"
+                  className="px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-[#e72a00] focus:border-transparent transition-colors flex-1 sm:flex-none"
+                />
+                <span className="text-sm text-gray-600 whitespace-nowrap">to</span>
+                <input
+                  type="time"
+                  defaultValue="18:00"
+                  className="px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-[#e72a00] focus:border-transparent transition-colors flex-1 sm:flex-none"
+                />
+              </div>
             </div>
           ))}
         </div>
@@ -724,29 +726,46 @@ const SettingsAdmin: React.FC = () => {
         )}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 lg:gap-6">
         {/* Sidebar */}
         <div className="lg:col-span-1">
-          <nav className="space-y-1">
+          {/* Mobile dropdown for sections */}
+          <div className="lg:hidden mb-4">
+            <label className="block text-sm font-medium text-gray-700 mb-2">Settings Section</label>
+            <select
+              value={activeSection}
+              onChange={(e) => setActiveSection(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#e72a00] text-sm"
+            >
+              {sections.map((section) => (
+                <option key={section.id} value={section.id}>
+                  {section.title} - {section.description}
+                </option>
+              ))}
+            </select>
+          </div>
+          
+          {/* Desktop navigation */}
+          <nav className="hidden lg:block space-y-1">
             {sections.map((section) => {
               const isActive = activeSection === section.id;
               return (
                 <button
                   key={section.id}
                   onClick={() => setActiveSection(section.id)}
-                  className={`w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors ${
+                  className={`w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors min-h-[44px] ${
                     isActive
                       ? 'bg-[#e72a00] text-white'
                       : 'text-gray-700 hover:bg-gray-100'
                   }`}
                 >
-                  <section.icon className={`h-4 w-4 mr-3 ${
+                  <section.icon className={`h-4 w-4 mr-3 flex-shrink-0 ${
                     isActive ? 'text-white' : 'text-gray-400'
-                  }`} />
-                  <div className="text-left">
+                  }`} aria-hidden="true" />
+                  <div className="text-left flex-1">
                     <div>{section.title}</div>
                     {!isActive && (
-                      <div className="text-xs text-gray-500 mt-0.5">
+                      <div className="text-xs text-gray-500 mt-0.5 line-clamp-2">
                         {section.description}
                       </div>
                     )}

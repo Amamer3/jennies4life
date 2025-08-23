@@ -276,7 +276,7 @@ const AboutPage: React.FC = () => {
                       className={`w-16 h-16 rounded-2xl flex items-center justify-center mb-6 shadow-lg bg-gradient-to-br ${feature.color === 'text-orange-500' ? 'from-orange-400 to-orange-600' : feature.color === 'text-yellow-500' ? 'from-yellow-400 to-yellow-600' : 'from-blue-400 to-blue-600'}`}
                     >
                       {React.isValidElement(feature.icon)
-                        ? React.cloneElement(feature.icon as React.ReactElement<any>, {
+                        ? React.cloneElement(feature.icon as React.ReactElement<React.SVGProps<SVGSVGElement>>, {
                             className: `h-8 w-8 text-white`,
                             'aria-hidden': true,
                           })
@@ -368,7 +368,7 @@ const AboutPage: React.FC = () => {
                         className={`w-16 h-16 rounded-2xl flex items-center justify-center flex-shrink-0 shadow-lg bg-gradient-to-br ${value.color === 'text-green-500' ? 'from-green-400 to-green-600' : value.color === 'text-red-500' ? 'from-red-400 to-red-600' : 'from-purple-400 to-purple-600'}`}
                       >
                         {React.isValidElement(value.icon)
-                          ? React.cloneElement(value.icon as React.ReactElement<any>, {
+                          ? React.cloneElement(value.icon as React.ReactElement<React.SVGProps<SVGSVGElement>>, {
                               className: `h-8 w-8 text-white`,
                               'aria-hidden': true,
                             })

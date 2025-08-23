@@ -17,7 +17,7 @@ import {
   Monitor,
   Tablet
 } from 'lucide-react';
-import { dashboardAPI } from '../../services/dashboardApi';
+import { dashboardAPI, type DashboardProduct, type DashboardPost, type RevenueData, type CategoryData, type DeviceData, type TopProduct, type ActivityItem } from '../../services/dashboardApi';
 
 
 interface MetricCard {
@@ -35,11 +35,37 @@ interface ChartData {
   color?: string;
 }
 
+interface DashboardStatsData {
+  totalProducts?: number;
+  publishedProducts?: number;
+  draftProducts?: number;
+  totalPosts?: number;
+  publishedPosts?: number;
+  draftPosts?: number;
+  recentProducts?: DashboardProduct[];
+  recentPosts?: DashboardPost[];
+  [key: string]: unknown;
+}
+
+interface AdminStatsData {
+  success?: boolean;
+  data?: Record<string, unknown>;
+  message?: string;
+  newUsersToday?: number;
+  totalUsers?: number;
+  [key: string]: unknown;
+}
+
 const AnalyticsAdmin: React.FC = () => {
   const [selectedPeriod, setSelectedPeriod] = useState('7d');
   const [selectedMetric, setSelectedMetric] = useState('revenue');
-  const [dashboardStats, setDashboardStats] = useState<any>(null);
-  const [adminStats, setAdminStats] = useState<any>(null);
+  const [dashboardStats, setDashboardStats] = useState<DashboardStatsData | null>(null);
+  const [adminStats, setAdminStats] = useState<AdminStatsData | null>(null);
+  const [revenueData, setRevenueData] = useState<RevenueData[]>([]);
+  const [categoryData, setCategoryData] = useState<CategoryData[]>([]);
+  const [deviceData, setDeviceData] = useState<DeviceData[]>([]);
+  const [topProducts, setTopProducts] = useState<TopProduct[]>([]);
+  const [recentActivity, setRecentActivity] = useState<ActivityItem[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -49,12 +75,30 @@ const AnalyticsAdmin: React.FC = () => {
   const fetchAnalyticsData = async () => {
     try {
       setLoading(true);
-      const [dashStats, admStats] = await Promise.all([
+      const [
+        dashStats,
+        admStats,
+        revenue,
+        categories,
+        devices,
+        products,
+        activity
+      ] = await Promise.all([
         dashboardAPI.getStats(),
-        dashboardAPI.getAdminStats()
+        dashboardAPI.getAdminStats(),
+        dashboardAPI.getRevenueData(selectedPeriod),
+        dashboardAPI.getCategoryData(),
+        dashboardAPI.getDeviceData(),
+        dashboardAPI.getTopProducts(),
+        dashboardAPI.getRecentActivity()
       ]);
-      setDashboardStats(dashStats);
-      setAdminStats(admStats);
+      setDashboardStats(dashStats as DashboardStatsData);
+      setAdminStats(admStats as AdminStatsData);
+      setRevenueData(revenue);
+      setCategoryData(categories);
+      setDeviceData(devices);
+      setTopProducts(products);
+      setRecentActivity(activity);
     } catch (error) {
       console.error('Failed to fetch analytics data:', error);
     } finally {
@@ -112,7 +156,7 @@ const AnalyticsAdmin: React.FC = () => {
       {
         title: 'Total Products',
         value: dashboardStats.totalProducts?.toString() || '0',
-        change: '+' + ((dashboardStats.publishedProducts / dashboardStats.totalProducts) * 100).toFixed(1) + '%',
+        change: '+' + (dashboardStats.publishedProducts && dashboardStats.totalProducts ? ((dashboardStats.publishedProducts / dashboardStats.totalProducts) * 100).toFixed(1) : '0') + '%',
         changeType: 'increase',
         icon: DollarSign,
         color: 'bg-green-500'
@@ -120,7 +164,7 @@ const AnalyticsAdmin: React.FC = () => {
       {
         title: 'Total Users',
         value: adminStats.totalUsers?.toString() || '0',
-        change: '+' + ((adminStats.activeUsers / adminStats.totalUsers) * 100).toFixed(1) + '%',
+        change: '+' + (adminStats.newUsersToday && adminStats.totalUsers ? ((adminStats.newUsersToday / adminStats.totalUsers) * 100).toFixed(1) : '0') + '%',
         changeType: 'increase',
         icon: Users,
         color: 'bg-purple-500'
@@ -128,7 +172,7 @@ const AnalyticsAdmin: React.FC = () => {
       {
         title: 'Published Posts',
         value: dashboardStats.publishedPosts?.toString() || '0',
-        change: '+' + ((dashboardStats.publishedPosts / dashboardStats.totalPosts) * 100).toFixed(1) + '%',
+        change: '+' + (dashboardStats.publishedPosts && dashboardStats.totalPosts ? ((dashboardStats.publishedPosts / dashboardStats.totalPosts) * 100).toFixed(1) : '0') + '%',
         changeType: 'increase',
         icon: Eye,
         color: 'bg-orange-500'
@@ -136,7 +180,7 @@ const AnalyticsAdmin: React.FC = () => {
       {
         title: 'Active Users',
         value: adminStats.activeUsers?.toString() || '0',
-        change: '+' + ((adminStats.newUsersToday / adminStats.totalUsers) * 100).toFixed(1) + '%',
+        change: '+' + (((adminStats.newUsersToday || 0) / (adminStats.totalUsers || 1)) * 100).toFixed(1) + '%',
         changeType: 'increase',
         icon: Target,
         color: 'bg-pink-500'
@@ -144,109 +188,33 @@ const AnalyticsAdmin: React.FC = () => {
     ];
   };
 
-  const revenueData: ChartData[] = [
-    { name: 'Mon', value: 4000 },
-    { name: 'Tue', value: 3000 },
-    { name: 'Wed', value: 5000 },
-    { name: 'Thu', value: 4500 },
-    { name: 'Fri', value: 6000 },
-    { name: 'Sat', value: 5500 },
-    { name: 'Sun', value: 4800 }
-  ];
-
-  const categoryData: ChartData[] = [
-    { name: 'Electronics', value: 35, color: '#3B82F6' },
-    { name: 'Fashion', value: 25, color: '#EF4444' },
-    { name: 'Beauty', value: 20, color: '#10B981' },
-    { name: 'Sports', value: 12, color: '#F59E0B' },
-    { name: 'Others', value: 8, color: '#8B5CF6' }
-  ];
-
-  const deviceData: ChartData[] = [
-    { name: 'Desktop', value: 45, color: '#3B82F6' },
-    { name: 'Mobile', value: 40, color: '#EF4444' },
-    { name: 'Tablet', value: 15, color: '#10B981' }
-  ];
-
-  const topProducts = [
-    {
-      id: '1',
-      name: 'Wireless Headphones',
-      sales: 234,
-      revenue: '$11,700',
-      image: 'https://images.pexels.com/photos/3394650/pexels-photo-3394650.jpeg'
-    },
-    {
-      id: '2',
-      name: 'Smart Watch',
-      sales: 189,
-      revenue: '$9,450',
-      image: 'https://images.pexels.com/photos/437037/pexels-photo-437037.jpeg'
-    },
-    {
-      id: '3',
-      name: 'Laptop Stand',
-      sales: 156,
-      revenue: '$7,800',
-      image: 'https://images.pexels.com/photos/7974/pexels-photo.jpg'
-    },
-    {
-      id: '4',
-      name: 'Phone Case',
-      sales: 143,
-      revenue: '$2,860',
-      image: 'https://images.pexels.com/photos/404280/pexels-photo-404280.jpeg'
-    },
-    {
-      id: '5',
-      name: 'Bluetooth Speaker',
-      sales: 128,
-      revenue: '$6,400',
-      image: 'https://images.pexels.com/photos/1649771/pexels-photo-1649771.jpeg'
-    }
-  ];
-
-  const recentActivity = [
-
-    {
-      id: '2',
-      type: 'user',
-      message: 'New user registration',
-      time: '5 minutes ago',
-      icon: Users,
-      color: 'text-green-600'
-    },
-    {
-      id: '3',
-      type: 'product',
-      message: 'Product "Smart Watch" low in stock',
-      time: '10 minutes ago',
-      icon: Activity,
-      color: 'text-orange-600'
-    },
-    {
-      id: '4',
-      type: 'revenue',
-      message: 'Daily revenue target achieved',
-      time: '1 hour ago',
-      icon: Target,
-      color: 'text-purple-600'
-    },
-    {
-      id: '5',
-      type: 'review',
-      message: 'New 5-star review received',
-      time: '2 hours ago',
-      icon: TrendingUp,
-      color: 'text-pink-600'
-    }
-  ];
+  // Helper function to get icon component from string
+  const getIconComponent = (iconName: string) => {
+    const iconMap: Record<string, React.ElementType> = {
+      Users,
+      Activity,
+      Target,
+      TrendingUp,
+      TrendingDown,
+      DollarSign,
+      Eye,
+      Calendar,
+      Download,
+      Filter,
+      BarChart3,
+      Clock,
+      Smartphone,
+      Monitor,
+      Tablet
+    };
+    return iconMap[iconName] || Activity;
+  };
 
   const SimpleBarChart = ({ data }: { data: ChartData[] }) => {
     const maxValue = Math.max(...data.map(d => d.value));
     
     return (
-      <div className="flex items-end justify-between h-64 px-4">
+      <div className="flex items-end justify-between h-64 px-4" role="img" aria-label="Revenue bar chart showing daily revenue data">
         {data.map((item, index) => (
           <div key={index} className="flex flex-col items-center space-y-2">
             <div className="text-xs text-gray-600">${(item.value / 1000).toFixed(1)}k</div>
@@ -268,7 +236,7 @@ const AnalyticsAdmin: React.FC = () => {
     const total = data.reduce((sum, item) => sum + item.value, 0);
     
     return (
-      <div className="space-y-4">
+      <div className="space-y-4" role="img" aria-label={`${title} pie chart showing category distribution`}>
         <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
         <div className="space-y-3">
           {data.map((item, index) => (
@@ -308,23 +276,35 @@ const AnalyticsAdmin: React.FC = () => {
           <p className="text-gray-600 mt-1">Track your business performance and insights</p>
         </div>
         <div className="mt-4 sm:mt-0 flex items-center space-x-3">
+          <label htmlFor="period-select" className="sr-only">Select time period</label>
           <select
+            id="period-select"
             value={selectedPeriod}
             onChange={(e) => setSelectedPeriod(e.target.value)}
-            className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#e72a00] text-sm"
+            className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#e72a00] focus:border-transparent text-sm"
+            aria-describedby="period-help"
           >
+            <div id="period-help" className="sr-only">Select the time period for analytics data</div>
             {periods.map(period => (
               <option key={period.value} value={period.value}>
                 {period.label}
               </option>
             ))}
           </select>
-          <button className="inline-flex items-center px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors">
-            <Filter className="h-4 w-4 mr-2" />
+          <button 
+            className="inline-flex items-center px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 min-h-[44px]"
+            type="button"
+            aria-label="Open filters menu"
+          >
+            <Filter className="h-4 w-4 mr-2" aria-hidden="true" />
             Filters
           </button>
-          <button className="inline-flex items-center px-4 py-2 bg-[#e72a00] text-white text-sm font-medium rounded-md hover:bg-[#d12400] transition-colors">
-            <Download className="h-4 w-4 mr-2" />
+          <button 
+            className="inline-flex items-center px-4 py-2 bg-[#e72a00] text-white text-sm font-medium rounded-md hover:bg-[#d12400] transition-colors focus:outline-none focus:ring-2 focus:ring-[#e72a00] focus:ring-offset-2 min-h-[44px]"
+            type="button"
+            aria-label="Export analytics data"
+          >
+            <Download className="h-4 w-4 mr-2" aria-hidden="true" />
             Export
           </button>
         </div>
@@ -351,9 +331,9 @@ const AnalyticsAdmin: React.FC = () => {
                 <p className="text-2xl font-bold text-gray-900 mt-1">{metric.value}</p>
                 <div className="flex items-center mt-2">
                   {metric.changeType === 'increase' ? (
-                    <TrendingUp className="h-4 w-4 text-green-500 mr-1" />
+                    <TrendingUp className="h-4 w-4 text-green-500 mr-1" aria-hidden="true" />
                   ) : (
-                    <TrendingDown className="h-4 w-4 text-red-500 mr-1" />
+                    <TrendingDown className="h-4 w-4 text-red-500 mr-1" aria-hidden="true" />
                   )}
                   <span className={`text-sm font-medium ${
                     metric.changeType === 'increase' ? 'text-green-600' : 'text-red-600'
@@ -363,8 +343,8 @@ const AnalyticsAdmin: React.FC = () => {
                   <span className="text-sm text-gray-500 ml-1">from last period</span>
                 </div>
               </div>
-              <div className={`${metric.color} p-3 rounded-lg`}>
-                <metric.icon className="h-6 w-6 text-white" />
+              <div className={`${metric.color} p-3 rounded-lg`} aria-hidden="true">
+                <metric.icon className="h-6 w-6 text-white" aria-hidden="true" />
               </div>
             </div>
           </motion.div>
@@ -387,12 +367,16 @@ const AnalyticsAdmin: React.FC = () => {
               <p className="text-sm text-gray-600">Daily revenue for the past week</p>
             </div>
             <div className="flex items-center space-x-2">
-              <BarChart3 className="h-5 w-5 text-gray-400" />
+              <BarChart3 className="h-5 w-5 text-gray-400" aria-hidden="true" />
+              <label htmlFor="metric-select" className="sr-only">Select metric type</label>
               <select
+                id="metric-select"
                 value={selectedMetric}
                 onChange={(e) => setSelectedMetric(e.target.value)}
-                className="text-sm border border-gray-300 rounded-md px-2 py-1 focus:outline-none focus:ring-2 focus:ring-[#e72a00]"
+                className="text-sm border border-gray-300 rounded-md px-2 py-1 focus:outline-none focus:ring-2 focus:ring-[#e72a00] focus:border-transparent"
+                aria-describedby="metric-help"
               >
+                <div id="metric-help" className="sr-only">Select the type of metric to display in the chart</div>
                 <option value="revenue">Revenue</option>
                 <option value="orders">Orders</option>
                 <option value="customers">Customers</option>
@@ -424,7 +408,7 @@ const AnalyticsAdmin: React.FC = () => {
         >
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-semibold text-gray-900">Top Products</h3>
-            <TrendingUp className="h-5 w-5 text-gray-400" />
+            <TrendingUp className="h-5 w-5 text-gray-400" aria-hidden="true" />
           </div>
           <div className="space-y-4">
             {topProducts.map((product, index) => (
@@ -461,7 +445,7 @@ const AnalyticsAdmin: React.FC = () => {
         >
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-semibold text-gray-900">Device Usage</h3>
-            <Monitor className="h-5 w-5 text-gray-400" />
+            <Monitor className="h-5 w-5 text-gray-400" aria-hidden="true" />
           </div>
           <div className="space-y-4">
             {deviceData.map((device, index) => {
@@ -470,7 +454,7 @@ const AnalyticsAdmin: React.FC = () => {
               return (
                 <div key={index} className="flex items-center justify-between">
                   <div className="flex items-center space-x-3">
-                    <IconComponent className="h-5 w-5 text-gray-400" />
+                    <IconComponent className="h-5 w-5 text-gray-400" aria-hidden="true" />
                     <span className="text-sm text-gray-700">{device.name}</span>
                   </div>
                   <div className="flex items-center space-x-2">
@@ -503,20 +487,23 @@ const AnalyticsAdmin: React.FC = () => {
             <Activity className="h-5 w-5 text-gray-400" />
           </div>
           <div className="space-y-4">
-            {recentActivity.map((activity) => (
-              <div key={activity.id} className="flex items-start space-x-3">
-                <div className={`flex-shrink-0 p-1 rounded-full bg-gray-100`}>
-                  <activity.icon className={`h-4 w-4 ${activity.color}`} />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm text-gray-900">{activity.message}</p>
-                  <div className="flex items-center mt-1">
-                    <Clock className="h-3 w-3 text-gray-400 mr-1" />
-                    <p className="text-xs text-gray-500">{activity.time}</p>
+            {recentActivity.map((activity) => {
+              const IconComponent = getIconComponent(activity.icon);
+              return (
+                <div key={activity.id} className="flex items-start space-x-3">
+                  <div className={`flex-shrink-0 p-1 rounded-full bg-gray-100`}>
+                    <IconComponent className={`h-4 w-4 ${activity.color}`} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm text-gray-900">{activity.message}</p>
+                    <div className="flex items-center mt-1">
+                      <Clock className="h-3 w-3 text-gray-400 mr-1" />
+                      <p className="text-xs text-gray-500">{activity.time}</p>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </motion.div>
       </div>
