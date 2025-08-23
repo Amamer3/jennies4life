@@ -1,5 +1,5 @@
 import React from 'react';
-import { Helmet } from 'react-helmet-async';
+import { useHead } from '@unhead/react';
 
 interface SEOProps {
   title?: string;
@@ -7,108 +7,144 @@ interface SEOProps {
   keywords?: string;
   image?: string;
   url?: string;
-  type?: 'website' | 'article' | 'product';
+  type?: string;
   author?: string;
   publishedTime?: string;
   modifiedTime?: string;
-  siteName?: string;
-  locale?: string;
-  structuredData?: object;
+  section?: string;
+  tags?: string[];
+  price?: string;
+  currency?: string;
+  availability?: string;
+  brand?: string;
+  category?: string;
+  rating?: number;
+  reviewCount?: number;
 }
 
 const SEO: React.FC<SEOProps> = ({
-  title = 'Royal-lounge - Premium Lifestyle Products & Reviews',
-  description = 'Discover premium lifestyle products, honest reviews, and exclusive deals at Jennies4Life. Your trusted source for quality products and lifestyle inspiration.',
-  keywords = 'lifestyle products, product reviews, deals, premium products, shopping, lifestyle blog',
-  image = '/og-image.jpg',
-  url = 'https://www.royal-lounge.org',
+  title = 'Jennies4Life - Premium Lifestyle Products & Reviews',
+  description = 'Discover curated lifestyle products, expert reviews, and amazing deals. Your trusted source for quality electronics, fashion, health & wellness products.',
+  keywords = 'lifestyle products, product reviews, deals, electronics, fashion, health, wellness, shopping',
+  image = '/Jennie4lifelogo.png',
+  url = 'https://jennies4life.com',
   type = 'website',
-  author = 'Royal-lounge',
+  author = 'Jennies4Life Team',
   publishedTime,
   modifiedTime,
-  siteName = 'Royal-lounge',
-  locale = 'en_US',
-  structuredData
+  section,
+  tags = [],
+  price,
+  currency = 'USD',
+  availability = 'in stock',
+  brand,
+  category,
+  rating,
+  reviewCount
 }) => {
-  const fullTitle = title.includes('Royal-lounge') ? title : `${title} | Royal-lounge`;
-  const fullUrl = url.startsWith('http') ? url : `https://www.royal-lounge.org${url}`;
-  const fullImage = image.startsWith('http') ? image : `https://www.royal-lounge.org${image}`;
+  const canonicalUrl = url || (typeof window !== 'undefined' ? window.location.href : 'https://jennies4life.com');
+  
+  // Build structured data
+  const structuredData: any = {
+    '@context': 'https://schema.org',
+    '@type': type === 'product' ? 'Product' : 'WebSite',
+    name: title,
+    description,
+    url: canonicalUrl,
+    image
+  };
 
-  return (
-    <Helmet>
-      {/* Basic Meta Tags */}
-      <title>{fullTitle}</title>
-      <meta name="description" content={description} />
-      <meta name="keywords" content={keywords} />
-      <meta name="author" content={author} />
-      <link rel="canonical" href={fullUrl} />
+  if (type === 'product' && price) {
+    structuredData['@type'] = 'Product';
+    structuredData.brand = brand;
+    structuredData.category = category;
+    structuredData.offers = {
+      '@type': 'Offer',
+      price,
+      priceCurrency: currency,
+      availability: `https://schema.org/${availability.replace(' ', '')}`
+    };
+    
+    if (rating && reviewCount) {
+      structuredData.aggregateRating = {
+        '@type': 'AggregateRating',
+        ratingValue: rating,
+        reviewCount
+      };
+    }
+  }
+
+  if (type === 'article') {
+    structuredData['@type'] = 'Article';
+    structuredData.author = {
+      '@type': 'Person',
+      name: author
+    };
+    structuredData.publisher = {
+      '@type': 'Organization',
+      name: 'Jennies4Life',
+      logo: {
+        '@type': 'ImageObject',
+        url: '/Jennie4lifelogo.png'
+      }
+    };
+    if (publishedTime) structuredData.datePublished = publishedTime;
+    if (modifiedTime) structuredData.dateModified = modifiedTime;
+    if (section) structuredData.articleSection = section;
+    if (tags.length > 0) structuredData.keywords = tags.join(', ');
+  }
+
+  useHead({
+    title,
+    meta: [
+      { name: 'description', content: description },
+      { name: 'keywords', content: keywords },
+      { name: 'author', content: author },
+      { name: 'robots', content: 'index, follow' },
+      { name: 'viewport', content: 'width=device-width, initial-scale=1.0' },
       
-      {/* Open Graph Meta Tags */}
-      <meta property="og:title" content={fullTitle} />
-      <meta property="og:description" content={description} />
-      <meta property="og:image" content={fullImage} />
-      <meta property="og:url" content={fullUrl} />
-      <meta property="og:type" content={type} />
-      <meta property="og:site_name" content={siteName} />
-      <meta property="og:locale" content={locale} />
+      // Open Graph
+      { property: 'og:title', content: title },
+      { property: 'og:description', content: description },
+      { property: 'og:image', content: image },
+      { property: 'og:url', content: canonicalUrl },
+      { property: 'og:type', content: type },
+      { property: 'og:site_name', content: 'Jennies4Life' },
       
-      {/* Twitter Card Meta Tags */}
-      <meta name="twitter:card" content="summary_large_image" />
-      <meta name="twitter:title" content={fullTitle} />
-      <meta name="twitter:description" content={description} />
-      <meta name="twitter:image" content={fullImage} />
-      <meta name="twitter:site" content="@jennies4life" />
-      <meta name="twitter:creator" content="@jennies4life" />
+      // Twitter Card
+      { name: 'twitter:card', content: 'summary_large_image' },
+      { name: 'twitter:title', content: title },
+      { name: 'twitter:description', content: description },
+      { name: 'twitter:image', content: image },
       
-      {/* Article specific meta tags */}
-      {type === 'article' && publishedTime && (
-        <meta property="article:published_time" content={publishedTime} />
-      )}
-      {type === 'article' && modifiedTime && (
-        <meta property="article:modified_time" content={modifiedTime} />
-      )}
-      {type === 'article' && author && (
-        <meta property="article:author" content={author} />
-      )}
+      // Article specific
+      ...(type === 'article' && publishedTime ? [{ property: 'article:published_time', content: publishedTime }] : []),
+      ...(type === 'article' && modifiedTime ? [{ property: 'article:modified_time', content: modifiedTime }] : []),
+      ...(type === 'article' && section ? [{ property: 'article:section', content: section }] : []),
+      ...(type === 'article' && author ? [{ property: 'article:author', content: author }] : []),
+      ...tags.map(tag => ({ property: 'article:tag', content: tag })),
       
-      {/* Additional SEO Meta Tags */}
-      <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
-      <meta name="googlebot" content="index, follow" />
-      <meta name="bingbot" content="index, follow" />
-      
-      {/* Structured Data */}
-      {structuredData && (
-        <script type="application/ld+json">
-          {JSON.stringify(structuredData)}
-        </script>
-      )}
-      
-      {/* Default Organization Structured Data */}
-      {!structuredData && (
-        <script type="application/ld+json">
-          {JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "Organization",
-            "name": "Jennies4Life",
-            "url": "https://www.royal-lounge.org",
-            "logo": "https://www.royal-lounge.org/Jennie4lifelogo.png",
-            "description": description,
-            "sameAs": [
-              "https://facebook.com/jennies4life",
-              "https://twitter.com/jennies4life",
-              "https://instagram.com/jennies4life"
-            ],
-            "contactPoint": {
-              "@type": "ContactPoint",
-              "telephone": "+233-123-4567",
-              "contactType": "customer service",
-              "email": "hello@royal-lounge.org"
-            }
-          })}
-        </script>
-      )}
-    </Helmet>
-  );
+      // Product specific
+      ...(type === 'product' && price ? [{ property: 'product:price:amount', content: price }] : []),
+      ...(type === 'product' && currency ? [{ property: 'product:price:currency', content: currency }] : []),
+      ...(type === 'product' && availability ? [{ property: 'product:availability', content: availability }] : []),
+      ...(type === 'product' && brand ? [{ property: 'product:brand', content: brand }] : []),
+      ...(type === 'product' && category ? [{ property: 'product:category', content: category }] : [])
+    ],
+    link: [
+      { rel: 'canonical', href: canonicalUrl },
+      { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' },
+      { rel: 'apple-touch-icon', href: '/apple-touch-icon.png' }
+    ],
+    script: [
+      {
+        type: 'application/ld+json',
+        innerHTML: JSON.stringify(structuredData)
+      }
+    ]
+  });
+
+  return null;
 };
 
 export default SEO;

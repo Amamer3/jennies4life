@@ -1,7 +1,12 @@
 import React, { Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { HelmetProvider } from 'react-helmet-async';
+import { createHead, UnheadProvider } from '@unhead/react/client';
+import { AuthProvider } from './contexts/AuthContext';
+import { CartProvider } from './contexts/CartContext';
+import { Toaster } from 'react-hot-toast';
+import ErrorBoundary from './components/ErrorBoundary';
 import Header from './components/Header';
+import Footer from './components/Footer';
 import Hero from './components/Hero';
 import FeaturedProducts from './components/FeaturedProducts';
 import TodaysSpecials from './components/TodaysSpecials';
@@ -10,10 +15,7 @@ import DealOfDay from './components/DealOfDay';
 import Categories from './components/Categories';
 import BlogSection from './components/BlogSection';
 import Newsletter from './components/Newsletter';
-import Footer from './components/Footer';
 import ProtectedRoute from './components/ProtectedRoute';
-import { AuthProvider } from './contexts/AuthContext';
-import ErrorBoundary from './components/ErrorBoundary';
 import SEO from './components/SEO';
 
 // Lazy load pages for better performance
@@ -44,15 +46,19 @@ const PageLoader = () => (
   </div>
 );
 
+// Create head instance for @unhead/react
+const head = createHead();
+
 function App() {
   return (
-    <HelmetProvider>
+    <UnheadProvider head={head}>
       <ErrorBoundary>
         <AuthProvider>
-          <Router>
-        <Routes>
-          {/* Home Page */}
-          <Route path="/" element={
+          <CartProvider>
+            <Router>
+              <Routes>
+                {/* Home Page */}
+                <Route path="/" element={
             <div className="min-h-screen bg-gray-50">
               <SEO 
                 title="Jennies4Life - Premium Lifestyle Products & Reviews"
@@ -74,10 +80,10 @@ function App() {
               </main>
               <Footer />
             </div>
-          } />
+                } />
           
-          {/* Public Routes with Header and Footer */}
-          <Route path="/products" element={
+                {/* Public Routes with Header and Footer */}
+                <Route path="/products" element={
             <div className="min-h-screen bg-gray-50">
               <SEO 
                 title="All Products - Jennies4Life"
@@ -172,42 +178,42 @@ function App() {
               <Suspense fallback={<PageLoader />}>
                 <AdminLayout>
                   <Routes>
-                    <Route path="/" element={
+                    <Route index element={
                       <Suspense fallback={<PageLoader />}>
                         <AdminDashboard />
                       </Suspense>
                     } />
-                    <Route path="/products" element={
+                    <Route path="products" element={
                       <Suspense fallback={<PageLoader />}>
                         <ProductsAdmin />
                       </Suspense>
                     } />
-                    <Route path="/categories" element={
+                    <Route path="categories" element={
                       <Suspense fallback={<PageLoader />}>
                         <CategoriesAdmin />
                       </Suspense>
                     } />
-                    <Route path="/deals" element={
+                    <Route path="deals" element={
                       <Suspense fallback={<PageLoader />}>
                         <DealsAdmin />
                       </Suspense>
                     } />
-                    <Route path="/blog" element={
+                    <Route path="blog" element={
                       <Suspense fallback={<PageLoader />}>
                         <BlogAdmin />
                       </Suspense>
                     } />
-                    <Route path="/users" element={
+                    <Route path="users" element={
                       <Suspense fallback={<PageLoader />}>
                         <UsersAdmin />
                       </Suspense>
                     } />
-                    <Route path="/analytics" element={
+                    <Route path="analytics" element={
                       <Suspense fallback={<PageLoader />}>
                         <AnalyticsAdmin />
                       </Suspense>
                     } />
-                    <Route path="/settings" element={
+                    <Route path="settings" element={
                       <Suspense fallback={<PageLoader />}>
                         <SettingsAdmin />
                       </Suspense>
@@ -224,11 +230,13 @@ function App() {
               <NotFoundPage />
             </Suspense>
           } />
-          </Routes>
-          </Router>
+              </Routes>
+            </Router>
+            <Toaster position="top-right" />
+          </CartProvider>
         </AuthProvider>
       </ErrorBoundary>
-    </HelmetProvider>
+    </UnheadProvider>
   );
 }
 
