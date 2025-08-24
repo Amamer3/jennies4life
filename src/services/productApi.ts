@@ -1,6 +1,9 @@
 import { authAPI } from './authApi';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
+// Use relative URL in development to leverage Vite proxy, full URL in production
+const API_BASE_URL = import.meta.env.DEV 
+  ? '' // Use relative URL in development to go through Vite proxy
+  : (import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000');
 
 // Helper function to validate image URLs
 function isValidImageUrl(url: string): boolean {
@@ -160,18 +163,22 @@ class ProductAPI {
     console.log('ProductAPI: Starting getProducts request');
     
     try {
-      const response = await this.makeAuthenticatedRequest<ProductsListResponse>(`${API_BASE_URL}/api/products`, {
+      const response = await this.makeAuthenticatedRequest<any>(`${API_BASE_URL}/api/products`, {
         method: 'GET'
       });
 
-      if (response.success && Array.isArray(response.products)) {
+      console.log('📦 API Response:', response);
+
+      if (response.success && Array.isArray(response.data)) {
+        console.log('✅ Products fetched successfully:', response.data.length, 'products');
         return {
           success: true,
-          products: response.products,
+          products: response.data,
           message: 'Products fetched successfully'
         };
       }
       
+      console.log('❌ API returned error:', response.message || 'Failed to fetch products');
       return {
         success: false,
         message: response.message || 'Failed to fetch products'
