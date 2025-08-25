@@ -212,16 +212,24 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     try {
       const profileResponse = await authAPI.getProfile();
       
+      // Log the entire response for debugging
+      console.log('👤 AuthContext - getProfile response:', profileResponse);
+      
       if (profileResponse.success && profileResponse.user) {
+        console.log('👤 AuthContext - valid user profile received:', profileResponse.user);
         setUser(profileResponse.user);
         setIsAuthenticated(true);
         return profileResponse.user;
       } else {
-        console.error('Failed to get profile:', profileResponse.message);
+        console.error('❌ AuthContext - Failed to get profile:', {
+          success: profileResponse.success,
+          message: profileResponse.message,
+          user: profileResponse.user
+        });
         return null;
       }
     } catch (error) {
-      console.error('Get profile error:', error);
+      console.error('❌ AuthContext - Get profile error:', error);
       return null;
     }
   };

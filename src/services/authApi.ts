@@ -307,6 +307,12 @@ class AuthAPI {
       
       const data = await response.json();
       console.log('👤 AuthAPI - getProfile response data:', data);
+      console.log('👤 AuthAPI - getProfile response data type:', typeof data);
+      console.log('👤 AuthAPI - getProfile response data keys:', Object.keys(data));
+      
+      // Check and handle nested user data
+      const userData = data.data?.user || data.user;
+      console.log('👤 AuthAPI - extracted user data:', userData);
       
       if (!response.ok) {
         console.error('👤 AuthAPI - getProfile failed with status:', response.status, 'data:', data);
@@ -316,7 +322,12 @@ class AuthAPI {
         };
       }
       
-      return data;
+      // Ensure we're returning the correct structure
+      return {
+        success: true,
+        user: userData,
+        message: data.message
+      };
     } catch (error) {
       console.error('👤 AuthAPI - Profile API error:', error);
       return {
