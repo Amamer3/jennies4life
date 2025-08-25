@@ -61,7 +61,7 @@ function App() {
                 <Route path="/" element={
             <div className="min-h-screen bg-gray-50">
               <SEO 
-                title="Jennies4Life - Premium Lifestyle Products & Reviews"
+                title="Royal-Lounge - Premium Lifestyle Products & Reviews"
                 description="Discover curated lifestyle products, expert reviews, and amazing deals. Your trusted source for quality electronics, fashion, health & wellness products."
                 keywords="lifestyle products, product reviews, deals, electronics, fashion, health, wellness, shopping"
                 type="website"
