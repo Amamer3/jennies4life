@@ -57,8 +57,20 @@ class AuthAPI {
     const token = localStorage.getItem('authToken');
     return {
       'Content-Type': 'application/json',
-      ...(token && { 'Authorization': `Bearer ${token}` })
+      ...(token && { Authorization: `Bearer ${token}` }),
     };
+  }
+
+  // Debug method to check stored tokens
+  debugTokens(): void {
+    const idToken = localStorage.getItem('authToken');
+    const refreshToken = localStorage.getItem('refreshToken');
+    console.log('🔍 Debug - ID Token:', idToken ? 'present' : 'missing');
+    console.log('🔍 Debug - Refresh Token:', refreshToken ? 'present' : 'missing');
+    console.log('🔍 Debug - Firebase User:', auth.currentUser ? 'authenticated' : 'not authenticated');
+    if (auth.currentUser) {
+      console.log('🔍 Debug - Firebase User ID:', auth.currentUser.uid);
+    }
   }
 
   async login(credentials: LoginRequest): Promise<LoginResponse> {
@@ -109,16 +121,16 @@ class AuthAPI {
         // Exchange custom token for Firebase ID token
         const userCredential = await signInWithCustomToken(auth, customToken);
         const idToken = await userCredential.user.getIdToken();
+        const firebaseRefreshToken = userCredential.user.refreshToken;
         
         console.log('🔐 AuthAPI - Firebase authentication successful');
+        console.log('🔍 AuthAPI - Firebase refresh token:', firebaseRefreshToken ? 'available' : 'not available');
         
-        // Store the Firebase ID token
+        // Store both Firebase ID token and refresh token
         localStorage.setItem('authToken', idToken);
+        localStorage.setItem('refreshToken', firebaseRefreshToken);
         
-        // Store refresh token if provided
-        if (data.refreshToken) {
-          localStorage.setItem('refreshToken', data.refreshToken);
-        }
+        console.log('✅ AuthAPI - Tokens stored successfully');
         
         return {
           success: true,
@@ -162,76 +174,32 @@ class AuthAPI {
     try {
       console.log('🔄 AuthAPI - starting refresh process');
       
-      // Try Firebase token refresh first if we have a user
-      if (auth.currentUser) {
-        try {
-          console.log('🔄 AuthAPI - refreshing Firebase ID token');
-          const newIdToken = await auth.currentUser.getIdToken(true); // Force refresh
-          if (newIdToken) {
-            localStorage.setItem('authToken', newIdToken);
-            console.log('✅ AuthAPI - Firebase token refresh successful');
-            return {
-              success: true,
-              token: newIdToken
-            };
-          }
-        } catch (firebaseError) {
-          console.warn('⚠️ AuthAPI - Firebase refresh failed:', firebaseError);
-          // Continue to backend refresh
-        }
-      }
-      
-      // Try backend refresh
       const refreshToken = localStorage.getItem('refreshToken');
       if (!refreshToken) {
         console.log('❌ AuthAPI - no refresh token available');
-        throw new Error('No refresh token available');
-      }
-      
-      console.log('🔄 AuthAPI - attempting backend token refresh');
-      const response = await fetch(`${API_BASE_URL}/api/auth/refresh`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ refreshToken }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`Refresh failed with status ${response.status}`);
-      }
-
-      const data = await response.json();
-      if (!data.success) {
-        throw new Error(data.message || 'Token refresh failed');
-      }
-      
-      if (!data.token) {
-        throw new Error('No token in refresh response');
-      }
-
-      // Handle JWT token
-      if (data.token.startsWith('eyJ') && data.token.split('.').length === 3) {
-        localStorage.setItem('authToken', data.token);
-        if (data.refreshToken) {
-          localStorage.setItem('refreshToken', data.refreshToken);
-        }
         return {
-          success: true,
-          token: data.token
+          success: false,
+          message: 'No refresh token available'
         };
       }
-
-      // Handle custom Firebase token
-      const userCredential = await signInWithCustomToken(auth, data.token);
-      const idToken = await userCredential.user.getIdToken();
-      localStorage.setItem('authToken', idToken);
-      if (data.refreshToken) {
-        localStorage.setItem('refreshToken', data.refreshToken);
+      
+      // Use Firebase SDK to refresh the token
+      const user = auth.currentUser;
+      if (user) {
+        console.log('🔄 AuthAPI - refreshing Firebase ID token');
+        const newIdToken = await user.getIdToken(true); // Force refresh
+        localStorage.setItem('authToken', newIdToken);
+        console.log('✅ AuthAPI - Firebase token refresh successful');
+        return {
+          success: true,
+          token: newIdToken
+        };
       }
+      
+      console.log('❌ AuthAPI - no authenticated user found');
       return {
-        success: true,
-        token: idToken
+        success: false,
+        message: 'No authenticated user found'
       };
     } catch (error) {
       console.error('❌ AuthAPI - refresh error:', error);
@@ -327,15 +295,30 @@ class AuthAPI {
 
   async getProfile(): Promise<ProfileResponse> {
     try {
+      const headers = this.getAuthHeaders();
+      console.log('👤 AuthAPI - getProfile request headers:', headers);
+      
       const response = await fetch(`${API_BASE_URL}/api/auth/profile`, {
         method: 'GET',
-        headers: this.getAuthHeaders(),
+        headers: headers,
       });
 
+      console.log('👤 AuthAPI - getProfile response status:', response.status);
+      
       const data = await response.json();
+      console.log('👤 AuthAPI - getProfile response data:', data);
+      
+      if (!response.ok) {
+        console.error('👤 AuthAPI - getProfile failed with status:', response.status, 'data:', data);
+        return {
+          success: false,
+          message: data.message || `Profile request failed with status ${response.status}`
+        };
+      }
+      
       return data;
     } catch (error) {
-      console.error('Profile API error:', error);
+      console.error('👤 AuthAPI - Profile API error:', error);
       return {
         success: false,
         message: 'Network error occurred while fetching profile'
