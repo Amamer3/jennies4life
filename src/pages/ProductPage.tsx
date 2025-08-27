@@ -12,7 +12,12 @@ import {
   ExternalLink,
   ChevronLeft,
   ChevronRight,
+  Bell,
+  TrendingUp
 } from 'lucide-react';
+import { NotificationForm } from '../components/NotificationForm';
+import { PriceHistory } from '../components/PriceHistory';
+import { notificationAPI } from '../services/notificationApi';
 import { motion } from 'framer-motion';
 import type { Product } from '../types';
 import { publicProductAPI } from '../services/publicProductApi';
@@ -386,6 +391,47 @@ const ProductPage: React.FC = () => {
                   <span className="text-xs sm:text-sm text-gray-800">{item.text}</span>
                 </div>
               ))}
+            </div>
+          </motion.div>
+        </div>
+
+        {/* Price History and Notifications */}
+        <div className="mt-8 sm:mt-12">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+            className="grid md:grid-cols-2 gap-6"
+          >
+            {/* Price History Chart */}
+            <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                <TrendingUp className="h-5 w-5 text-blue-500" />
+                Price History
+              </h3>
+              <PriceHistory productId={product.id} />
+            </div>
+
+            {/* Price Alert Form */}
+            <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                <Bell className="h-5 w-5 text-blue-500" />
+                Price Alert
+              </h3>
+              <NotificationForm
+                onSubmit={async (form) => {
+                  try {
+                    await notificationAPI.createNotification({
+                      ...form,
+                      productId: product.id
+                    });
+                  } catch (error) {
+                    console.error('Failed to create price alert:', error);
+                    throw error;
+                  }
+                }}
+                initialProduct={product.id}
+              />
             </div>
           </motion.div>
         </div>
