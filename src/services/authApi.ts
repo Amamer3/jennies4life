@@ -1,10 +1,10 @@
 import { signInWithCustomToken } from 'firebase/auth';
 import { auth } from '../config/firebase';
 
-// Use relative URL in development to leverage Vite proxy, full URL in production
+// Always use the Vite proxy in development for consistent behavior
 export const API_BASE_URL = import.meta.env.DEV 
-  ? '' // Use relative URL in development to go through Vite proxy
-  : (import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000');
+  ? '' // Use Vite proxy in development
+  : import.meta.env.VITE_API_BASE_URL;
 
 interface LoginRequest {
   username: string;
@@ -93,11 +93,24 @@ class AuthAPI {
 
       console.log('🔐 AuthAPI - login response status:', response.status);
       
-      const data = await response.json();
-      console.log('🔐 AuthAPI - backend login response:', data);
-      console.log('🔍 AuthAPI - response data keys:', Object.keys(data));
-      if (data.data) {
-        console.log('🔍 AuthAPI - nested data keys:', Object.keys(data.data));
+      // First get the response text
+      const responseText = await response.text();
+      console.log('🔐 AuthAPI - raw response:', responseText);
+      
+      let data;
+      try {
+        data = JSON.parse(responseText);
+        console.log('🔐 AuthAPI - backend login response:', data);
+        console.log('🔍 AuthAPI - response data keys:', Object.keys(data));
+        if (data.data) {
+          console.log('🔍 AuthAPI - nested data keys:', Object.keys(data.data));
+        }
+      } catch (parseError) {
+        console.error('🔐 AuthAPI - Failed to parse response:', parseError);
+        return {
+          success: false,
+          message: `Server returned invalid response: ${responseText.substring(0, 100)}...`
+        };
       }
       
       if (response.ok && data.success) {
@@ -182,18 +195,40 @@ class AuthAPI {
           message: 'No refresh token available'
         };
       }
+
+      // Try to sign in with custom token if available
+      const customToken = localStorage.getItem('customToken');
+      if (customToken) {
+        try {
+          console.log('🔄 AuthAPI - attempting to sign in with stored custom token');
+          const userCredential = await signInWithCustomToken(auth, customToken);
+          const newIdToken = await userCredential.user.getIdToken();
+          localStorage.setItem('authToken', newIdToken);
+          console.log('✅ AuthAPI - Successfully restored session with custom token');
+          return {
+            success: true,
+            token: newIdToken
+          };
+        } catch (error) {
+          console.log('⚠️ AuthAPI - Failed to use stored custom token:', error);
+        }
+      }
       
-      // Use Firebase SDK to refresh the token
+      // If we have a current user, try to refresh their token
       const user = auth.currentUser;
       if (user) {
         console.log('🔄 AuthAPI - refreshing Firebase ID token');
-        const newIdToken = await user.getIdToken(true); // Force refresh
-        localStorage.setItem('authToken', newIdToken);
-        console.log('✅ AuthAPI - Firebase token refresh successful');
-        return {
-          success: true,
-          token: newIdToken
-        };
+        try {
+          const newIdToken = await user.getIdToken(true); // Force refresh
+          localStorage.setItem('authToken', newIdToken);
+          console.log('✅ AuthAPI - Firebase token refresh successful');
+          return {
+            success: true,
+            token: newIdToken
+          };
+        } catch (error) {
+          console.error('❌ AuthAPI - Failed to refresh token:', error);
+        }
       }
       
       console.log('❌ AuthAPI - no authenticated user found');
@@ -287,8 +322,8 @@ class AuthAPI {
       localStorage.removeItem('refreshToken');
       
       return {
-        success: true,
-        message: 'Logged out successfully (local cleanup completed)'
+        success: false,
+        message: error instanceof Error ? error.message : 'Failed to logout properly'
       };
     }
   }
@@ -305,10 +340,20 @@ class AuthAPI {
 
       console.log('👤 AuthAPI - getProfile response status:', response.status);
       
-      const data = await response.json();
-      console.log('👤 AuthAPI - getProfile response data:', data);
-      console.log('👤 AuthAPI - getProfile response data type:', typeof data);
-      console.log('👤 AuthAPI - getProfile response data keys:', Object.keys(data));
+      let data;
+      try {
+        const text = await response.text();
+        console.log('👤 AuthAPI - getProfile raw response:', text);
+        data = text ? JSON.parse(text) : null;
+        console.log('👤 AuthAPI - getProfile parsed data:', data);
+        console.log('👤 AuthAPI - getProfile response data type:', typeof data);
+        if (data) {
+          console.log('👤 AuthAPI - getProfile response data keys:', Object.keys(data));
+        }
+      } catch (parseError) {
+        console.error('👤 AuthAPI - Failed to parse response:', parseError);
+        data = null;
+      }
       
       // Check and handle nested user data
       const userData = data.data?.user || data.user;

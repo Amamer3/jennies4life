@@ -6,7 +6,7 @@ import {
   Package,
   Loader2
 } from 'lucide-react';
-import { dashboardAPI, type DashboardStats, type DashboardProduct, type DashboardPost } from '../../services/dashboardApi';
+import { dashboardAPI, type DashboardStats, type DashboardProduct, type DashboardPost } from '@/services/dashboardApi';
 
 const AdminDashboard: React.FC = () => {
   const [stats, setStats] = useState<DashboardStats | null>(null);
@@ -20,18 +20,44 @@ const AdminDashboard: React.FC = () => {
       setLoading(true);
       setError(null);
       
-      const [statsResponse, productsResponse, postsResponse] = await Promise.all([
-        dashboardAPI.getStats(),
-        dashboardAPI.getProducts(),
-        dashboardAPI.getPosts()
-      ]);
+      if (!localStorage.getItem('authToken')) {
+        throw new Error('Please log in to access the dashboard');
+      }
       
-      setStats(statsResponse);
-      setProducts(productsResponse.data || []);
-      setPosts(postsResponse.data || []);
+      // Fetch one by one to handle errors better
+      try {
+        const statsResponse = await dashboardAPI.getStats();
+        setStats(statsResponse);
+      } catch (error) {
+        console.error('Failed to fetch stats:', error);
+        if (error instanceof Error && error.message.includes('No authentication token')) {
+          window.location.href = '/admin/login';
+          return;
+        }
+      }
+
+      try {
+        const productsResponse = await dashboardAPI.getProducts();
+        setProducts(productsResponse.data || []);
+      } catch (error) {
+        console.error('Failed to fetch products:', error);
+      }
+
+      try {
+        const postsResponse = await dashboardAPI.getPosts();
+        setPosts(postsResponse.data || []);
+      } catch (error) {
+        console.error('Failed to fetch posts:', error);
+      }
+      
     } catch (err) {
-      setError('Failed to load dashboard data');
+      const errorMessage = err instanceof Error ? err.message : 'Failed to load dashboard data';
+      setError(errorMessage);
       console.error('Dashboard data fetch error:', err);
+      
+      if (errorMessage.includes('Please log in')) {
+        window.location.href = '/admin/login';
+      }
     } finally {
       setLoading(false);
     }
@@ -44,21 +70,21 @@ const AdminDashboard: React.FC = () => {
   const statsConfig = [
     {
       title: 'Total Products',
-      value: stats?.totalProducts.toString() || '0',
+      value: (stats?.totalProducts ?? 0).toString(),
       change: '+0%',
       icon: Package,
       color: 'bg-green-500',
     },
     {
       title: 'Published Products',
-      value: stats?.publishedProducts.toString() || '0',
+      value: (stats?.publishedProducts ?? 0).toString(),
       change: '+0%',
       icon: TrendingUp,
       color: 'bg-blue-500',
     },
     {
       title: 'Total Posts',
-      value: stats?.totalPosts.toString() || '0',
+      value: (stats?.totalPosts ?? 0).toString(),
       change: '+0%',
       icon: FileText,
       color: 'bg-purple-500',

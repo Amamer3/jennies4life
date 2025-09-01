@@ -157,7 +157,7 @@ const Hero: React.FC = () => {
               className="w-full h-full rounded-3xl overflow-hidden relative"
             >
               <img
-                src="/logonew1.jpg"
+                src="https://images.pexels.com/photos/2529147/pexels-photo-2529147.jpeg"
                 alt="Premium Shopping Experience"
                 className="w-full h-full object-cover transition-transform duration-700 hover:scale-110"
               />

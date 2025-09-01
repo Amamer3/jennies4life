@@ -51,6 +51,7 @@ class PublicCategoryAPI {
       };
     } catch (error) {
       console.error('🚨 Error fetching active categories:', error);
+      console.log('📦 Using mock data as fallback...');
       
       return {
         success: false,

@@ -113,24 +113,49 @@ export interface ActivityItem {
 class DashboardAPI {
   private getAuthHeaders(): HeadersInit {
     const token = localStorage.getItem('authToken');
+    console.log('🔐 Dashboard API - Auth token:', token ? 'present' : 'missing');
+    
+    if (!token) {
+      throw new Error('No authentication token found. Please login again.');
+    }
+
     return {
       'Content-Type': 'application/json',
-      ...(token && { 'Authorization': `Bearer ${token}` })
+      'Authorization': `Bearer ${token}`
     };
   }
 
 
   async getStats(): Promise<DashboardStats> {
-    const response = await fetch(`${API_BASE_URL}/api/dashboard/stats`, {
-      headers: this.getAuthHeaders()
-    });
-    
-    if (!response.ok) {
-      throw new Error('Failed to fetch dashboard stats');
+    try {
+      console.log('📊 Dashboard API - Fetching stats...');
+      
+      const headers = this.getAuthHeaders();
+      console.log('📝 Request headers:', headers);
+      
+      const response = await fetch(`${API_BASE_URL}/api/dashboard/stats`, {
+        headers: headers
+      });
+
+      console.log('📡 Response status:', response.status);
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('❌ API Error:', {
+          status: response.status,
+          statusText: response.statusText,
+          body: errorText
+        });
+        throw new Error(`Failed to fetch dashboard stats: ${response.status} ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      console.log('✅ Dashboard stats fetched successfully:', data);
+      return data;
+    } catch (error) {
+      console.error('❌ Dashboard API Error:', error);
+      throw error;
     }
-    
-    const result = await response.json();
-    return result.data;
   }
 
   async getAdminStats(): Promise<AdminStatsResponse> {
@@ -178,16 +203,7 @@ class DashboardAPI {
     });
     
     if (!response.ok) {
-      // Return mock data if API fails
-      return [
-        { name: 'Mon', value: 4000 },
-        { name: 'Tue', value: 3000 },
-        { name: 'Wed', value: 5000 },
-        { name: 'Thu', value: 4500 },
-        { name: 'Fri', value: 6000 },
-        { name: 'Sat', value: 5500 },
-        { name: 'Sun', value: 4800 }
-      ];
+      throw new Error(`Failed to fetch revenue data: ${response.status}`);
     }
     
     const result = await response.json();
@@ -200,14 +216,7 @@ class DashboardAPI {
     });
     
     if (!response.ok) {
-      // Return mock data if API fails
-      return [
-        { name: 'Electronics', value: 35, color: '#3B82F6' },
-        { name: 'Fashion', value: 25, color: '#EF4444' },
-        { name: 'Beauty', value: 20, color: '#10B981' },
-        { name: 'Sports', value: 12, color: '#F59E0B' },
-        { name: 'Others', value: 8, color: '#8B5CF6' }
-      ];
+      throw new Error(`Failed to fetch category data: ${response.status}`);
     }
     
     const result = await response.json();
@@ -220,12 +229,7 @@ class DashboardAPI {
     });
     
     if (!response.ok) {
-      // Return mock data if API fails
-      return [
-        { name: 'Desktop', value: 45, color: '#3B82F6' },
-        { name: 'Mobile', value: 40, color: '#EF4444' },
-        { name: 'Tablet', value: 15, color: '#10B981' }
-      ];
+      throw new Error(`Failed to fetch device data: ${response.status}`);
     }
     
     const result = await response.json();
@@ -238,44 +242,7 @@ class DashboardAPI {
     });
     
     if (!response.ok) {
-      // Return mock data if API fails
-      return [
-        {
-          id: '1',
-          name: 'Wireless Headphones',
-          sales: 234,
-          revenue: '$11,700',
-          image: 'https://images.pexels.com/photos/3394650/pexels-photo-3394650.jpeg'
-        },
-        {
-          id: '2',
-          name: 'Smart Watch',
-          sales: 189,
-          revenue: '$9,450',
-          image: 'https://images.pexels.com/photos/437037/pexels-photo-437037.jpeg'
-        },
-        {
-          id: '3',
-          name: 'Laptop Stand',
-          sales: 156,
-          revenue: '$7,800',
-          image: 'https://images.pexels.com/photos/7974/pexels-photo.jpg'
-        },
-        {
-          id: '4',
-          name: 'Phone Case',
-          sales: 143,
-          revenue: '$2,860',
-          image: 'https://images.pexels.com/photos/404280/pexels-photo-404280.jpeg'
-        },
-        {
-          id: '5',
-          name: 'Bluetooth Speaker',
-          sales: 128,
-          revenue: '$6,400',
-          image: 'https://images.pexels.com/photos/1649771/pexels-photo-1649771.jpeg'
-        }
-      ];
+      throw new Error(`Failed to fetch top products: ${response.status}`);
     }
     
     const result = await response.json();
@@ -288,41 +255,7 @@ class DashboardAPI {
     });
     
     if (!response.ok) {
-      // Return mock data if API fails
-      return [
-        {
-          id: '2',
-          type: 'user',
-          message: 'New user registration',
-          time: '5 minutes ago',
-          icon: 'Users',
-          color: 'text-green-600'
-        },
-        {
-          id: '3',
-          type: 'product',
-          message: 'Product "Smart Watch" low in stock',
-          time: '10 minutes ago',
-          icon: 'Activity',
-          color: 'text-orange-600'
-        },
-        {
-          id: '4',
-          type: 'revenue',
-          message: 'Daily revenue target achieved',
-          time: '1 hour ago',
-          icon: 'Target',
-          color: 'text-purple-600'
-        },
-        {
-          id: '5',
-          type: 'review',
-          message: 'New 5-star review received',
-          time: '2 hours ago',
-          icon: 'TrendingUp',
-          color: 'text-pink-600'
-        }
-      ];
+      throw new Error(`Failed to fetch recent activity: ${response.status}`);
     }
     
     const result = await response.json();

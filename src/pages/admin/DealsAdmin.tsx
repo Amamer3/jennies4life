@@ -28,13 +28,59 @@ const DealsAdmin: React.FC = () => {
   const [selectedDeal, setSelectedDeal] = useState<Deal | null>(null);
 
   const [deals, setDeals] = useState<Deal[]>([]);
-  const [, setLoading] = useState(true);
+  const [loading, setLoading] = useState(true);
 
   // Fetch deals from API
   const fetchDeals = async () => {
     try {
       setLoading(true);
-      const fetchedDeals = await dealsApi.getAllDeals();
+      const authToken = localStorage.getItem('authToken');
+      console.log('🔐 Auth Token:', authToken ? 'Present' : 'Missing');
+      
+      console.log('🔄 Fetching deals...');
+      const apiUrl = `${import.meta.env.VITE_API_BASE_URL || 'https://jennies4life-server.onrender.com'}/api/deals`;
+      console.log('🌐 API URL:', apiUrl);
+      
+      const response = await fetch(apiUrl, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${authToken}`
+        }
+      });
+
+      console.log('📡 Response status:', response.status);
+      console.log('📝 Response headers:', Object.fromEntries(response.headers.entries()));
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('❌ API Error:', {
+          status: response.status,
+          statusText: response.statusText,
+          body: errorText
+        });
+        throw new Error(`HTTP error! status: ${response.status}, body: ${errorText}`);
+      }
+
+      const data = await response.json();
+      console.log('✅ API Response:', data);
+
+      // Handle different response structures
+      let fetchedDeals = [];
+      if (Array.isArray(data)) {
+        console.log('📦 Response is direct array');
+        fetchedDeals = data;
+      } else if (data && Array.isArray(data.data)) {
+        console.log('📦 Response has data array property');
+        fetchedDeals = data.data;
+      } else if (data && Array.isArray(data.deals)) {
+        console.log('📦 Response has deals array property');
+        fetchedDeals = data.deals;
+      } else {
+        console.warn('⚠️ Unexpected response structure:', data);
+      }
+
+      console.log(`✨ Processed ${fetchedDeals.length} deals:`, fetchedDeals);
       setDeals(fetchedDeals);
     } catch (error) {
       console.error('Failed to fetch deals:', error);
@@ -238,7 +284,7 @@ const DealsAdmin: React.FC = () => {
                    type="checkbox"
                    id="isActive"
                    defaultChecked={deal?.isActive ?? true}
-                   className="h-4 w-4 text-[#e72a00] focus:ring-[#e72a00] border-gray-300 rounded"
+                   className="h-4 w-4 text-[#e72a00] focus:ring-[#e72a00] border-gray-300 border rounded"
                  />
                  <label htmlFor="isActive" className="ml-2 block text-sm text-gray-700">
                    Active Deal
@@ -250,7 +296,7 @@ const DealsAdmin: React.FC = () => {
                    type="checkbox"
                    id="featured"
                    defaultChecked={deal?.featured || false}
-                   className="h-4 w-4 text-[#e72a00] focus:ring-[#e72a00] border-gray-300 rounded"
+                   className="h-4 w-4 text-[#e72a00] focus:ring-[#e72a00] border-gray-300 border rounded"
                  />
                  <label htmlFor="featured" className="ml-2 block text-sm text-gray-700">
                    Featured Deal (Show prominently on homepage)
@@ -377,8 +423,14 @@ const DealsAdmin: React.FC = () => {
       </div>
 
       {/* Deals Grid */}
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 sm:gap-6">
-        {filteredDeals.map((deal, index) => (
+      {loading ? (
+        <div className="text-center py-12">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#e72a00] mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading deals...</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 sm:gap-6">
+          {filteredDeals.map((deal, index) => (
           <motion.div
             key={deal.id}
             initial={{ opacity: 0, y: 20 }}
@@ -519,6 +571,7 @@ const DealsAdmin: React.FC = () => {
           </motion.div>
         ))}
       </div>
+      )}
 
       {/* Empty State */}
       {filteredDeals.length === 0 && (

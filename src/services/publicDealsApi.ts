@@ -61,6 +61,10 @@ class PublicDealsAPI {
       });
 
       if (!response.ok) {
+        // Check if it's a service suspension (503) or other server error
+        if (response.status === 503) {
+          throw new Error('Backend service is currently unavailable. Please try again later.');
+        }
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 

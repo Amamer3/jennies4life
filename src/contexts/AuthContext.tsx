@@ -41,6 +41,7 @@
 
 import React, { useState, useEffect, createContext, useContext } from 'react';
 import { authAPI } from '../services/authApi';
+import { auth } from '../config/firebase';
 import type { User, AuthProviderProps, AuthContextType } from '../types/auth';
 
 // Create the AuthContext
@@ -81,42 +82,38 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     const checkAuthStatus = async () => {
       console.log('🔍 AuthContext - checking auth status on mount');
       
-      // Debug token storage
-      authAPI.debugTokens();
-      
       try {
+        // Check if we have stored tokens first
         const token = localStorage.getItem('authToken');
-        console.log('🔍 AuthContext - stored token exists:', !!token);
+        const refreshToken = localStorage.getItem('refreshToken');
         
-        if (!token) {
-          console.log('No auth token found - user must login');
+        if (!token || !refreshToken) {
+          console.log('🔍 AuthContext - no stored tokens found');
           setIsAuthenticated(false);
           return;
         }
 
-        console.log('🔍 AuthContext - token found, checking authentication');
-        
-        // First try to get user profile with existing token
-        const profileResponse = await authAPI.getProfile();
-        
-        if (profileResponse.success && profileResponse.user) {
-          console.log('✅ AuthContext - profile verification successful with existing token');
-          setUser(profileResponse.user);
-          setIsAuthenticated(true);
-          return;
+        // Try to validate existing token first
+        try {
+          const profileResponse = await authAPI.getProfile();
+          
+          if (profileResponse.success && profileResponse.user) {
+            console.log('✅ AuthContext - existing token is valid');
+            setUser(profileResponse.user);
+            setIsAuthenticated(true);
+            return;
+          }
+        } catch (error) {
+          console.log('⚠️ AuthContext - existing token invalid, attempting refresh');
         }
-        
-        console.log('⚠️ AuthContext - profile verification failed, attempting token refresh');
-        
-        // If profile fails, try to refresh the token
+
+        // If existing token fails, try refresh
         const refreshResponse = await authAPI.refresh();
         
         if (refreshResponse.success && refreshResponse.token) {
-          console.log('✅ AuthContext - token refresh successful, retrying profile');
+          console.log('✅ AuthContext - token refresh successful');
           
-          // Small delay to ensure token is properly stored
-          await new Promise(resolve => setTimeout(resolve, 100));
-          
+          // Retry getting profile with new token
           const retryProfileResponse = await authAPI.getProfile();
           
           if (retryProfileResponse.success && retryProfileResponse.user) {
@@ -124,26 +121,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             setUser(retryProfileResponse.user);
             setIsAuthenticated(true);
             return;
-          } else {
-            console.log('❌ AuthContext - profile verification failed after successful token refresh');
-            setUser(null);
-            setIsAuthenticated(false);
-            localStorage.removeItem('authToken');
-            localStorage.removeItem('refreshToken');
-            return;
           }
         }
-        
-        // Handle refresh failure gracefully
-        if (refreshResponse.message === 'No refresh token available') {
-          console.log('ℹ️ AuthContext - no refresh token available, user needs to login again');
-        } else {
-          console.log('❌ AuthContext - token refresh failed:', refreshResponse.message);
-        }
-        setUser(null);
-        setIsAuthenticated(false);
+
+        // If all fails, clear tokens and set unauthenticated
+        console.log('❌ AuthContext - authentication failed, clearing tokens');
         localStorage.removeItem('authToken');
         localStorage.removeItem('refreshToken');
+        setIsAuthenticated(false);
       } catch (error) {
         console.error('❌ AuthContext - authentication error:', error);
         // Clean up on any auth failure
@@ -196,15 +181,24 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const logout = async () => {
     try {
-      await authAPI.logout();
+      const response = await authAPI.logout();
+      if (!response.success) {
+        throw new Error(response.message || 'Failed to logout properly');
+      }
     } catch (error) {
-      console.error('Logout error:', error);
+      console.error('🚫 Logout error:', error);
+      throw error; // Re-throw to handle in UI
     } finally {
+      // Clear auth state regardless of API success
       setUser(null);
       setIsAuthenticated(false);
-      // authAPI.logout() already clears localStorage, but ensure it's cleared
       localStorage.removeItem('authToken');
       localStorage.removeItem('refreshToken');
+      localStorage.removeItem('user');
+      // Clear any other auth-related localStorage items
+      Object.keys(localStorage)
+        .filter(key => key.toLowerCase().includes('auth') || key.toLowerCase().includes('token'))
+        .forEach(key => localStorage.removeItem(key));
     }
   };
 

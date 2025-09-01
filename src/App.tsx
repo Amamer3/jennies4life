@@ -29,7 +29,10 @@ const NotFoundPage = React.lazy(() => import('./pages/NotFoundPage'));
 
 // Lazy load admin components
 const AdminLayout = React.lazy(() => import('./components/AdminLayout'));
-const AdminDashboard = React.lazy(() => import('./pages/admin/AdminDashboard'));
+const AdminDashboard = React.lazy(() => import('./pages/admin/AdminDashboard').catch(error => {
+  console.error('Failed to load AdminDashboard:', error);
+  return { default: () => <div>Failed to load dashboard. Please try refreshing the page.</div> };
+}));
 const ProductsAdmin = React.lazy(() => import('./pages/admin/ProductsAdmin'));
 const CategoriesAdmin = React.lazy(() => import('./pages/admin/CategoriesAdmin'));
 const DealsAdmin = React.lazy(() => import('./pages/admin/DealsAdmin'));

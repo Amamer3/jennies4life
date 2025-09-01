@@ -27,7 +27,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
   const [isMobile, setIsMobile] = useState(false);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
 
   React.useEffect(() => {
     const checkMobile = () => {
@@ -206,10 +206,18 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  onClick={() => {
-                    setShowLogoutConfirm(false);
-                    // Navigate immediately to prevent any loading state
-                    window.location.href = '/admin/login';
+                  onClick={async () => {
+                    try {
+                      setShowLogoutConfirm(false);
+                      await logout();
+                      // Force reload the page to clear any cached state
+                      window.location.replace('/admin/login');
+                    } catch (error) {
+                      console.error('Failed to sign out:', error);
+                      alert(error instanceof Error ? error.message : 'Failed to sign out. Please try again.');
+                      // If there's an error, force reload anyway to ensure user is logged out
+                      window.location.replace('/admin/login');
+                    }
                   }}
                   className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:ml-3 sm:w-auto sm:text-sm transition-colors duration-200"
                 >
