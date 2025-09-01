@@ -26,7 +26,7 @@ export default defineConfig({
     strictPort: true,
     proxy: {
       '/api': {
-        target: 'http://localhost:3000',
+        target: 'https://jennies4life-server-fxqp.onrender.com',
         changeOrigin: true,
         secure: false,
         configure: (proxy, _options) => {
