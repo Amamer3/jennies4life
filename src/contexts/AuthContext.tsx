@@ -41,7 +41,6 @@
 
 import React, { useState, useEffect, createContext, useContext } from 'react';
 import { authAPI } from '../services/authApi';
-import { auth } from '../config/firebase';
 import type { User, AuthProviderProps, AuthContextType } from '../types/auth';
 
 // Create the AuthContext
