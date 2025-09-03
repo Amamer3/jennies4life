@@ -17,7 +17,8 @@ export default defineConfig({
       '@unhead/react',
       'react-hot-toast',
       'framer-motion',
-      'lucide-react'
+      'lucide-react',
+      'recharts'
     ],
     force: true
   },
