@@ -1,13 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer
-} from 'recharts';
 import { AlertTriangle } from 'lucide-react';
 import { notificationAPI } from '../services/notificationApi';
 
@@ -66,29 +57,19 @@ export const PriceHistory: React.FC<PriceHistoryProps> = ({ productId }) => {
     <div className="bg-white p-4 rounded-lg shadow-md">
       <h3 className="text-lg font-semibold mb-4">Price History</h3>
       
-      <div className="h-[300px]">
-        <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={priceHistory}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis 
-              dataKey="date" 
-              tickFormatter={(date: string) => new Date(date).toLocaleDateString()}
-            />
-            <YAxis />
-            <Tooltip 
-              labelFormatter={(date: string) => new Date(date).toLocaleDateString()}
-              formatter={(value: number) => [`$${value.toFixed(2)}`, 'Price']}
-            />
-            <Line
-              type="monotone"
-              dataKey="price"
-              stroke="#2563eb"
-              strokeWidth={2}
-              dot={false}
-              activeDot={{ r: 8 }}
-            />
-          </LineChart>
-        </ResponsiveContainer>
+      <div className="h-[300px] flex items-center justify-center">
+        <div className="text-center text-gray-500">
+          <p>Price history chart temporarily disabled</p>
+          <p className="text-sm mt-2">Data available: {priceHistory.length} entries</p>
+          <div className="mt-4 text-xs text-gray-400">
+            {priceHistory.slice(0, 3).map((entry, index) => (
+              <div key={index}>
+                {new Date(entry.date).toLocaleDateString()}: ${entry.price.toFixed(2)}
+              </div>
+            ))}
+            {priceHistory.length > 3 && <div>... and {priceHistory.length - 3} more</div>}
+          </div>
+        </div>
       </div>
     </div>
   );

@@ -33,13 +33,22 @@ import { getAuth } from 'firebase/auth';
  * @constant {object} firebaseConfig
  */
 const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-  appId: import.meta.env.VITE_FIREBASE_APP_ID
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || '',
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || '',
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || '',
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || '',
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || '',
+  appId: import.meta.env.VITE_FIREBASE_APP_ID || ''
 };
+
+// Check if all required Firebase config values are present
+const requiredConfigKeys = ['apiKey', 'authDomain', 'projectId', 'storageBucket', 'messagingSenderId', 'appId'];
+const missingKeys = requiredConfigKeys.filter(key => !firebaseConfig[key as keyof typeof firebaseConfig]);
+
+if (missingKeys.length > 0) {
+  console.warn('Missing Firebase configuration:', missingKeys);
+  console.warn('Firebase authentication will not work properly. Please check your environment variables.');
+}
 
 /**
  * Initialize Firebase application
@@ -49,7 +58,14 @@ const firebaseConfig = {
  * 
  * @constant {FirebaseApp} app - The initialized Firebase application instance
  */
-const app = initializeApp(firebaseConfig);
+let app;
+try {
+  app = initializeApp(firebaseConfig);
+} catch (error) {
+  console.error('Failed to initialize Firebase:', error);
+  // Create a mock app for development/testing
+  app = {} as any;
+}
 
 /**
  * Firebase Authentication service instance
@@ -69,11 +85,19 @@ const app = initializeApp(firebaseConfig);
  * const userCredential = await signInWithCustomToken(auth, customToken);
  * ```
  */
-export const auth = getAuth(app);
+let auth;
+try {
+  auth = getAuth(app);
+} catch (error) {
+  console.error('Failed to initialize Firebase Auth:', error);
+  // Create a mock auth for development/testing
+  auth = {} as any;
+}
 
 /**
  * Default export of the Firebase app instance
  * 
  * @default app
  */
+export { auth };
 export default app;
