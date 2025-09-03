@@ -22,6 +22,8 @@
 
 import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
+import type { FirebaseApp } from 'firebase/app';
+import type { Auth } from 'firebase/auth';
 
 /**
  * Firebase configuration object
@@ -58,13 +60,13 @@ if (missingKeys.length > 0) {
  * 
  * @constant {FirebaseApp} app - The initialized Firebase application instance
  */
-let app;
+let app: FirebaseApp;
 try {
   app = initializeApp(firebaseConfig);
 } catch (error) {
   console.error('Failed to initialize Firebase:', error);
   // Create a mock app for development/testing
-  app = {} as any;
+  app = {} as FirebaseApp;
 }
 
 /**
@@ -85,13 +87,13 @@ try {
  * const userCredential = await signInWithCustomToken(auth, customToken);
  * ```
  */
-let auth;
+let auth: Auth;
 try {
   auth = getAuth(app);
 } catch (error) {
   console.error('Failed to initialize Firebase Auth:', error);
   // Create a mock auth for development/testing
-  auth = {} as any;
+  auth = {} as Auth;
 }
 
 /**
